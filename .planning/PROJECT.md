@@ -38,7 +38,7 @@ Position Borina Keo as the go-to leader for integrating AI into existing ERP (Mi
 
 ## Context
 
-- **Owner:** Borina Keo
+- **Owner:** Borina Keo (he/him)
 - **LinkedIn:** https://www.linkedin.com/in/borina-keo-3534ab80/
 - **GitHub:** https://github.com/Bmee007
 - **ERP Systems:** Microsoft Dynamics 365 (implemented migration from IBM AS400)
