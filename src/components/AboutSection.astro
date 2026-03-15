@@ -7,7 +7,7 @@ const stats = [
 ---
 
 <section id="about" class="about-root">
-  <div class="about-container">
+  <div class="about-container section-animate">
     <div class="about-header">
       <h2>About Me</h2>
       <p class="about-tagline">ERP &amp; WMS transformation leader with AI at the core</p>
@@ -39,6 +39,24 @@ const stats = [
 </section>
 
 <style>
+  /* ── Scroll-triggered reveal ──────────────────────────── */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease, transform 500ms ease;
+  }
+  .section-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .section-animate {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   .about-root {
     padding: 5rem 1.5rem;
     min-height: 100vh;

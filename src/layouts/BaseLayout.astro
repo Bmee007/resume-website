@@ -68,5 +68,21 @@ const personJsonLd = {
   <body>
     <Nav />
     <slot />
+    <script>
+      // Shared IntersectionObserver for scroll-triggered .section-animate reveals
+      // Fires once per element, unobserves after trigger to avoid redundant calls
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
+      );
+      document.querySelectorAll('.section-animate').forEach((el) => observer.observe(el));
+    </script>
   </body>
 </html>

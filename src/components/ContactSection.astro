@@ -2,7 +2,7 @@
 ---
 
 <section id="contact" class="contact-root">
-  <div class="contact-inner">
+  <div class="contact-inner section-animate">
     <h2 class="contact-heading">Get In Touch</h2>
     <p class="contact-tagline">Open to consulting engagements and full-time opportunities</p>
 
@@ -83,6 +83,24 @@
 </section>
 
 <style>
+  /* ── Scroll-triggered reveal ──────────────────────────── */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease, transform 500ms ease;
+  }
+  .section-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .section-animate {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   /* Layout */
   .contact-root {
     padding: 6rem 1.5rem;

@@ -34,7 +34,7 @@ const categories = [
 ---
 
 <section id="skills" class="skills-root">
-  <div class="skills-container">
+  <div class="skills-container section-animate">
     <div class="skills-header">
       <h2>Skills &amp; Expertise</h2>
       <p class="skills-tagline">Specialized across the full ERP · WMS · AI stack</p>
@@ -59,6 +59,24 @@ const categories = [
 </section>
 
 <style>
+  /* ── Scroll-triggered reveal ──────────────────────────── */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease, transform 500ms ease;
+  }
+  .section-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .section-animate {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   .skills-root {
     padding: 5rem 1.5rem;
     min-height: 100vh;
@@ -102,6 +120,12 @@ const categories = [
 
   .skill-card {
     padding: 0;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  .skill-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
   }
 
   .skill-card-inner {

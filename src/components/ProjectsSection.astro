@@ -25,7 +25,7 @@ const projects = [
 ---
 
 <section id="projects" class="projects-root">
-  <div class="projects-container">
+  <div class="projects-container section-animate">
     <div class="projects-header">
       <h2>AI Integrations</h2>
       <p class="projects-tagline">Leading AI-powered transformation across ERP &amp; WMS systems</p>
@@ -51,6 +51,24 @@ const projects = [
 </section>
 
 <style>
+  /* ── Scroll-triggered reveal ──────────────────────────── */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 500ms ease, transform 500ms ease;
+  }
+  .section-animate.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .section-animate {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   .projects-root {
     padding: 5rem 1.5rem;
   }
@@ -93,6 +111,7 @@ const projects = [
 
   .project-card {
     padding: 0;
+    transition: transform 200ms ease, box-shadow 200ms ease;
   }
 
   .project-card-inner {
@@ -106,8 +125,8 @@ const projects = [
   }
 
   .project-card:hover {
+    transform: translateY(-4px);
     box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
-    transition: box-shadow 0.2s;
   }
 
   .project-title {
