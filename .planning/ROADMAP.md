@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Design System** - Astro/Tailwind scaffold, design tokens, responsive base, sticky nav, and deployment pipeline (completed 2026-03-15)
 - [ ] **Phase 2: Hero, About & Skills** - Full-viewport hero with photo and CTA, professional bio, and categorized skills display
-- [ ] **Phase 3: Experience & AI Projects** - Career timeline with quantified impact and AI integration showcase cards
+- [x] **Phase 3: Experience & AI Projects** - Career timeline with quantified impact and AI integration showcase cards (completed 2026-03-15)
 - [ ] **Phase 4: Contact & Deployment** - Formspree contact form wired end-to-end, social links, and live Vercel URL
 - [ ] **Phase 5: SEO, Polish & Launch** - SEO metadata, Open Graph, JSON-LD, animations, performance audit, and responsive QA
 
@@ -107,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Design System | 4/4 | Complete   | 2026-03-15 |
 | 2. Hero, About & Skills | 4/5 | In Progress|  |
-| 3. Experience & AI Projects | 3/4 | In Progress|  |
+| 3. Experience & AI Projects | 4/4 | Complete   | 2026-03-15 |
 | 4. Contact & Deployment | 0/TBD | Not started | - |
 | 5. SEO, Polish & Launch | 0/TBD | Not started | - |
