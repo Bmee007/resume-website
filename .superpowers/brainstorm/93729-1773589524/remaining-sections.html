@@ -1,0 +1,78 @@
+<h2>Remaining Sections — Style + Theme Assignment</h2>
+<p class="subtitle">Which style fits each remaining section? (A = subtle full-section tint, C = floating accent)</p>
+
+<div style="margin-bottom:2rem;">
+  <h3 style="margin-bottom:1rem;">Proposed theme assignments</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
+    <div style="background:#1e293b;border-radius:8px;padding:1rem;border:1px solid #334155;">
+      <div style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">About Section</div>
+      <div style="color:#e2e8f0;font-weight:600;font-size:0.9rem;">Pharmaceuticals</div>
+      <div style="color:#64748b;font-size:0.75rem;margin-top:0.25rem;">cleanroom / lab imagery — signals precision & compliance</div>
+    </div>
+    <div style="background:#1e293b;border-radius:8px;padding:1rem;border:1px solid #334155;">
+      <div style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Skills Section</div>
+      <div style="color:#e2e8f0;font-weight:600;font-size:0.9rem;">Supply Chain</div>
+      <div style="color:#64748b;font-size:0.75rem;margin-top:0.25rem;">logistics / network imagery — matches ERP/WMS expertise</div>
+    </div>
+    <div style="background:#1e293b;border-radius:8px;padding:1rem;border:1px solid #334155;">
+      <div style="color:#94a3b8;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Contact Section</div>
+      <div style="color:#e2e8f0;font-weight:600;font-size:0.9rem;">Supply Chain</div>
+      <div style="color:#64748b;font-size:0.75rem;margin-top:0.25rem;">same pool — subtle tint keeps form readable</div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-bottom:1rem;">Which style for each?</h3>
+<div class="options" data-multiselect>
+
+  <div class="option" data-choice="about-a" onclick="toggleSelect(this)">
+    <div class="letter">1A</div>
+    <div class="content">
+      <h3>About → Style A (subtle tint)</h3>
+      <p>Faint pharma/lab photo behind bio text. Keeps it professional and readable. Recommended — bio is text-heavy.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="about-c" onclick="toggleSelect(this)">
+    <div class="letter">1C</div>
+    <div class="content">
+      <h3>About → Style C (floating accent)</h3>
+      <p>Small rotated image floats in corner. More visual personality. Works if photo is subtle enough.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="skills-a" onclick="toggleSelect(this)">
+    <div class="letter">2A</div>
+    <div class="content">
+      <h3>Skills → Style A (subtle tint)</h3>
+      <p>Faint supply chain photo behind the skills grid. Consistent with Experience.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="skills-c" onclick="toggleSelect(this)">
+    <div class="letter">2C</div>
+    <div class="content">
+      <h3>Skills → Style C (floating accent)</h3>
+      <p>Floating supply chain imagery beside the chips. Adds dynamism to a dense grid.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="contact-a" onclick="toggleSelect(this)">
+    <div class="letter">3A</div>
+    <div class="content">
+      <h3>Contact → Style A (subtle tint)</h3>
+      <p>Very faint background behind the form. Keeps CTA section focused. Recommended.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="contact-none" onclick="toggleSelect(this)">
+    <div class="letter">3–</div>
+    <div class="content">
+      <h3>Contact → No imagery</h3>
+      <p>Clean dark background only. Form sections often benefit from minimal distraction.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:1.5rem;">Select one option per section (1_, 2_, 3_), or tell me in the terminal.</p>
