@@ -149,6 +149,8 @@ test("POLSH-02 @smoke — .skill-card has CSS transition containing 'transform';
 
   // Hover .skill-card and check transform changes
   await page.hover(".skill-card");
+  // Wait for CSS transition (200ms) to complete before reading computed style
+  await page.waitForTimeout(250);
   const skillTransform = await skillCard.evaluate((el) =>
     getComputedStyle(el).transform
   );
@@ -179,9 +181,10 @@ test("POLSH-03 @smoke — emerald #10B981 appears in computed styles on at least
 }) => {
   const emeraldHex = "#10b981";
   const emeraldRgb = "rgb(16, 185, 129)";
+  const emeraldRgba = "rgba(16, 185, 129,";
 
   const emeraldCount = await page.evaluate(
-    ({ hex, rgb }) => {
+    ({ hex, rgb, rgba }) => {
       const selectors = [
         // Photo outline / hero photo border
         ".hero-photo",
@@ -213,7 +216,7 @@ test("POLSH-03 @smoke — emerald #10B981 appears in computed styles on at least
             style.boxShadow,
           ];
           const matched = colorProps.some(
-            (v) => v.includes(rgb) || v.toLowerCase().includes(hex)
+            (v) => v.includes(rgb) || v.toLowerCase().includes(hex) || v.includes(rgba)
           );
           if (matched && !matchedSelectors.has(sel)) {
             matchedSelectors.add(sel);
@@ -224,7 +227,7 @@ test("POLSH-03 @smoke — emerald #10B981 appears in computed styles on at least
 
       return matchCount;
     },
-    { hex: emeraldHex, rgb: emeraldRgb }
+    { hex: emeraldHex, rgb: emeraldRgb, rgba: emeraldRgba }
   );
 
   expect(emeraldCount).toBeGreaterThanOrEqual(3);

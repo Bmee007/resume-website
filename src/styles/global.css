@@ -1,36 +1,147 @@
 /* src/styles/global.css */
 @import "tailwindcss";
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
 
 @theme {
-  /* Colors — use --color-* namespace so Tailwind generates bg-*, text-*, border-* utilities */
-  --color-bg:      #0F172A;   /* slate-900 / page background */
-  --color-surface: #1E293B;   /* slate-800 / card/surface background */
-  --color-border:  #334155;   /* slate-700 / border color */
-  --color-text:    #F8FAFC;   /* slate-50  / primary text */
-  --color-accent:  #10B981;   /* emerald-500 / interactive accent */
-
-  /* Fonts */
-  --font-heading: "DM Sans", sans-serif;
-  --font-body:    "Inter", sans-serif;
-
-  /* Glow — used via CSS var() in components, not as Tailwind utility */
-  --glow-accent: 0 0 12px rgba(16, 185, 129, 0.35);
+  /* Legacy tokens — kept for non-hero sections */
+  --color-surface: #1E293B;
+  --color-border:  #334155;
+  --color-text:    #F8FAFC;
+  --color-accent:  #10B981;
+  --font-heading:  "Geist Sans", sans-serif;
+  --font-body:     "Geist Sans", sans-serif;
+  --glow-accent:    0 0 12px rgba(16, 185, 129, 0.35);
   --glow-accent-sm: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
-html {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-body);
-  scroll-behavior: smooth;
+/* ── HSL design tokens ─────────────────────────────────────── */
+:root {
+  --background:          260 87% 3%;
+  --foreground:          40 6% 95%;
+  --primary:             121 95% 76%;
+  --primary-foreground:  0 0% 5%;
+  --hero-heading:        40 10% 96%;
+  --hero-sub:            40 6% 82%;
+  --secondary:           240 4% 16%;
+  --muted:               240 4% 16%;
+  --border-hsl:          240 4% 20%;
 }
 
-/* Base body resets */
-*, *::before, *::after {
-  box-sizing: border-box;
+/* ── Base reset ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Geist Sans", sans-serif;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+}
+
+/* ── Liquid Glass ──────────────────────────────────────────── */
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45)  0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0)    40%,
+    rgba(255, 255, 255, 0)    60%,
+    rgba(255, 255, 255, 0.15) 80%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* ── Button variants ───────────────────────────────────────── */
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-family: "Geist Sans", sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+.btn-hero:hover { background: hsl(var(--primary) / 0.9); }
+
+.btn-hero-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.01);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  color: hsl(var(--foreground));
+  font-family: "Geist Sans", sans-serif;
+  font-weight: 400;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-hero-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1.4px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+    rgba(255,255,255,0)    40%, rgba(255,255,255,0)    60%,
+    rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.btn-hero-secondary:hover { background: rgba(255, 255, 255, 0.05); }
+
+/* ── Marquee ───────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0%); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+  animation: marquee 20s linear infinite;
 }
