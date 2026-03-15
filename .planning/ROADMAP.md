@@ -91,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Design System | 1/3 | In Progress|  |
+| 1. Foundation & Design System | 2/3 | In Progress|  |
 | 2. Hero, About & Skills | 0/TBD | Not started | - |
 | 3. Experience & AI Projects | 0/TBD | Not started | - |
 | 4. Contact & Deployment | 0/TBD | Not started | - |
