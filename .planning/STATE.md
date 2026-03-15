@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-03-15T13:10:40.148Z"
+stopped_at: "Checkpoint: 05-05-PLAN.md task 2 (human-verify)"
+last_updated: "2026-03-15T13:14:36.123Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 21
-  completed_plans: 20
+  completed_plans: 21
   percent: 5
 ---
 
@@ -69,6 +69,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 05-seo-polish-launch P03 | 4 | 2 tasks | 7 files |
 | Phase 05-seo-polish-launch P02 | 4 | 2 tasks | 5 files |
 | Phase 05-seo-polish-launch P04 | 11 | 2 tasks | 4 files |
+| Phase 05-seo-polish-launch P05 | 2 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -124,6 +125,8 @@ Recent decisions affecting current work:
 - [Phase 05-seo-polish-launch]: SEO-06 verified against built preview server not dev server — sitemap only exists post-build
 - [Phase 05-seo-polish-launch]: Card hover pattern: transition on base rule (not :hover) so animation applies on both enter and leave
 - [Phase 05-seo-polish-launch]: POLSH-03 test extended to detect rgba() format for emerald chip borders — rgba substring does not match rgb() includes check
+- [Phase 05-seo-polish-launch]: 404.astro imports BaseLayout (not Nav directly) — auto-includes Nav, avoids duplicate nav bar
+- [Phase 05-seo-polish-launch]: OG image is a user_setup item requiring human creation before SEO-05 fully passes
 
 ### Pending Todos
 
@@ -137,6 +140,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T13:10:40.144Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-03-15T13:14:36.119Z
+Stopped at: Checkpoint: 05-05-PLAN.md task 2 (human-verify)
 Resume file: None
