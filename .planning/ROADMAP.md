@@ -104,7 +104,7 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Phase 5 Playwright smoke test scaffold (9 RED tests, Wave 0)
+- [x] 05-01-PLAN.md — Phase 5 Playwright smoke test scaffold (9 RED tests, Wave 0) (completed 2026-03-15)
 - [ ] 05-02-PLAN.md — SEO head: BaseLayout OG/JSON-LD/canonical, sitemap integration, robots.txt
 - [ ] 05-03-PLAN.md — Scroll animations: hero CSS keyframe load + section IntersectionObserver reveals
 - [ ] 05-04-PLAN.md — Hover states: lift+glow on cards and social links, emerald accent audit
