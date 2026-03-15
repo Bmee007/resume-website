@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-02-PLAN.md
-last_updated: "2026-03-15T11:51:49.853Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-03-15T12:14:34.535Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 5
 ---
 
@@ -64,6 +64,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 03-experience-ai-projects P04 | 0 | 1 tasks | 1 files |
 | Phase 04-contact-deployment P01 | 2 | 1 tasks | 1 files |
 | Phase 04-contact-deployment P02 | 3 | 2 tasks | 3 files |
+| Phase 04-contact-deployment P03 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,7 @@ Recent decisions affecting current work:
 - [Phase 04-contact-deployment]: HERO-04 test scoped to #hero to avoid strict mode violation from duplicate LinkedIn/GitHub aria-labels in ContactSection
 - [Phase 04-contact-deployment]: social-icon-link declared locally in ContactSection scoped styles (Astro scoped styles do not share across components)
 - [Phase 04-contact-deployment]: Formspree form uses YOUR_FORM_ID placeholder — user must replace before form delivers email
+- [Phase 04-contact-deployment]: www.linkedin.com is the canonical LinkedIn URL — omitting www causes redirect ambiguity; fix applied to ContactSection and HeroSection
 
 ### Pending Todos
 
@@ -121,6 +123,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T11:51:49.849Z
-Stopped at: Completed 04-02-PLAN.md
+Last session: 2026-03-15T12:14:34.531Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
