@@ -1,0 +1,137 @@
+---
+const stats = [
+  { value: "10+", label: "Years of Experience" }, // TODO: confirm with Borina
+  { value: "2",   label: "Full ERP Migrations" },  // TODO: confirm with Borina
+  { value: "5+",  label: "AI Integrations Deployed" }, // TODO: confirm with Borina
+];
+---
+
+<section id="about" class="about-root">
+  <div class="about-container">
+    <div class="about-header">
+      <h2>About Me</h2>
+      <p class="about-tagline">ERP &amp; WMS transformation leader with AI at the core</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-bio-col">
+        <!-- Positioning statement (ABOUT-03) -->
+        <p class="about-position">
+          With over a decade of enterprise systems leadership, I bridge the gap between complex ERP/WMS platforms and the AI technologies that make them intelligent — turning operational data into strategic advantage.
+        </p>
+        <!-- TODO: replace with Borina's real bio copy before launch -->
+        <!-- Bio prose (ABOUT-01, ABOUT-02) — mentions D365, Manhattan DFIO, IBM AS400 -->
+        <p class="about-bio">
+          I lead enterprise-scale digital transformation programs where legacy infrastructure meets modern AI — from migrating IBM AS400 environments to Microsoft Dynamics 365, to implementing Manhattan DFIO for warehouse operations serving Fortune 500 distribution networks. My work bridges operational expertise and emerging technology: I design and deploy Azure OpenAI integrations, Power Automate workflows, and custom ML models that make ERP and WMS systems intelligent. The result is measurable: faster fulfillment cycles, reduced inventory variance, and supply chains that predict rather than react.
+        </p>
+      </div>
+      <div class="about-stats-col">
+        {stats.map(stat => (
+          <div class="liquid-glass stat-box rounded-2xl">
+            <div class="stat-inner">
+              <span class="stat-value">{stat.value}</span>
+              <span class="stat-label">{stat.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-root {
+    padding: 5rem 1.5rem;
+    background: transparent;
+  }
+
+  .about-container {
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .about-header {
+    margin-bottom: 3rem;
+  }
+
+  .about-header h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .about-tagline {
+    font-size: 1.125rem;
+    color: hsl(var(--foreground) / 0.6);
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .about-grid {
+      grid-template-columns: 3fr 2fr;
+    }
+  }
+
+  .about-bio-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .about-position {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: hsl(var(--foreground) / 0.9);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .about-bio {
+    font-size: 1rem;
+    color: hsl(var(--foreground) / 0.75);
+    line-height: 1.75;
+    margin: 0;
+  }
+
+  .about-stats-col {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .stat-box {
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stat-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .stat-value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: hsl(var(--foreground) / 0.7);
+    margin-top: 0.25rem;
+    font-weight: 400;
+  }
+</style>
