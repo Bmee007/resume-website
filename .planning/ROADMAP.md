@@ -101,7 +101,14 @@ Plans:
   3. Sections fade in on scroll entry and all interactive elements (links, buttons, cards) have visible hover states
   4. Body text on the dark background meets WCAG AA contrast (4.5:1 minimum), and the electric blue/green accent is consistent throughout
   5. A styled 404 page, sitemap.xml, and robots.txt are accessible at their expected URLs
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Phase 5 Playwright smoke test scaffold (9 RED tests, Wave 0)
+- [ ] 05-02-PLAN.md — SEO head: BaseLayout OG/JSON-LD/canonical, sitemap integration, robots.txt
+- [ ] 05-03-PLAN.md — Scroll animations: hero CSS keyframe load + section IntersectionObserver reveals
+- [ ] 05-04-PLAN.md — Hover states: lift+glow on cards and social links, emerald accent audit
+- [ ] 05-05-PLAN.md — 404 page + alt text audit + OG image + Lighthouse/WCAG human checkpoint
 
 ## Progress
 
@@ -114,4 +121,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Hero, About & Skills | 4/5 | In Progress|  |
 | 3. Experience & AI Projects | 4/4 | Complete   | 2026-03-15 |
 | 4. Contact & Deployment | 3/3 | Complete   | 2026-03-15 |
-| 5. SEO, Polish & Launch | 0/TBD | Not started | - |
+| 5. SEO, Polish & Launch | 0/5 | Not started | - |
