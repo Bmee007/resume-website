@@ -67,20 +67,20 @@
 
 ### SEO & Performance
 
-- [ ] **SEO-01**: Page title and meta description optimized for "ERP AI integration consultant" search intent
-- [ ] **SEO-02**: Schema.org `Person` JSON-LD markup with name, LinkedIn, GitHub, and job title
-- [ ] **SEO-03**: Open Graph tags (og:title, og:description, og:image 1200x630) for LinkedIn share cards
-- [ ] **SEO-04**: Lighthouse performance score ≥ 90 on mobile
-- [ ] **SEO-05**: All images have descriptive alt text
-- [ ] **SEO-06**: Sitemap and robots.txt present
+- [x] **SEO-01**: Page title and meta description optimized for "ERP AI integration consultant" search intent
+- [x] **SEO-02**: Schema.org `Person` JSON-LD markup with name, LinkedIn, GitHub, and job title
+- [x] **SEO-03**: Open Graph tags (og:title, og:description, og:image 1200x630) for LinkedIn share cards
+- [x] **SEO-04**: Lighthouse performance score ≥ 90 on mobile
+- [x] **SEO-05**: All images have descriptive alt text
+- [x] **SEO-06**: Sitemap and robots.txt present
 
 ### Polish
 
-- [ ] **POLSH-01**: Scroll-triggered fade-in animations on section entry (respects prefers-reduced-motion)
-- [ ] **POLSH-02**: Hover states on all interactive elements (links, buttons, cards)
-- [ ] **POLSH-03**: Consistent electric blue/green accent color used throughout
-- [ ] **POLSH-04**: Typography is legible on dark background (sufficient contrast ratios — WCAG AA)
-- [ ] **POLSH-05**: 404 page styled to match site
+- [x] **POLSH-01**: Scroll-triggered fade-in animations on section entry (respects prefers-reduced-motion)
+- [x] **POLSH-02**: Hover states on all interactive elements (links, buttons, cards)
+- [x] **POLSH-03**: Consistent electric blue/green accent color used throughout
+- [x] **POLSH-04**: Typography is legible on dark background (sufficient contrast ratios — WCAG AA)
+- [x] **POLSH-05**: 404 page styled to match site
 
 ## v2 Requirements
 
@@ -153,17 +153,17 @@
 | CONT-04 | Phase 4 | Complete |
 | CONT-05 | Phase 4 | Complete |
 | CONT-06 | Phase 4 | Complete |
-| SEO-01 | Phase 5 | Pending |
-| SEO-02 | Phase 5 | Pending |
-| SEO-03 | Phase 5 | Pending |
-| SEO-04 | Phase 5 | Pending |
-| SEO-05 | Phase 5 | Pending |
-| SEO-06 | Phase 5 | Pending |
-| POLSH-01 | Phase 5 | Pending |
-| POLSH-02 | Phase 5 | Pending |
-| POLSH-03 | Phase 5 | Pending |
-| POLSH-04 | Phase 5 | Pending |
-| POLSH-05 | Phase 5 | Pending |
+| SEO-01 | Phase 5 | Complete |
+| SEO-02 | Phase 5 | Complete |
+| SEO-03 | Phase 5 | Complete |
+| SEO-04 | Phase 5 | Complete |
+| SEO-05 | Phase 5 | Complete |
+| SEO-06 | Phase 5 | Complete |
+| POLSH-01 | Phase 5 | Complete |
+| POLSH-02 | Phase 5 | Complete |
+| POLSH-03 | Phase 5 | Complete |
+| POLSH-04 | Phase 5 | Complete |
+| POLSH-05 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 47 total
