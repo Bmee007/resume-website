@@ -273,6 +273,12 @@
     background-color: #10B981;
   }
 
+  /* ── Hero load animation ──────────────────────────────── */
+  @keyframes hero-fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
   /* ── Heading ──────────────────────────────────────────── */
   .hero-heading {
     font-size: clamp(2.25rem, 7vw, 4.5rem);
@@ -282,16 +288,28 @@
     color: hsl(var(--hero-heading));
     margin: 0;
     letter-spacing: -0.02em;
+    animation: hero-fade-in 600ms ease forwards;
   }
 
   /* ── Subheading ───────────────────────────────────────── */
   .hero-sub {
     font-size: 1.125rem;
     max-width: 28rem;
-    opacity: 0.8;
+    opacity: 0;
     color: hsl(var(--hero-sub));
     margin: 0;
     line-height: 1.6;
+    animation: hero-fade-in 600ms ease 150ms forwards;
+  }
+
+  /* ── Reduced motion: disable hero animations ──────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-heading,
+    .hero-sub {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
   }
 
   /* ── CTAs ─────────────────────────────────────────────── */
