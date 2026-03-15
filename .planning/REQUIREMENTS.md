@@ -58,12 +58,12 @@
 
 ### Contact
 
-- [ ] **CONT-01**: Contact / inquiry section at bottom of page
-- [ ] **CONT-02**: Contact form with 3 fields maximum: Name, Email, Message
-- [ ] **CONT-03**: Form submission handled via Formspree (no backend required)
-- [ ] **CONT-04**: Success/error state shown after form submission
-- [ ] **CONT-05**: LinkedIn profile link in contact section
-- [ ] **CONT-06**: GitHub profile link in contact section
+- [x] **CONT-01**: Contact / inquiry section at bottom of page
+- [x] **CONT-02**: Contact form with 3 fields maximum: Name, Email, Message
+- [x] **CONT-03**: Form submission handled via Formspree (no backend required)
+- [x] **CONT-04**: Success/error state shown after form submission
+- [x] **CONT-05**: LinkedIn profile link in contact section
+- [x] **CONT-06**: GitHub profile link in contact section
 
 ### SEO & Performance
 
@@ -147,12 +147,12 @@
 | PROJ-02 | Phase 3 | Complete |
 | PROJ-03 | Phase 3 | Complete |
 | PROJ-04 | Phase 3 | Complete |
-| CONT-01 | Phase 4 | Pending |
-| CONT-02 | Phase 4 | Pending |
-| CONT-03 | Phase 4 | Pending |
-| CONT-04 | Phase 4 | Pending |
-| CONT-05 | Phase 4 | Pending |
-| CONT-06 | Phase 4 | Pending |
+| CONT-01 | Phase 4 | Complete |
+| CONT-02 | Phase 4 | Complete |
+| CONT-03 | Phase 4 | Complete |
+| CONT-04 | Phase 4 | Complete |
+| CONT-05 | Phase 4 | Complete |
+| CONT-06 | Phase 4 | Complete |
 | SEO-01 | Phase 5 | Pending |
 | SEO-02 | Phase 5 | Pending |
 | SEO-03 | Phase 5 | Pending |
