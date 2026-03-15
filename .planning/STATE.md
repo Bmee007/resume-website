@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-hero-about-skills 02-02-PLAN.md
-last_updated: "2026-03-15T06:34:58.653Z"
+stopped_at: Completed 02-hero-about-skills 02-04-PLAN.md
+last_updated: "2026-03-15T06:37:22.924Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 8
   percent: 5
 ---
 
@@ -55,6 +55,8 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 01-foundation-design-system P04 | 5 | 1 tasks | 1 files |
 | Phase 02-hero-about-skills P01 | 5 | 1 tasks | 1 files |
 | Phase 02-hero-about-skills P02 | 4 | 1 tasks | 2 files |
+| Phase 02-hero-about-skills P03 | 1 | 1 tasks | 1 files |
+| Phase 02-hero-about-skills P04 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -82,6 +84,10 @@ Recent decisions affecting current work:
 - [Phase 02-hero-about-skills]: Phase 2 smoke tests: scope all locators to section IDs to prevent strict mode violations
 - [Phase 02-hero-about-skills]: Photo above text on mobile (order: -1) gives stronger visual identity on small screens
 - [Phase 02-hero-about-skills]: FOUND-02 test failure is pre-existing (--color-bg removed in 01-02 working tree); deferred, not caused by 02-02
+- [Phase 02-hero-about-skills]: stat-inner z-index:1 required to render text above liquid-glass::before pseudo-element (z-index:0)
+- [Phase 02-hero-about-skills]: AboutSection uses Dynamics 365 full name in bio prose; satisfies D365 grep check with more readable phrasing
+- [Phase 02-hero-about-skills]: skill-card-inner z-index:1 required for content to render above liquid-glass ::before pseudo-element
+- [Phase 02-hero-about-skills]: Chip hover via CSS :hover in scoped style block — no JS, universal for all chips
 
 ### Pending Todos
 
@@ -95,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T06:34:58.650Z
-Stopped at: Completed 02-hero-about-skills 02-02-PLAN.md
+Last session: 2026-03-15T06:37:22.921Z
+Stopped at: Completed 02-hero-about-skills 02-04-PLAN.md
 Resume file: None
