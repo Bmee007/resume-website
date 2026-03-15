@@ -5,6 +5,7 @@ const experiences = [
     company: "[Current Company]",
     dateRange: "2023 – Present",
     featured: false,
+    bgColor: "#1e3a8a",
     bullets: [
       "Architected Power Automate + AI Builder workflows, automating [X] manual processes across finance and ops",
       "Led Azure OpenAI pilot for supply chain demand forecasting, achieving [Y]% forecast accuracy improvement",
@@ -45,7 +46,7 @@ const experiences = [
     <div class="timeline-track">
       {experiences.map((entry) => (
         <div class:list={["timeline-entry", entry.featured && "is-featured"]}>
-          <div class:list={["entry-card rounded-2xl", entry.featured ? "liquid-glass" : "entry-card--flat"]}>
+          <div class:list={["entry-card rounded-2xl", entry.featured ? "liquid-glass" : "entry-card--flat"]} style={entry.bgColor ? `background: ${entry.bgColor}; border-color: ${entry.bgColor};` : ""}>
             <div class="entry-inner">
               <div class="entry-header">
                 <h3 class="entry-title">{entry.title}</h3>
