@@ -1,10 +1,27 @@
 ---
-// Nav.astro — Sticky navigation with scroll-state toggle, active section spy, hamburger menu
+// Nav.astro — Liquid-glass pill navbar, fixed at top
+//             Scroll state, active section spy, hamburger menu preserved
 ---
-<header id="site-nav">
-  <div class="nav-inner">
-    <!-- Logo / Name -->
-    <a href="#" class="nav-brand">Borina Keo</a>
+
+<header id="site-nav" aria-label="Site navigation">
+  <div class="nav-wrapper">
+  <!-- Pill wrapper — centered, max 850px -->
+  <div class="nav-pill liquid-glass rounded-3xl">
+
+    <!-- Logo -->
+    <a href="#" class="nav-brand" aria-label="Back to top">
+      <span class="nav-logo-icon" aria-hidden="true">
+        <!-- Crosshair icon -->
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="8" cy="8" r="5"/>
+          <line x1="8" y1="1" x2="8" y2="3"/>
+          <line x1="8" y1="13" x2="8" y2="15"/>
+          <line x1="1" y1="8" x2="3" y2="8"/>
+          <line x1="13" y1="8" x2="15" y2="8"/>
+        </svg>
+      </span>
+      <span class="nav-brand-text">BK</span>
+    </a>
 
     <!-- Desktop nav links -->
     <nav class="desktop-nav" aria-label="Main navigation">
@@ -12,103 +29,142 @@
       <a href="#skills" class="nav-link">Skills</a>
       <a href="#experience" class="nav-link">Experience</a>
       <a href="#projects" class="nav-link">Projects</a>
-      <a href="#contact" class="nav-link">Contact</a>
     </nav>
 
-    <!-- Hamburger button (mobile only) -->
-    <button id="hamburger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle navigation menu">
-      <span class="h-bar"></span>
-      <span class="h-bar"></span>
-      <span class="h-bar"></span>
-    </button>
+    <!-- CTA + hamburger row -->
+    <div class="nav-actions">
+      <a href="#contact" class="btn-hero nav-cta rounded-xl">Contact Me</a>
+
+      <!-- Hamburger (mobile only) -->
+      <button id="hamburger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle navigation menu">
+        <span class="h-bar"></span>
+        <span class="h-bar"></span>
+        <span class="h-bar"></span>
+      </button>
+    </div>
   </div>
 
   <!-- Mobile menu panel -->
-  <div id="mobile-menu" role="navigation" aria-label="Mobile navigation">
-    <a href="#about" class="mobile-nav-link nav-link">About</a>
-    <a href="#skills" class="mobile-nav-link nav-link">Skills</a>
+  <div id="mobile-menu" class="mobile-menu liquid-glass" role="navigation" aria-label="Mobile navigation">
+
+    <a href="#about"      class="mobile-nav-link nav-link">About</a>
+    <a href="#skills"     class="mobile-nav-link nav-link">Skills</a>
     <a href="#experience" class="mobile-nav-link nav-link">Experience</a>
-    <a href="#projects" class="mobile-nav-link nav-link">Projects</a>
-    <a href="#contact" class="mobile-nav-link nav-link">Contact</a>
+    <a href="#projects"   class="mobile-nav-link nav-link">Projects</a>
+    <a href="#contact"    class="mobile-nav-link nav-link">Contact</a>
+  </div>
   </div>
 </header>
 
 <style>
+  /* ── Outer header (positioning shell) ──────────────────── */
   #site-nav {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 50;
-    background: transparent;
-    border-bottom: 1px solid transparent;
-    transition: background 0.3s ease, border-color 0.3s ease,
-                backdrop-filter 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 1rem 0;
+    pointer-events: none; /* let clicks through the transparent gap */
   }
 
-  #site-nav.scrolled {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom-color: #334155;
+  /* ── Inner wrapper — constrains pill + dropdown to same max-width ── */
+  .nav-wrapper {
+    width: 100%;
+    max-width: 850px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
   }
 
-  .nav-inner {
-    max-width: 72rem; /* max-w-6xl */
-    margin: 0 auto;
-    padding: 0 1.5rem;
-    height: 4rem;
+  /* ── Pill ─────────────────────────────────────────────── */
+  .nav-pill {
+    pointer-events: auto;
+    width: 100%;
+    padding: 0.625rem 1.25rem;
+    border-radius: 1.5rem; /* rounded-3xl */
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1.5rem;
   }
 
+  /* ── Logo ─────────────────────────────────────────────── */
   .nav-brand {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    font-size: 1.125rem;
-    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     text-decoration: none;
-    transition: color 0.2s;
+    color: hsl(var(--foreground));
+    flex-shrink: 0;
   }
 
-  .nav-brand:hover {
-    color: var(--color-accent);
+  .nav-logo-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.6), hsl(var(--primary)));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: hsl(var(--primary-foreground));
   }
 
+  .nav-brand-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Desktop links ────────────────────────────────────── */
   .desktop-nav {
     display: none;
     align-items: center;
-    gap: 2rem;
+    gap: 1.75rem;
+    flex: 1;
+    justify-content: center;
   }
 
   @media (min-width: 768px) {
-    .desktop-nav {
-      display: flex;
-    }
-
-    #hamburger {
-      display: none;
-    }
+    .desktop-nav { display: flex; }
+    #hamburger   { display: none; }
   }
 
   .nav-link {
-    color: #F8FAFC;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: hsl(var(--foreground) / 0.9);
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 0.2s, text-shadow 0.2s;
+    font-size: 1rem;
+    font-weight: 400;
+    transition: color 0.2s;
+    white-space: nowrap;
   }
 
   .nav-link:hover,
   .nav-link.active {
-    color: #10B981;
+    color: hsl(var(--primary));
   }
 
-  .nav-link.active {
-    text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  /* ── Actions (CTA + hamburger) ────────────────────────── */
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
   }
 
-  /* Hamburger button */
+  .nav-cta {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.875rem;
+    text-decoration: none;
+  }
+
+  /* ── Hamburger ────────────────────────────────────────── */
   #hamburger {
     background: none;
     border: none;
@@ -117,55 +173,51 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    gap: 5px;
   }
 
   .h-bar {
     display: block;
-    width: 24px;
+    width: 22px;
     height: 2px;
-    background: #F8FAFC;
-    margin-bottom: 5px;
+    background: hsl(var(--foreground));
     transition: transform 0.3s ease, opacity 0.3s ease;
-  }
-
-  .h-bar:last-child {
-    margin-bottom: 0;
   }
 
   #hamburger[aria-expanded="true"] .h-bar:nth-child(1) {
     transform: translateY(7px) rotate(45deg);
   }
-
   #hamburger[aria-expanded="true"] .h-bar:nth-child(2) {
     opacity: 0;
   }
-
   #hamburger[aria-expanded="true"] .h-bar:nth-child(3) {
     transform: translateY(-7px) rotate(-45deg);
   }
 
-  /* Mobile menu panel */
-  #mobile-menu {
+  /* ── Mobile menu ──────────────────────────────────────── */
+  .mobile-menu {
+    pointer-events: auto;
     display: none;
     flex-direction: column;
-    padding: 0 1.5rem 1rem;
-    gap: 1rem;
-    background: rgba(15, 23, 42, 0.95);
+    width: auto;
+    min-width: 180px;
+    border-radius: 1rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    gap: 0.75rem;
   }
 
-  #mobile-menu.open {
-    display: flex;
+  .mobile-menu.open { display: flex; }
+
+  .mobile-nav-link {
+    font-size: 1rem;
+    padding: 0.25rem 0;
   }
 </style>
 
 <script>
-  // 1. Transparent to frosted-glass after 80px scroll
-  const nav = document.getElementById("site-nav");
-  window.addEventListener("scroll", () => {
-    nav?.classList.toggle("scrolled", window.scrollY > 80);
-  }, { passive: true });
-
-  // 2. Active section via IntersectionObserver (%-based margin — viewport-size independent)
+  // 1. Scroll spy — no visual state change needed for the pill (always liquid-glass)
+  //    but keep active link highlighting
   const navLinks = document.querySelectorAll(".nav-link");
   const observer = new IntersectionObserver(
     (entries) => {
@@ -184,7 +236,7 @@
   );
   document.querySelectorAll("section[id]").forEach((s) => observer.observe(s));
 
-  // 3. Hamburger toggle
+  // 2. Hamburger toggle
   const hamburger = document.getElementById("hamburger");
   const mobileMenu = document.getElementById("mobile-menu");
   hamburger?.addEventListener("click", () => {
@@ -193,7 +245,7 @@
     mobileMenu?.classList.toggle("open");
   });
 
-  // 4. Auto-close mobile menu on link tap
+  // 3. Auto-close mobile menu on link tap
   document.querySelectorAll(".mobile-nav-link").forEach((link) => {
     link.addEventListener("click", () => {
       hamburger?.setAttribute("aria-expanded", "false");
