@@ -5,12 +5,36 @@ import Nav from "../components/Nav.astro";
 interface Props {
   title: string;
   description?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  canonicalUrl?: string;
 }
 
 const {
   title,
-  description = "ERP & WMS AI Integration Leader — Borina Keo",
+  description = "Borina Keo — ERP & WMS AI Integration Leader. 15+ years delivering AI integration across Microsoft Dynamics 365, Manhattan DFIO, and Azure OpenAI for Fortune 500 operations.",
+  ogTitle = title,
+  ogDescription = description,
+  ogImage = "/og-image.png",
+  canonicalUrl = Astro.url.href,
 } = Astro.props;
+
+const siteBase = Astro.site ?? new URL(Astro.request.url).origin;
+const ogImageAbsolute = new URL(ogImage, siteBase).href;
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Borina Keo",
+  "jobTitle": "ERP & WMS AI Integration Leader",
+  "url": siteBase,
+  "sameAs": [
+    "https://www.linkedin.com/in/borinakeo",
+    "https://github.com/Bmee007"
+  ],
+  "description": "AI integration leader specializing in Microsoft Dynamics 365, Manhattan DFIO, and Azure OpenAI for enterprise ERP and WMS modernization."
+};
 ---
 <html lang="en">
   <head>
@@ -19,13 +43,27 @@ const {
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <!-- Google Fonts: DM Sans + Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Inter:wght@400&display=swap"
-      rel="stylesheet"
-    />
+    <!-- Fonts loaded via @fontsource/geist-sans in global.css -->
+
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:image" content={ogImageAbsolute} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
+    <meta name="twitter:image" content={ogImageAbsolute} />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
   </head>
   <body>
     <Nav />
