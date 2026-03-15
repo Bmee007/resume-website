@@ -84,7 +84,12 @@ Plans:
   2. Submitting the form with valid data delivers the message to Borina via Formspree and shows a success confirmation on the page
   3. Submitting the form with invalid or missing data shows an inline error state (not a silent failure)
   4. LinkedIn and GitHub profile links are visible and correct in the contact section
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Phase 4 Playwright smoke test scaffold (6 RED tests, Wave 0)
+- [ ] 04-02-PLAN.md — ContactSection component + wire into index.astro (form, states, social links, footer)
+- [ ] 04-03-PLAN.md — Formspree account activation + visual verification checkpoint
 
 ### Phase 5: SEO, Polish & Launch
 **Goal**: The site earns a Lighthouse performance score of 90+ on mobile, ranks for intended keywords, and looks polished enough to impress Fortune 500 decision-makers
@@ -108,5 +113,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Design System | 4/4 | Complete   | 2026-03-15 |
 | 2. Hero, About & Skills | 4/5 | In Progress|  |
 | 3. Experience & AI Projects | 4/4 | Complete   | 2026-03-15 |
-| 4. Contact & Deployment | 0/TBD | Not started | - |
+| 4. Contact & Deployment | 0/3 | Not started | - |
 | 5. SEO, Polish & Launch | 0/TBD | Not started | - |
