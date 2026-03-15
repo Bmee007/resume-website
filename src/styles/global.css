@@ -1,0 +1,36 @@
+/* src/styles/global.css */
+@import "tailwindcss";
+
+@theme {
+  /* Colors — use --color-* namespace so Tailwind generates bg-*, text-*, border-* utilities */
+  --color-bg:      #0F172A;   /* slate-900 / page background */
+  --color-surface: #1E293B;   /* slate-800 / card/surface background */
+  --color-border:  #334155;   /* slate-700 / border color */
+  --color-text:    #F8FAFC;   /* slate-50  / primary text */
+  --color-accent:  #10B981;   /* emerald-500 / interactive accent */
+
+  /* Fonts */
+  --font-heading: "DM Sans", sans-serif;
+  --font-body:    "Inter", sans-serif;
+
+  /* Glow — used via CSS var() in components, not as Tailwind utility */
+  --glow-accent: 0 0 12px rgba(16, 185, 129, 0.35);
+  --glow-accent-sm: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+html {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  scroll-behavior: smooth;
+}
+
+/* Base body resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
