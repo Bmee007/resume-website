@@ -34,6 +34,10 @@ const categories = [
 ---
 
 <section id="skills" class="skills-root">
+
+  <!-- Background layer -->
+  <div class="section-bg" aria-hidden="true"></div>
+
   <div class="skills-container section-animate">
     <div class="skills-header">
       <h2>Skills &amp; Expertise</h2>
@@ -80,11 +84,36 @@ const categories = [
   .skills-root {
     padding: 5rem 1.5rem;
     min-height: 100vh;
+    position: relative;
+    overflow: hidden;
   }
 
   .skills-container {
     max-width: 72rem;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Background layer ─────────────────────────────────── */
+  .section-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/bg-skills.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .section-bg.is-visible {
+    opacity: 0.12;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-bg { transition: none; }
+    .section-bg.is-visible { opacity: 0.12; }
   }
 
   .skills-header {
@@ -173,3 +202,18 @@ const categories = [
     color: #10B981;
   }
 </style>
+
+<script>
+  const bgObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          bgObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
+  );
+  document.querySelectorAll('#skills .section-bg').forEach((el) => bgObserver.observe(el));
+</script>
