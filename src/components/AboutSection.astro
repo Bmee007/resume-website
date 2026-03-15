@@ -7,6 +7,11 @@ const stats = [
 ---
 
 <section id="about" class="about-root">
+
+  <!-- Background layer -->
+  <div class="section-bg" aria-hidden="true"></div>
+
+  <!-- existing .about-container content unchanged below -->
   <div class="about-container section-animate">
     <div class="about-header">
       <h2>About Me</h2>
@@ -58,14 +63,39 @@ const stats = [
   }
 
   .about-root {
+    position: relative;
+    overflow: hidden;
     padding: 5rem 1.5rem;
     min-height: 100vh;
     background: transparent;
   }
 
   .about-container {
+    position: relative;
+    z-index: 1;
     max-width: 72rem;
     margin: 0 auto;
+  }
+
+  /* ── Background layer ─────────────────────────────────── */
+  .section-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/bg-about.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .section-bg.is-visible {
+    opacity: 0.12;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-bg { transition: none; }
+    .section-bg.is-visible { opacity: 0.12; }
   }
 
   .about-header {
@@ -154,3 +184,19 @@ const stats = [
     font-weight: 400;
   }
 </style>
+
+<script>
+  // Background reveal — fire-once IntersectionObserver matching BaseLayout pattern
+  const bgObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          bgObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
+  );
+  document.querySelectorAll('#about .section-bg').forEach((el) => bgObserver.observe(el));
+</script>
