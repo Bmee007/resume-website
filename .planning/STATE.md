@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-03-15T08:23:52.551Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-15T08:26:44.156Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 5
 ---
 
@@ -59,6 +59,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 02-hero-about-skills P04 | 1 | 1 tasks | 1 files |
 | Phase 02-hero-about-skills P05 | 40 | 2 tasks | 2 files |
 | Phase 03-experience-ai-projects P01 | 3 | 1 tasks | 1 files |
+| Phase 03-experience-ai-projects P02 | 1 | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 02-hero-about-skills]: Chip hover via CSS :hover in scoped style block — no JS, universal for all chips
 - [Phase 02-hero-about-skills]: color:transparent on .hero-photo hides alt text; background-color:#10B981 shows emerald fill as intentional portrait placeholder
 - [Phase 03-experience-ai-projects]: EXP-05 and PROJ-02 smoke tests guard against vacuous-pass with up-front count assertions before iteration/evaluation
+- [Phase 03-experience-ai-projects]: entry-inner z-index:1 mandatory — liquid-glass::before is position:absolute z-index:0; without it, content is hidden behind the pseudo-element
+- [Phase 03-experience-ai-projects]: timeline-track uses padding-left:2.5rem (not margin) to position entries right of the vertical rule without overflow risk
 
 ### Pending Todos
 
@@ -105,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T08:23:52.547Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-03-15T08:26:44.153Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None
