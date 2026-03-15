@@ -43,18 +43,18 @@
 
 ### Experience
 
-- [ ] **EXP-01**: Career timeline / experience section showing work history
-- [ ] **EXP-02**: Each role shows: company, title, dates, and 2-3 bullet accomplishments
-- [ ] **EXP-03**: D365 migration from IBM AS400 featured as a key implementation
-- [ ] **EXP-04**: Manhattan DFIO implementation featured as a key implementation
-- [ ] **EXP-05**: Timeline is mobile-friendly (not a broken side-by-side layout on small screens)
+- [x] **EXP-01**: Career timeline / experience section showing work history
+- [x] **EXP-02**: Each role shows: company, title, dates, and 2-3 bullet accomplishments
+- [x] **EXP-03**: D365 migration from IBM AS400 featured as a key implementation
+- [x] **EXP-04**: Manhattan DFIO implementation featured as a key implementation
+- [x] **EXP-05**: Timeline is mobile-friendly (not a broken side-by-side layout on small screens)
 
 ### AI Projects
 
-- [ ] **PROJ-01**: AI integration showcase section with 2-4 featured project cards
-- [ ] **PROJ-02**: Each project card shows: system integrated (D365/Manhattan), AI technology used (Azure OpenAI, Power Automate, etc.), and outcome/impact
-- [ ] **PROJ-03**: GitHub link on relevant project cards (links to github.com/Bmee007)
-- [ ] **PROJ-04**: Section headline positions Borina as a leader, not just an implementer
+- [x] **PROJ-01**: AI integration showcase section with 2-4 featured project cards
+- [x] **PROJ-02**: Each project card shows: system integrated (D365/Manhattan), AI technology used (Azure OpenAI, Power Automate, etc.), and outcome/impact
+- [x] **PROJ-03**: GitHub link on relevant project cards (links to github.com/Bmee007)
+- [x] **PROJ-04**: Section headline positions Borina as a leader, not just an implementer
 
 ### Contact
 
@@ -138,15 +138,15 @@
 | SKILL-03 | Phase 2 | Complete |
 | SKILL-04 | Phase 2 | Complete |
 | SKILL-05 | Phase 2 | Complete |
-| EXP-01 | Phase 3 | Pending |
-| EXP-02 | Phase 3 | Pending |
-| EXP-03 | Phase 3 | Pending |
-| EXP-04 | Phase 3 | Pending |
-| EXP-05 | Phase 3 | Pending |
-| PROJ-01 | Phase 3 | Pending |
-| PROJ-02 | Phase 3 | Pending |
-| PROJ-03 | Phase 3 | Pending |
-| PROJ-04 | Phase 3 | Pending |
+| EXP-01 | Phase 3 | Complete |
+| EXP-02 | Phase 3 | Complete |
+| EXP-03 | Phase 3 | Complete |
+| EXP-04 | Phase 3 | Complete |
+| EXP-05 | Phase 3 | Complete |
+| PROJ-01 | Phase 3 | Complete |
+| PROJ-02 | Phase 3 | Complete |
+| PROJ-03 | Phase 3 | Complete |
+| PROJ-04 | Phase 3 | Complete |
 | CONT-01 | Phase 4 | Pending |
 | CONT-02 | Phase 4 | Pending |
 | CONT-03 | Phase 4 | Pending |
