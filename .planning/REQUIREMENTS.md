@@ -22,24 +22,24 @@
 
 ### Hero
 
-- [ ] **HERO-01**: Full-viewport hero section with name ("Borina Keo"), title ("ERP & WMS AI Integration Leader"), and tagline
-- [ ] **HERO-02**: Professional photo displayed prominently (LinkedIn photo as placeholder)
-- [ ] **HERO-03**: Single primary CTA button ("Contact Me") that scrolls to contact section
-- [ ] **HERO-04**: LinkedIn and GitHub icon links in hero
+- [x] **HERO-01**: Full-viewport hero section with name ("Borina Keo"), title ("ERP & WMS AI Integration Leader"), and tagline
+- [x] **HERO-02**: Professional photo displayed prominently (LinkedIn photo as placeholder)
+- [x] **HERO-03**: Single primary CTA button ("Contact Me") that scrolls to contact section
+- [x] **HERO-04**: LinkedIn and GitHub icon links in hero
 
 ### About
 
-- [ ] **ABOUT-01**: About / bio section with professional summary drawn from LinkedIn profile
-- [ ] **ABOUT-02**: Highlights D365, Manhattan DFIO, IBM AS400 migration, and AI integration expertise
-- [ ] **ABOUT-03**: Years of experience and professional positioning statement visible
+- [x] **ABOUT-01**: About / bio section with professional summary drawn from LinkedIn profile
+- [x] **ABOUT-02**: Highlights D365, Manhattan DFIO, IBM AS400 migration, and AI integration expertise
+- [x] **ABOUT-03**: Years of experience and professional positioning statement visible
 
 ### Skills
 
-- [ ] **SKILL-01**: Skills & expertise section organized by category (ERP, WMS, AI/ML, Leadership)
-- [ ] **SKILL-02**: ERP category includes: Microsoft Dynamics 365, IBM AS400, legacy migration
-- [ ] **SKILL-03**: WMS category includes: Manhattan DFIO, warehouse operations
-- [ ] **SKILL-04**: AI/ML category includes: Azure OpenAI / Microsoft Copilot, Power Automate + AI Builder, custom ML/Python models, supply chain AI (demand forecasting, pick optimization)
-- [ ] **SKILL-05**: Visual skill display (tags, badges, or grouped cards) — not a plain bullet list
+- [x] **SKILL-01**: Skills & expertise section organized by category (ERP, WMS, AI/ML, Leadership)
+- [x] **SKILL-02**: ERP category includes: Microsoft Dynamics 365, IBM AS400, legacy migration
+- [x] **SKILL-03**: WMS category includes: Manhattan DFIO, warehouse operations
+- [x] **SKILL-04**: AI/ML category includes: Azure OpenAI / Microsoft Copilot, Power Automate + AI Builder, custom ML/Python models, supply chain AI (demand forecasting, pick optimization)
+- [x] **SKILL-05**: Visual skill display (tags, badges, or grouped cards) — not a plain bullet list
 
 ### Experience
 
@@ -126,18 +126,18 @@
 | NAV-02 | Phase 1 | Complete |
 | NAV-03 | Phase 1 | Complete |
 | NAV-04 | Phase 1 | Complete |
-| HERO-01 | Phase 2 | Pending |
-| HERO-02 | Phase 2 | Pending |
-| HERO-03 | Phase 2 | Pending |
-| HERO-04 | Phase 2 | Pending |
-| ABOUT-01 | Phase 2 | Pending |
-| ABOUT-02 | Phase 2 | Pending |
-| ABOUT-03 | Phase 2 | Pending |
-| SKILL-01 | Phase 2 | Pending |
-| SKILL-02 | Phase 2 | Pending |
-| SKILL-03 | Phase 2 | Pending |
-| SKILL-04 | Phase 2 | Pending |
-| SKILL-05 | Phase 2 | Pending |
+| HERO-01 | Phase 2 | Complete |
+| HERO-02 | Phase 2 | Complete |
+| HERO-03 | Phase 2 | Complete |
+| HERO-04 | Phase 2 | Complete |
+| ABOUT-01 | Phase 2 | Complete |
+| ABOUT-02 | Phase 2 | Complete |
+| ABOUT-03 | Phase 2 | Complete |
+| SKILL-01 | Phase 2 | Complete |
+| SKILL-02 | Phase 2 | Complete |
+| SKILL-03 | Phase 2 | Complete |
+| SKILL-04 | Phase 2 | Complete |
+| SKILL-05 | Phase 2 | Complete |
 | EXP-01 | Phase 3 | Pending |
 | EXP-02 | Phase 3 | Pending |
 | EXP-03 | Phase 3 | Pending |

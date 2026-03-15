@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-15T05:57:48.628Z"
+stopped_at: Completed 02-hero-about-skills 02-01-PLAN.md
+last_updated: "2026-03-15T06:29:42.215Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 9
+  completed_plans: 5
   percent: 5
 ---
 
@@ -53,6 +53,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 01-foundation-design-system P02 | 3 min | 2 tasks | 9 files |
 | Phase 01-foundation-design-system P03 | 30 | 3 tasks | 3 files |
 | Phase 01-foundation-design-system P04 | 5 | 1 tasks | 1 files |
+| Phase 02-hero-about-skills P01 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,8 @@ Recent decisions affecting current work:
 - [Phase 01-04]: NAV-04 assertion uses .desktop-nav with not.toBeVisible() — CSS-driven visibility, not class attribute check
 - [Phase 01-04]: NAV-02 uses toBeInViewport() expect assertion; locator.isInViewport() not available in Playwright 1.58.2
 - [Phase 01-04]: NAV-03 scopes locator to .desktop-nav to avoid strict mode violation from mobile menu duplicate .nav-link elements
+- [Phase 02-hero-about-skills]: HERO-01 scoped to #hero h1 to avoid Playwright strict mode violation from multiple h1 elements including DevTools overlay
+- [Phase 02-hero-about-skills]: Phase 2 smoke tests: scope all locators to section IDs to prevent strict mode violations
 
 ### Pending Todos
 
@@ -89,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T05:57:48.624Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-hero-about-skills/02-CONTEXT.md
+Last session: 2026-03-15T06:29:42.211Z
+Stopped at: Completed 02-hero-about-skills 02-01-PLAN.md
+Resume file: None
