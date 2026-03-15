@@ -2,6 +2,10 @@
 ---
 
 <section id="contact" class="contact-root">
+
+  <!-- Background layer -->
+  <div class="section-bg" aria-hidden="true"></div>
+
   <div class="contact-inner section-animate">
     <h2 class="contact-heading">Get In Touch</h2>
     <p class="contact-tagline">Open to consulting engagements and full-time opportunities</p>
@@ -104,6 +108,29 @@
   /* Layout */
   .contact-root {
     padding: 6rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── Background layer ─────────────────────────────────── */
+  .section-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/bg-contact.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .section-bg.is-visible {
+    opacity: 0.10;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-bg { transition: none; }
+    .section-bg.is-visible { opacity: 0.10; }
   }
 
   .contact-inner {
@@ -113,6 +140,8 @@
     flex-direction: column;
     align-items: center;
     gap: 2rem;
+    position: relative;
+    z-index: 1;
   }
 
   .contact-heading {
@@ -229,6 +258,21 @@
     margin-top: 1rem;
   }
 </style>
+
+<script>
+  const bgObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          bgObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
+  );
+  document.querySelectorAll('#contact .section-bg').forEach((el) => bgObserver.observe(el));
+</script>
 
 <script>
   const FORMSPREE_ID = "xdawllej";
