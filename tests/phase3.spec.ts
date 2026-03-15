@@ -104,7 +104,7 @@ test("PROJ-03 @smoke — at least one project card links to github.com/Bmee007",
   const projectsSection = page.locator("#projects");
   await projectsSection.scrollIntoViewIfNeeded();
   await expect(
-    page.locator('#projects a[href*="github.com/Bmee007"]')
+    page.locator('#projects a[href*="github.com/Bmee007"]').first()
   ).toBeVisible();
 });
 

@@ -1,0 +1,162 @@
+---
+const projects = [
+  {
+    title: "D365 AI Procurement Automation",
+    system: "Microsoft Dynamics 365",
+    aiTech: "Azure OpenAI",
+    outcome: "Reduced purchase order cycle time by [X]% and eliminated [Y] hours/week of manual review through AI-powered approval routing integrated directly into D365 workflows.",
+    githubUrl: "https://github.com/Bmee007",
+  },
+  {
+    title: "Manhattan DFIO Pick Optimization",
+    system: "Manhattan DFIO",
+    aiTech: "Custom ML / Python",
+    outcome: "Deployed AI-driven pick path optimization across [X] distribution centers, increasing warehouse throughput by [Y]% and reducing labor costs by [Z]%.",
+    githubUrl: "https://github.com/Bmee007",
+  },
+  {
+    title: "Supply Chain Demand Forecasting",
+    system: "Power Automate + AI Builder",
+    aiTech: "Azure OpenAI",
+    outcome: "Built end-to-end demand forecasting pipeline integrating ERP sales data with AI Builder models, improving forecast accuracy by [X]% and reducing stockout events by [Y]%.",
+    githubUrl: null,
+  },
+];
+---
+
+<section id="projects" class="projects-root">
+  <div class="projects-container">
+    <div class="projects-header">
+      <h2>AI Integrations</h2>
+      <p class="projects-tagline">Leading AI-powered transformation across ERP &amp; WMS systems</p>
+    </div>
+    <div class="projects-grid">
+      {projects.map((project) => (
+        <div class="liquid-glass project-card rounded-2xl">
+          <div class="project-card-inner">
+            <h3 class="project-title">{project.title}</h3>
+            <div class="project-chips">
+              <span class="project-chip">{project.system}</span>
+              <span class="project-chip">{project.aiTech}</span>
+            </div>
+            <p class="project-outcome">{project.outcome}</p>
+            {project.githubUrl && (
+              <a href={project.githubUrl} class="project-github" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects-root {
+    padding: 5rem 1.5rem;
+  }
+
+  .projects-container {
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .projects-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .projects-header h2 {
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .projects-tagline {
+    font-size: 1.125rem;
+    color: hsl(var(--foreground) / 0.6);
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .projects-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .project-card {
+    padding: 0;
+  }
+
+  .project-card-inner {
+    position: relative;
+    z-index: 1;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+  }
+
+  .project-card:hover {
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    transition: box-shadow 0.2s;
+  }
+
+  .project-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .project-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .project-chip {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid #334155;
+    font-size: 0.875rem;
+    color: hsl(var(--foreground) / 0.8);
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .project-chip:hover {
+    border-color: #10B981;
+    color: #10B981;
+  }
+
+  .project-outcome {
+    font-size: 0.9375rem;
+    color: hsl(var(--foreground) / 0.7);
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+  }
+
+  .project-github {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: #10B981;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+    transition: border-color 0.2s;
+    align-self: flex-start;
+  }
+
+  .project-github:hover {
+    border-color: #10B981;
+  }
+</style>
