@@ -37,6 +37,10 @@ const experiences = [
 ---
 
 <section id="experience" class="exp-root">
+
+  <!-- Background layer -->
+  <div class="section-bg" aria-hidden="true"></div>
+
   <div class="exp-container section-animate">
     <div class="exp-header">
       <h2>Experience</h2>
@@ -88,8 +92,36 @@ const experiences = [
   }
 
   /* Section shell — mirrors SkillsSection padding/container pattern */
-  .exp-root { padding: 5rem 1.5rem; }
-  .exp-container { max-width: 72rem; margin: 0 auto; }
+  .exp-root { padding: 5rem 1.5rem; position: relative; overflow: hidden; }
+  .exp-container { max-width: 72rem; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* ── Background layer ─────────────────────────────────── */
+  @keyframes bg-slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 0.12; transform: translateY(0); }
+  }
+
+  .section-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: url('/images/bg-experience.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+  }
+
+  .section-bg.is-visible {
+    animation: bg-slide-up 0.8s ease forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-bg.is-visible {
+      animation: none;
+      opacity: 0.12;
+      transform: translateY(0);
+    }
+  }
   .exp-header { margin-bottom: 3rem; text-align: center; }
   .exp-header h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; color: hsl(var(--foreground)); margin: 0; }
   .exp-tagline { font-size: 1.125rem; color: hsl(var(--foreground) / 0.6); margin-top: 0.5rem; margin-bottom: 0; }
@@ -181,3 +213,18 @@ const experiences = [
   .entry-bullets { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
   .entry-bullets li { font-size: 0.9375rem; color: hsl(var(--foreground) / 0.8); line-height: 1.6; }
 </style>
+
+<script>
+  const bgObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          bgObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
+  );
+  document.querySelectorAll('#experience .section-bg').forEach((el) => bgObserver.observe(el));
+</script>
