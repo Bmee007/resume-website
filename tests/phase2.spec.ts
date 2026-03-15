@@ -33,8 +33,9 @@ test("HERO-04 @smoke — LinkedIn and GitHub social icon links are visible", asy
   page,
 }) => {
   await page.goto("/");
-  const linkedin = page.locator('a[aria-label="LinkedIn profile"]');
-  const github = page.locator('a[aria-label="GitHub profile"]');
+  const hero = page.locator("#hero");
+  const linkedin = hero.locator('a[aria-label="LinkedIn profile"]');
+  const github = hero.locator('a[aria-label="GitHub profile"]');
   await expect(linkedin).toBeVisible();
   await expect(github).toBeVisible();
   await expect(linkedin).toHaveAttribute("href", /linkedin\.com/);
