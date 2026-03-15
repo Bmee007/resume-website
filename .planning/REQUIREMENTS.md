@@ -10,7 +10,7 @@
 - [x] **FOUND-01**: Project scaffolded with Astro 5.x and Tailwind CSS v4
 - [x] **FOUND-02**: Dark theme design tokens (colors, typography, spacing) defined as CSS custom properties
 - [x] **FOUND-03**: Site is fully responsive (mobile, tablet, desktop)
-- [ ] **FOUND-04**: Site deployed to Vercel with a live public URL
+- [x] **FOUND-04**: Site deployed to Vercel with a live public URL
 - [x] **FOUND-05**: `.gitignore`, `README.md`, and project config files in place
 
 ### Navigation
@@ -120,7 +120,7 @@
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
 | FOUND-03 | Phase 1 | Complete |
-| FOUND-04 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | NAV-01 | Phase 1 | Complete |
 | NAV-02 | Phase 1 | Complete |
