@@ -6,3 +6,5 @@ playwright-report/
 .env
 .env.local
 .vercel
+.DS_Store
+.superpowers/
