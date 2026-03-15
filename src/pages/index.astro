@@ -1,19 +1,16 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import HeroSection from "../components/HeroSection.astro";
+import AboutSection from "../components/AboutSection.astro";
+import SkillsSection from "../components/SkillsSection.astro";
 ---
 <BaseLayout title="Borina Keo — ERP & WMS AI Integration Leader">
-  <!-- Hero: above fold, no nav link, full viewport height -->
-  <section id="hero" class="min-h-screen flex items-center justify-center">
-    <p style="color: rgba(248,250,252,0.3); font-family: var(--font-body);">Hero — Phase 2</p>
-  </section>
 
-  <section id="about" class="min-h-screen flex items-center justify-center">
-    <p style="color: rgba(248,250,252,0.3); font-family: var(--font-body);">About — Phase 2</p>
-  </section>
+  <HeroSection />
 
-  <section id="skills" class="min-h-screen flex items-center justify-center">
-    <p style="color: rgba(248,250,252,0.3); font-family: var(--font-body);">Skills — Phase 2</p>
-  </section>
+  <AboutSection />
+
+  <SkillsSection />
 
   <section id="experience" class="min-h-screen flex items-center justify-center">
     <p style="color: rgba(248,250,252,0.3); font-family: var(--font-body);">Experience — Phase 3</p>
@@ -26,4 +23,5 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   <section id="contact" class="min-h-screen flex items-center justify-center">
     <p style="color: rgba(248,250,252,0.3); font-family: var(--font-body);">Contact — Phase 4</p>
   </section>
+
 </BaseLayout>
