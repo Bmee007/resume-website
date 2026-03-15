@@ -96,9 +96,19 @@ test("NAV-02 @smoke — clicking nav link scrolls to #about section", async ({
   page,
 }) => {
   await page.goto("/");
-  await page.click('a[href="#about"]');
-  const isInViewport = await page.locator("#about").isInViewport();
-  expect(isInViewport).toBe(true);
+
+  // On mobile (< 768px), desktop nav is hidden — open hamburger first
+  const hamburger = page.locator("#hamburger");
+  const isHamburgerVisible = await hamburger.isVisible();
+  if (isHamburgerVisible) {
+    await hamburger.click();
+    await expect(page.locator("#mobile-menu")).toBeVisible();
+    await page.click('a.mobile-nav-link[href="#about"]');
+  } else {
+    await page.click('.desktop-nav a[href="#about"]');
+  }
+
+  await expect(page.locator("#about")).toBeInViewport();
 });
 
 // NAV-03 — active section highlighting
@@ -108,7 +118,7 @@ test("NAV-03 @smoke — nav link gets active class when section is in view", asy
   await page.goto("/");
   await page.locator("#skills").scrollIntoViewIfNeeded();
   await page.waitForTimeout(300);
-  const navLink = page.locator('a[href="#skills"].nav-link');
+  const navLink = page.locator('.desktop-nav a[href="#skills"]');
   await expect(navLink).toHaveClass(/active/);
 });
 
@@ -121,7 +131,7 @@ test("NAV-04 @smoke — hamburger menu works on mobile viewport", async ({
 
   // Hamburger visible, desktop nav hidden
   await expect(page.locator("#hamburger")).toBeVisible();
-  await expect(page.locator(".nav-links")).toHaveClass(/hidden/);
+  await expect(page.locator(".desktop-nav")).not.toBeVisible();
 
   // Open mobile menu
   await page.click("#hamburger");
