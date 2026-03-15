@@ -1,0 +1,388 @@
+---
+// HeroSection.astro — Dark SaaS landing page hero
+// Two-column split: headline/tagline/CTAs on left, circular photo on right
+---
+
+<section id="hero" class="hero-root">
+
+  <!-- Video background -->
+  <div class="hero-video-wrap" aria-hidden="true">
+    <video autoplay muted loop playsinline class="hero-video">
+      <source src="/hero-video.mp4" type="video/mp4" />
+    </video>
+    <!-- Gradient overlay so text stays legible regardless of video -->
+    <!-- Note: video-not-found console error is expected during dev — fallback renders correctly -->
+    <div class="hero-overlay"></div>
+  </div>
+
+  <!-- Content stack (positioned over video) -->
+  <div class="hero-content">
+
+    <!-- ① Announcement badge — full-width, above the split -->
+    <div class="hero-badge liquid-glass rounded-full">
+      <span class="badge-label">AI + ERP Integration Leader</span>
+      <span class="badge-chip">
+        View Work
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <path d="M4.5 2.5l4 4-4 4"/>
+        </svg>
+      </span>
+    </div>
+
+    <!-- ② Two-column split: left = text/CTAs, right = photo -->
+    <div class="hero-split">
+
+      <!-- Left column: heading, tagline, CTAs, social links -->
+      <div class="hero-left">
+        <h1 class="hero-heading">
+          Borina Keo<br />ERP &amp; WMS AI Integration Leader
+        </h1>
+
+        <p class="hero-sub">
+          Bridging Microsoft Dynamics 365, Manhattan DFIO, and AI — turning legacy ERP &amp; WMS systems into intelligent, automated operations.
+        </p>
+
+        <div class="hero-ctas">
+          <a href="#contact" class="btn-hero rounded-full hero-cta-primary">
+            Contact Me
+          </a>
+          <a href="#about" class="btn-hero-secondary rounded-full hero-cta-secondary">
+            View My Work
+          </a>
+        </div>
+
+        <!-- Social icon links (HERO-04) -->
+        <!-- TODO: verify LinkedIn URL with Borina before launch -->
+        <div class="hero-social-links">
+          <a href="https://linkedin.com/in/borinakeo" target="_blank" rel="noopener noreferrer"
+             aria-label="LinkedIn profile" class="social-icon-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+            </svg>
+          </a>
+          <a href="https://github.com/Bmee007" target="_blank" rel="noopener noreferrer"
+             aria-label="GitHub profile" class="social-icon-link">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right column: portrait photo -->
+      <div class="hero-right">
+        <div class="hero-photo-wrap">
+          <!-- TODO: replace public/borina-photo.jpg with Borina's actual photo — circular crop auto-applies via CSS -->
+          <img
+            src="/borina-photo.jpg"
+            alt="Borina Keo — ERP &amp; WMS AI Integration Leader"
+            class="hero-photo"
+            width="320"
+            height="320"
+          />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ③ Social proof marquee — full-width, below the split -->
+    <div class="hero-social-proof">
+      <span class="proof-label">Technologies &amp; platforms</span>
+      <div class="marquee-viewport">
+        <div class="marquee-track">
+          {[
+            "Microsoft D365", "Manhattan DFIO", "Azure OpenAI", "IBM AS400",
+            "Power Automate", "AI Builder", "Python / ML", "Microsoft Copilot",
+            "Microsoft D365", "Manhattan DFIO", "Azure OpenAI", "IBM AS400",
+            "Power Automate", "AI Builder", "Python / ML", "Microsoft Copilot",
+          ].map((tech) => (
+            <div class="brand-item">
+              <span class="brand-icon liquid-glass rounded-lg">
+                {tech[0]}
+              </span>
+              <span class="brand-name">{tech}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ── Root ─────────────────────────────────────────────── */
+  .hero-root {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── Video background ─────────────────────────────────── */
+  .hero-video-wrap {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.25;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 80% 60% at 50% 40%,
+      hsl(var(--background) / 0.4) 0%,
+      hsl(var(--background) / 0.85) 70%,
+      hsl(var(--background)) 100%
+    );
+  }
+
+  /* ── Content stack ────────────────────────────────────── */
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 7rem 1.5rem 4rem; /* top pad clears the fixed pill nav */
+    width: 100%;
+    max-width: 72rem;
+  }
+
+  /* ── Badge ────────────────────────────────────────────── */
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    align-self: center;
+  }
+
+  .badge-label {
+    font-size: 0.875rem;
+    color: hsl(var(--foreground) / 0.8);
+    font-weight: 400;
+  }
+
+  .badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 9999px;
+    padding: 0.2rem 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: hsl(var(--foreground));
+  }
+
+  /* ── Two-column split ─────────────────────────────────── */
+  .hero-split {
+    display: grid;
+    grid-template-columns: 1fr; /* mobile: stacked */
+    gap: 2.5rem;
+    align-items: center;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .hero-split {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ── Left column ──────────────────────────────────────── */
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: center; /* mobile: center */
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero-left {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
+  /* ── Right column ─────────────────────────────────────── */
+  .hero-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    order: -1; /* mobile: photo appears above text */
+  }
+
+  @media (min-width: 768px) {
+    .hero-right {
+      order: 0; /* desktop: photo stays on right */
+    }
+  }
+
+  /* ── Photo ────────────────────────────────────────────── */
+  .hero-photo-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-photo {
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    object-fit: cover;
+    outline: 2px solid #10B981;
+    outline-offset: 4px;
+    box-shadow: var(--glow-accent);
+    display: block;
+  }
+
+  /* ── Heading ──────────────────────────────────────────── */
+  .hero-heading {
+    font-size: clamp(2.25rem, 7vw, 4.5rem);
+    font-weight: 600;
+    line-height: 1.05;
+    max-width: 64rem;
+    color: hsl(var(--hero-heading));
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Subheading ───────────────────────────────────────── */
+  .hero-sub {
+    font-size: 1.125rem;
+    max-width: 28rem;
+    opacity: 0.8;
+    color: hsl(var(--hero-sub));
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  /* ── CTAs ─────────────────────────────────────────────── */
+  .hero-ctas {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    .hero-ctas {
+      justify-content: flex-start;
+    }
+  }
+
+  .hero-cta-primary,
+  .hero-cta-secondary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* ── Social icon links ────────────────────────────────── */
+  .hero-social-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.25rem;
+  }
+
+  .social-icon-link {
+    color: hsl(var(--foreground) / 0.4);
+    transition: color 0.2s;
+    display: inline-flex;
+  }
+
+  .social-icon-link:hover {
+    color: #10B981;
+  }
+
+  /* ── Social proof ─────────────────────────────────────── */
+  .hero-social-proof {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 56rem;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    align-self: center;
+  }
+
+  .proof-label {
+    font-size: 0.875rem;
+    color: hsl(var(--foreground) / 0.5);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .marquee-viewport {
+    overflow: hidden;
+    flex: 1;
+    /* fade edges */
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      #fff 10%,
+      #fff 90%,
+      transparent 100%
+    );
+  }
+
+  /* ── Brand items ──────────────────────────────────────── */
+  .brand-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .brand-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: hsl(var(--foreground) / 0.7);
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: hsl(var(--foreground) / 0.7);
+  }
+
+  /* ── Mobile adjustments ───────────────────────────────── */
+  @media (max-width: 640px) {
+    .hero-social-proof {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .proof-label {
+      align-self: center;
+    }
+  }
+</style>
