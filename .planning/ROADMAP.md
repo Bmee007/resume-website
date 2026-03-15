@@ -113,5 +113,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Foundation & Design System | 4/4 | Complete   | 2026-03-15 |
 | 2. Hero, About & Skills | 4/5 | In Progress|  |
 | 3. Experience & AI Projects | 4/4 | Complete   | 2026-03-15 |
-| 4. Contact & Deployment | 0/3 | Not started | - |
+| 4. Contact & Deployment | 2/3 | In Progress|  |
 | 5. SEO, Polish & Launch | 0/TBD | Not started | - |
