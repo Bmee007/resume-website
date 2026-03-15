@@ -48,7 +48,14 @@ Plans:
   3. LinkedIn and GitHub icon links are visible in the hero and navigate to the correct profiles
   4. The About section contains a professional bio that names D365, Manhattan DFIO, IBM AS400 migration, and AI integration
   5. The Skills section displays named technologies (not a plain bullet list) organized into at least four domain categories: ERP, WMS, AI/ML, and Leadership
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Phase 2 Playwright smoke test scaffold (12 RED tests, Wave 0)
+- [ ] 02-02-PLAN.md — Hero refactor: two-column split, circular photo, social icon links
+- [ ] 02-03-PLAN.md — AboutSection component: two-column bio + 3 stat callout boxes
+- [ ] 02-04-PLAN.md — SkillsSection component: 2x2 grid of liquid-glass category cards with pill chips
+- [ ] 02-05-PLAN.md — Wire AboutSection + SkillsSection into index.astro + visual verification checkpoint
 
 ### Phase 3: Experience & AI Projects
 **Goal**: Enterprise visitors can verify Borina's track record through a timeline of quantified roles and a showcase of specific AI integration projects
@@ -93,7 +100,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Design System | 4/4 | Complete   | 2026-03-15 |
-| 2. Hero, About & Skills | 0/TBD | Not started | - |
+| 2. Hero, About & Skills | 0/5 | Not started | - |
 | 3. Experience & AI Projects | 0/TBD | Not started | - |
 | 4. Contact & Deployment | 0/TBD | Not started | - |
 | 5. SEO, Polish & Launch | 0/TBD | Not started | - |
