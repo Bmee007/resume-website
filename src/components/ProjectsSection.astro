@@ -26,9 +26,8 @@ const projects = [
 
 <section id="projects" class="projects-root">
 
-  <!-- Floating background accents -->
-  <div class="section-bg-accent section-bg-accent--tr" aria-hidden="true"></div>
-  <div class="section-bg-accent section-bg-accent--bl" aria-hidden="true"></div>
+  <!-- Background image -->
+  <div class="section-bg" aria-hidden="true"></div>
 
   <div class="projects-container section-animate">
     <div class="projects-header">
@@ -88,51 +87,25 @@ const projects = [
     z-index: 1;
   }
 
-  /* ── Floating background accents ─────────────────────── */
-  @keyframes bg-zoom {
-    from { opacity: 0; transform: scale(1.05) rotate(var(--accent-rotate, 3deg)); }
-    to   { opacity: 0.20; transform: scale(1) rotate(var(--accent-rotate, 3deg)); }
-  }
-
-  .section-bg-accent {
+  /* ── Background image ────────────────────────────────── */
+  .section-bg {
     position: absolute;
-    width: 300px;
-    height: 200px;
-    border-radius: 8px;
+    inset: 0;
     z-index: 0;
-    background-image: url('/images/bg-projects.jpg');
+    background-image: url('/images/circuit.svg');
     background-size: cover;
+    background-position: center;
     opacity: 0;
+    transition: opacity 0.8s ease;
   }
 
-  .section-bg-accent--tr {
-    top: -20px;
-    right: -20px;
-    --accent-rotate: 3deg;
-    background-position: center top;
-    mask-image: linear-gradient(to bottom left, rgba(0,0,0,0.85) 0%, transparent 65%);
-    -webkit-mask-image: linear-gradient(to bottom left, rgba(0,0,0,0.85) 0%, transparent 65%);
-  }
-
-  .section-bg-accent--bl {
-    bottom: -20px;
-    left: -20px;
-    --accent-rotate: -2deg;
-    background-position: center bottom;
-    mask-image: linear-gradient(to top right, rgba(0,0,0,0.85) 0%, transparent 65%);
-    -webkit-mask-image: linear-gradient(to top right, rgba(0,0,0,0.85) 0%, transparent 65%);
-  }
-
-  .section-bg-accent.is-visible {
-    animation: bg-zoom 1.0s ease forwards;
+  .section-bg.is-visible {
+    opacity: 0.5;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .section-bg-accent.is-visible {
-      animation: none;
-      opacity: 0.20;
-      transform: scale(1) rotate(var(--accent-rotate, 3deg));
-    }
+    .section-bg { transition: none; }
+    .section-bg.is-visible { opacity: 0.5; }
   }
 
   .projects-header {
@@ -249,5 +222,5 @@ const projects = [
     },
     { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
   );
-  document.querySelectorAll('#projects .section-bg-accent').forEach((el) => projectsBgObserver.observe(el));
+  document.querySelectorAll('#projects .section-bg').forEach((el) => projectsBgObserver.observe(el));
 </script>
