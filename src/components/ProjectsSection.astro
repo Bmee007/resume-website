@@ -76,6 +76,7 @@ const projects = [
 
   .projects-root {
     padding: 5rem 1.5rem;
+    min-height: 100vh;
     position: relative;
     overflow: hidden;
   }
@@ -237,16 +238,16 @@ const projects = [
 </style>
 
 <script>
-  const bgObserver = new IntersectionObserver(
+  const projectsBgObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          bgObserver.unobserve(entry.target);
+          projectsBgObserver.unobserve(entry.target);
         }
       });
     },
     { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
   );
-  document.querySelectorAll('#projects .section-bg-accent').forEach((el) => bgObserver.observe(el));
+  document.querySelectorAll('#projects .section-bg-accent').forEach((el) => projectsBgObserver.observe(el));
 </script>

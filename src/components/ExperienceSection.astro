@@ -92,7 +92,7 @@ const experiences = [
   }
 
   /* Section shell — mirrors SkillsSection padding/container pattern */
-  .exp-root { padding: 5rem 1.5rem; position: relative; overflow: hidden; }
+  .exp-root { padding: 5rem 1.5rem; min-height: 100vh; position: relative; overflow: hidden; }
   .exp-container { max-width: 72rem; margin: 0 auto; position: relative; z-index: 1; }
 
   /* ── Background layer ─────────────────────────────────── */
@@ -215,16 +215,16 @@ const experiences = [
 </style>
 
 <script>
-  const bgObserver = new IntersectionObserver(
+  const expBgObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          bgObserver.unobserve(entry.target);
+          expBgObserver.unobserve(entry.target);
         }
       });
     },
     { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
   );
-  document.querySelectorAll('#experience .section-bg').forEach((el) => bgObserver.observe(el));
+  document.querySelectorAll('#experience .section-bg').forEach((el) => expBgObserver.observe(el));
 </script>
