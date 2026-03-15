@@ -12,7 +12,7 @@ Four and a half phases take this project from zero to a live, SEO-optimized pers
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Design System** - Astro/Tailwind scaffold, design tokens, responsive base, sticky nav, and deployment pipeline
+- [x] **Phase 1: Foundation & Design System** - Astro/Tailwind scaffold, design tokens, responsive base, sticky nav, and deployment pipeline (completed 2026-03-15)
 - [ ] **Phase 2: Hero, About & Skills** - Full-viewport hero with photo and CTA, professional bio, and categorized skills display
 - [ ] **Phase 3: Experience & AI Projects** - Career timeline with quantified impact and AI integration showcase cards
 - [ ] **Phase 4: Contact & Deployment** - Formspree contact form wired end-to-end, social links, and live Vercel URL
@@ -91,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Design System | 2/3 | In Progress|  |
+| 1. Foundation & Design System | 3/3 | Complete   | 2026-03-15 |
 | 2. Hero, About & Skills | 0/TBD | Not started | - |
 | 3. Experience & AI Projects | 0/TBD | Not started | - |
 | 4. Contact & Deployment | 0/TBD | Not started | - |

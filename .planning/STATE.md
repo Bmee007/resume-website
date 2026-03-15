@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-02-PLAN.md
-last_updated: "2026-03-15T00:32:30.213Z"
+stopped_at: Completed 01-03-PLAN.md
+last_updated: "2026-03-15T00:53:47.460Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 5
 ---
 
@@ -51,6 +51,7 @@ Progress: [█░░░░░░░░░] 5%
 
 *Updated after each plan completion*
 | Phase 01-foundation-design-system P02 | 3 min | 2 tasks | 9 files |
+| Phase 01-foundation-design-system P03 | 30 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,8 @@ Recent decisions affecting current work:
 - [Phase 01-02]: Astro 5.x scaffolded to temp dir due to non-empty project root; files manually merged preserving Playwright infrastructure
 - [Phase 01-02]: package.json type:module required by Astro 5.x; test files updated to use ESM import.meta.url pattern for __dirname
 - [Phase 01-02]: Tailwind v4 CSS-first config: @theme block in global.css replaces tailwind.config.js
+- [Phase 01-03]: Static Astro zero-config Vercel deployment: no vercel.json or adapter needed, CLI auto-detects framework
+- [Phase 01-03]: IntersectionObserver rootMargin -5%/-95% for stable single-section active nav state
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T00:32:30.210Z
-Stopped at: Completed 01-02-PLAN.md
+Last session: 2026-03-15T00:53:47.457Z
+Stopped at: Completed 01-03-PLAN.md
 Resume file: None
