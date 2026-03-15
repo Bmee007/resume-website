@@ -7,18 +7,18 @@
 
 ### Foundation
 
-- [ ] **FOUND-01**: Project scaffolded with Astro 5.x and Tailwind CSS v4
-- [ ] **FOUND-02**: Dark theme design tokens (colors, typography, spacing) defined as CSS custom properties
-- [ ] **FOUND-03**: Site is fully responsive (mobile, tablet, desktop)
+- [x] **FOUND-01**: Project scaffolded with Astro 5.x and Tailwind CSS v4
+- [x] **FOUND-02**: Dark theme design tokens (colors, typography, spacing) defined as CSS custom properties
+- [x] **FOUND-03**: Site is fully responsive (mobile, tablet, desktop)
 - [ ] **FOUND-04**: Site deployed to Vercel with a live public URL
-- [ ] **FOUND-05**: `.gitignore`, `README.md`, and project config files in place
+- [x] **FOUND-05**: `.gitignore`, `README.md`, and project config files in place
 
 ### Navigation
 
-- [ ] **NAV-01**: Sticky navigation bar with Borina's name/logo and section links
-- [ ] **NAV-02**: Smooth scroll to sections on nav link click
-- [ ] **NAV-03**: Active section highlighted in nav as user scrolls
-- [ ] **NAV-04**: Mobile hamburger menu that opens/closes correctly
+- [x] **NAV-01**: Sticky navigation bar with Borina's name/logo and section links
+- [x] **NAV-02**: Smooth scroll to sections on nav link click
+- [x] **NAV-03**: Active section highlighted in nav as user scrolls
+- [x] **NAV-04**: Mobile hamburger menu that opens/closes correctly
 
 ### Hero
 
@@ -117,15 +117,15 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
-| FOUND-02 | Phase 1 | Pending |
-| FOUND-03 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
+| FOUND-02 | Phase 1 | Complete |
+| FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
-| NAV-01 | Phase 1 | Pending |
-| NAV-02 | Phase 1 | Pending |
-| NAV-03 | Phase 1 | Pending |
-| NAV-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Complete |
+| NAV-01 | Phase 1 | Complete |
+| NAV-02 | Phase 1 | Complete |
+| NAV-03 | Phase 1 | Complete |
+| NAV-04 | Phase 1 | Complete |
 | HERO-01 | Phase 2 | Pending |
 | HERO-02 | Phase 2 | Pending |
 | HERO-03 | Phase 2 | Pending |

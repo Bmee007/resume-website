@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Playwright test scaffold (Wave 0 smoke tests for all Phase 1 requirements)
+- [x] 01-01-PLAN.md — Playwright test scaffold (Wave 0 smoke tests for all Phase 1 requirements)
 - [ ] 01-02-PLAN.md — Astro scaffold + Tailwind v4 design tokens + BaseLayout + section stubs
 - [ ] 01-03-PLAN.md — Nav component (sticky, scroll-state, active section, hamburger) + Vercel deployment
 
@@ -91,7 +91,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Design System | 0/3 | Not started | - |
+| 1. Foundation & Design System | 1/3 | In Progress|  |
 | 2. Hero, About & Skills | 0/TBD | Not started | - |
 | 3. Experience & AI Projects | 0/TBD | Not started | - |
 | 4. Contact & Deployment | 0/TBD | Not started | - |
