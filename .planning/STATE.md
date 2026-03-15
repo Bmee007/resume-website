@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-03-15T08:26:44.156Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-03-15T08:29:42.677Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
   percent: 5
 ---
 
@@ -60,6 +60,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 02-hero-about-skills P05 | 40 | 2 tasks | 2 files |
 | Phase 03-experience-ai-projects P01 | 3 | 1 tasks | 1 files |
 | Phase 03-experience-ai-projects P02 | 1 | 1 tasks | 2 files |
+| Phase 03-experience-ai-projects P03 | 1 | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 03-experience-ai-projects]: EXP-05 and PROJ-02 smoke tests guard against vacuous-pass with up-front count assertions before iteration/evaluation
 - [Phase 03-experience-ai-projects]: entry-inner z-index:1 mandatory — liquid-glass::before is position:absolute z-index:0; without it, content is hidden behind the pseudo-element
 - [Phase 03-experience-ai-projects]: timeline-track uses padding-left:2.5rem (not margin) to position entries right of the vertical rule without overflow risk
+- [Phase 03-experience-ai-projects]: PROJ-03 strict mode fix: added .first() to test locator to handle two GitHub links without Playwright strict mode violation
+- [Phase 03-experience-ai-projects]: project-chip re-declared locally in ProjectsSection scoped styles (Astro scoped styles do not share across components)
 
 ### Pending Todos
 
@@ -108,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T08:26:44.153Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-03-15T08:29:42.674Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
