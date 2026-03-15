@@ -1,0 +1,154 @@
+---
+const experiences = [
+  {
+    title: "AI & ERP Integration Lead",
+    company: "[Current Company]",
+    dateRange: "2023 – Present",
+    featured: false,
+    bullets: [
+      "Architected Power Automate + AI Builder workflows, automating [X] manual processes across finance and ops",
+      "Led Azure OpenAI pilot for supply chain demand forecasting, achieving [Y]% forecast accuracy improvement",
+    ],
+  },
+  {
+    title: "ERP Implementation Lead — D365 Migration",
+    company: "[Company B]",
+    dateRange: "2019 – 2023",
+    featured: true,
+    bullets: [
+      "Directed full Microsoft Dynamics 365 migration from IBM AS400, cutting operational costs by [X]%",
+      "Integrated Azure OpenAI into D365 procurement workflows, reducing cycle time by [Y]%",
+      "Led [Z]-person cross-functional team through 18-month ERP modernization program",
+    ],
+  },
+  {
+    title: "WMS Implementation Lead — Manhattan DFIO",
+    company: "[Company C]",
+    dateRange: "2016 – 2019",
+    featured: true,
+    bullets: [
+      "Deployed Manhattan DFIO across [X] distribution centers, increasing warehouse throughput by [Y]%",
+      "Integrated AI-driven pick optimization into Manhattan DFIO, reducing labor costs by [Z]%",
+      "Partnered with C-suite stakeholders to align WMS roadmap with 5-year supply chain strategy",
+    ],
+  },
+];
+---
+
+<section id="experience" class="exp-root">
+  <div class="exp-container">
+    <div class="exp-header">
+      <h2>Experience</h2>
+      <p class="exp-tagline">Quantified impact across ERP, WMS, and AI transformation</p>
+    </div>
+
+    <div class="timeline-track">
+      {experiences.map((entry) => (
+        <div class:list={["timeline-entry", entry.featured && "is-featured"]}>
+          <div class:list={["entry-card rounded-2xl", entry.featured ? "liquid-glass" : "entry-card--flat"]}>
+            <div class="entry-inner">
+              <div class="entry-header">
+                <h3 class="entry-title">{entry.title}</h3>
+                <div class="entry-meta">
+                  <span class="entry-company">{entry.company}</span>
+                  <span class="entry-dates">{entry.dateRange}</span>
+                </div>
+              </div>
+              <ul class="entry-bullets">
+                {entry.bullets.map((bullet) => (
+                  <li>{bullet}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Section shell — mirrors SkillsSection padding/container pattern */
+  .exp-root { padding: 5rem 1.5rem; }
+  .exp-container { max-width: 72rem; margin: 0 auto; }
+  .exp-header { margin-bottom: 3rem; text-align: center; }
+  .exp-header h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; color: hsl(var(--foreground)); margin: 0; }
+  .exp-tagline { font-size: 1.125rem; color: hsl(var(--foreground) / 0.6); margin-top: 0.5rem; margin-bottom: 0; }
+
+  /* Timeline track */
+  .timeline-track {
+    position: relative;
+    padding-left: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Vertical connecting line */
+  .timeline-track::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 1.25rem;
+    bottom: 1.25rem;
+    width: 2px;
+    background: hsl(var(--border-hsl));
+  }
+
+  /* Entry dot */
+  .timeline-entry {
+    position: relative;
+  }
+
+  .timeline-entry::before {
+    content: '';
+    position: absolute;
+    left: -2.125rem;
+    top: 1.125rem;
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: hsl(var(--primary));
+    z-index: 1;
+  }
+
+  /* Pulse animation on featured entry dot */
+  .timeline-entry.is-featured::before {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    animation: dot-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes dot-pulse {
+    0%   { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0.5); }
+    50%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0   rgba(16, 185, 129, 0); }
+  }
+
+  /* Flat card for regular entries */
+  .entry-card--flat {
+    background: #1E293B;
+    border: 1px solid #334155;
+    border-radius: 1rem;
+  }
+
+  /* Emerald left-border stripe for featured entries */
+  .is-featured .entry-card {
+    border-left: 3px solid #10B981;
+  }
+
+  /* Inner wrapper — z-index:1 prevents content hidden behind liquid-glass::before */
+  .entry-inner {
+    position: relative;
+    z-index: 1;
+    padding: 1.75rem;
+  }
+
+  /* Entry header and content */
+  .entry-header { margin-bottom: 1rem; }
+  .entry-title { font-size: 1.125rem; font-weight: 600; color: hsl(var(--foreground)); margin: 0 0 0.25rem; }
+  .entry-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+  .entry-company { font-size: 0.9375rem; color: hsl(var(--foreground) / 0.7); }
+  .entry-dates { font-size: 0.875rem; color: hsl(var(--foreground) / 0.5); }
+  .entry-bullets { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .entry-bullets li { font-size: 0.9375rem; color: hsl(var(--foreground) / 0.8); line-height: 1.6; }
+</style>
