@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-03-15T13:04:35.719Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-03-15T13:10:40.148Z"
 last_activity: 2026-03-15 — Plan 01-01 complete; Playwright test infrastructure installed with 8-requirement smoke test suite
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 21
-  completed_plans: 19
+  completed_plans: 20
   percent: 5
 ---
 
@@ -68,6 +68,7 @@ Progress: [█░░░░░░░░░] 5%
 | Phase 05-seo-polish-launch P01 | 4 | 1 tasks | 1 files |
 | Phase 05-seo-polish-launch P03 | 4 | 2 tasks | 7 files |
 | Phase 05-seo-polish-launch P02 | 4 | 2 tasks | 5 files |
+| Phase 05-seo-polish-launch P04 | 11 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -121,6 +122,8 @@ Recent decisions affecting current work:
 - [Phase 05-seo-polish-launch]: site URL set to https://borinakeo.vercel.app in astro.config.mjs with TODO comment to update before launch
 - [Phase 05-seo-polish-launch]: ogImage absolute URL computed via new URL(ogImage, siteBase) using Astro.site; defaults to /og-image.png
 - [Phase 05-seo-polish-launch]: SEO-06 verified against built preview server not dev server — sitemap only exists post-build
+- [Phase 05-seo-polish-launch]: Card hover pattern: transition on base rule (not :hover) so animation applies on both enter and leave
+- [Phase 05-seo-polish-launch]: POLSH-03 test extended to detect rgba() format for emerald chip borders — rgba substring does not match rgb() includes check
 
 ### Pending Todos
 
@@ -134,6 +137,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-15T13:04:35.715Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-03-15T13:10:40.144Z
+Stopped at: Completed 05-04-PLAN.md
 Resume file: None
