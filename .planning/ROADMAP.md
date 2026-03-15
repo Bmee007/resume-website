@@ -67,7 +67,13 @@ Plans:
   3. The timeline renders without layout breakage on a 375px viewport (no side-by-side columns that collapse poorly)
   4. The AI projects section contains 2-4 cards, each naming the integrated system, the AI technology used, and a measurable outcome
   5. At least one project card links to github.com/Bmee007, and the section headline positions Borina as a leader rather than an implementer
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Phase 3 Playwright smoke tests (9 RED tests for EXP-01 through PROJ-04, Wave 0)
+- [ ] 03-02-PLAN.md — ExperienceSection component: vertical timeline, featured entries, CSS-only pulse dot
+- [ ] 03-03-PLAN.md — ProjectsSection component: 2-column grid, liquid-glass cards, chips, GitHub links
+- [ ] 03-04-PLAN.md — Wire ExperienceSection + ProjectsSection into index.astro + visual checkpoint
 
 ### Phase 4: Contact & Deployment
 **Goal**: A visitor who wants to hire or inquire can submit a contact form and receive confirmation; Borina's social profiles are accessible from the contact section
@@ -101,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation & Design System | 4/4 | Complete   | 2026-03-15 |
 | 2. Hero, About & Skills | 4/5 | In Progress|  |
-| 3. Experience & AI Projects | 0/TBD | Not started | - |
+| 3. Experience & AI Projects | 0/4 | Not started | - |
 | 4. Contact & Deployment | 0/TBD | Not started | - |
 | 5. SEO, Polish & Launch | 0/TBD | Not started | - |
