@@ -1,0 +1,203 @@
+---
+// Nav.astro — Sticky navigation with scroll-state toggle, active section spy, hamburger menu
+---
+<header id="site-nav">
+  <div class="nav-inner">
+    <!-- Logo / Name -->
+    <a href="#" class="nav-brand">Borina Keo</a>
+
+    <!-- Desktop nav links -->
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="#about" class="nav-link">About</a>
+      <a href="#skills" class="nav-link">Skills</a>
+      <a href="#experience" class="nav-link">Experience</a>
+      <a href="#projects" class="nav-link">Projects</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+
+    <!-- Hamburger button (mobile only) -->
+    <button id="hamburger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle navigation menu">
+      <span class="h-bar"></span>
+      <span class="h-bar"></span>
+      <span class="h-bar"></span>
+    </button>
+  </div>
+
+  <!-- Mobile menu panel -->
+  <div id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+    <a href="#about" class="mobile-nav-link nav-link">About</a>
+    <a href="#skills" class="mobile-nav-link nav-link">Skills</a>
+    <a href="#experience" class="mobile-nav-link nav-link">Experience</a>
+    <a href="#projects" class="mobile-nav-link nav-link">Projects</a>
+    <a href="#contact" class="mobile-nav-link nav-link">Contact</a>
+  </div>
+</header>
+
+<style>
+  #site-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s ease, border-color 0.3s ease,
+                backdrop-filter 0.3s ease;
+  }
+
+  #site-nav.scrolled {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom-color: #334155;
+  }
+
+  .nav-inner {
+    max-width: 72rem; /* max-w-6xl */
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-brand {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-brand:hover {
+    color: var(--color-accent);
+  }
+
+  .desktop-nav {
+    display: none;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .desktop-nav {
+      display: flex;
+    }
+
+    #hamburger {
+      display: none;
+    }
+  }
+
+  .nav-link {
+    color: #F8FAFC;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: #10B981;
+  }
+
+  .nav-link.active {
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  }
+
+  /* Hamburger button */
+  #hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .h-bar {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: #F8FAFC;
+    margin-bottom: 5px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .h-bar:last-child {
+    margin-bottom: 0;
+  }
+
+  #hamburger[aria-expanded="true"] .h-bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  #hamburger[aria-expanded="true"] .h-bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  #hamburger[aria-expanded="true"] .h-bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Mobile menu panel */
+  #mobile-menu {
+    display: none;
+    flex-direction: column;
+    padding: 0 1.5rem 1rem;
+    gap: 1rem;
+    background: rgba(15, 23, 42, 0.95);
+  }
+
+  #mobile-menu.open {
+    display: flex;
+  }
+</style>
+
+<script>
+  // 1. Transparent to frosted-glass after 80px scroll
+  const nav = document.getElementById("site-nav");
+  window.addEventListener("scroll", () => {
+    nav?.classList.toggle("scrolled", window.scrollY > 80);
+  }, { passive: true });
+
+  // 2. Active section via IntersectionObserver (%-based margin — viewport-size independent)
+  const navLinks = document.querySelectorAll(".nav-link");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          navLinks.forEach((link) =>
+            link.classList.toggle(
+              "active",
+              link.getAttribute("href") === `#${entry.target.id}`
+            )
+          );
+        }
+      });
+    },
+    { rootMargin: "-5% 0% -95% 0%", threshold: 0 }
+  );
+  document.querySelectorAll("section[id]").forEach((s) => observer.observe(s));
+
+  // 3. Hamburger toggle
+  const hamburger = document.getElementById("hamburger");
+  const mobileMenu = document.getElementById("mobile-menu");
+  hamburger?.addEventListener("click", () => {
+    const isOpen = hamburger.getAttribute("aria-expanded") === "true";
+    hamburger.setAttribute("aria-expanded", String(!isOpen));
+    mobileMenu?.classList.toggle("open");
+  });
+
+  // 4. Auto-close mobile menu on link tap
+  document.querySelectorAll(".mobile-nav-link").forEach((link) => {
+    link.addEventListener("click", () => {
+      hamburger?.setAttribute("aria-expanded", "false");
+      mobileMenu?.classList.remove("open");
+    });
+  });
+</script>
