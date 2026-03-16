@@ -1,8 +1,8 @@
 ---
 const stats = [
-  { value: "10+", label: "Years of Experience" }, // TODO: confirm with Borina
-  { value: "2",   label: "Full ERP Migrations" },  // TODO: confirm with Borina
-  { value: "5+",  label: "AI Integrations Deployed" }, // TODO: confirm with Borina
+  { value: "15+", label: "Years of Experience" },
+  { value: "2",   label: "Full ERP Migrations" },
+  { value: "5+",  label: "AI Integrations Deployed" },
 ];
 ---
 
@@ -18,18 +18,21 @@ const stats = [
     </div>
     <div class="about-grid">
       <div class="about-bio-col">
-        <!-- Positioning statement (ABOUT-03) -->
-        <p class="about-position">
-          With over a decade of enterprise systems leadership, I bridge the gap between complex ERP/WMS platforms and the AI technologies that make them intelligent — turning operational data into strategic advantage.
-        </p>
-        <!-- TODO: replace with Borina's real bio copy before launch -->
-        <!-- Bio prose (ABOUT-01, ABOUT-02) — mentions D365, Manhattan DFIO, IBM AS400 -->
-        <p class="about-bio">
-          I lead enterprise-scale digital transformation programs where legacy infrastructure meets modern AI — from migrating IBM AS400 environments to Microsoft Dynamics 365 (D365), to implementing Manhattan DFIO for warehouse operations serving Fortune 500 distribution networks.
-        </p>
-        <p class="about-bio">
-          My work bridges operational expertise and emerging technology: I design and deploy Azure OpenAI integrations, Power Automate workflows, and custom ML models that make ERP and WMS systems intelligent. The result is measurable: faster fulfillment cycles, reduced inventory variance, and supply chains that predict rather than react.
-        </p>
+        <div class="liquid-glass about-bio-card rounded-2xl">
+          <div class="about-bio-inner">
+            <!-- Positioning statement (ABOUT-03) -->
+            <p class="about-position">
+              With over a decade of enterprise systems leadership, I bridge the gap between complex ERP/WMS platforms and the AI technologies that make them intelligent — turning operational data into strategic advantage.
+            </p>
+            <!-- Bio prose (ABOUT-01, ABOUT-02) — mentions D365, Manhattan DFIO, IBM AS400 -->
+            <p class="about-bio">
+              I lead enterprise-scale digital transformation programs where legacy infrastructure meets modern AI — from migrating IBM AS400 environments to Microsoft Dynamics 365 (D365), to implementing Manhattan DFIO for warehouse operations serving Fortune 500 distribution networks.
+            </p>
+            <p class="about-bio">
+              My work bridges operational expertise and emerging technology: I design and deploy Azure OpenAI integrations, Power Automate workflows, and custom ML models that make ERP and WMS systems intelligent. The result is measurable: faster fulfillment cycles, reduced inventory variance, and supply chains that predict rather than react.
+            </p>
+          </div>
+        </div>
       </div>
       <div class="about-stats-col">
         {stats.map(stat => (
@@ -136,16 +139,30 @@ const stats = [
     gap: 1.25rem;
   }
 
+  .about-bio-card {
+    padding: 0;
+  }
+
+  .about-bio-inner {
+    position: relative;
+    z-index: 1;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
   .about-position {
-    font-size: 1.125rem;
-    font-weight: 500;
-    color: hsl(var(--foreground) / 0.9);
-    line-height: 1.6;
+    font-size: 1rem;
+    font-weight: 400;
+    color: hsl(var(--foreground) / 0.88);
+    line-height: 1.75;
     margin: 0;
   }
 
   .about-bio {
     font-size: 1rem;
+    font-weight: 400;
     color: hsl(var(--foreground) / 0.88);
     line-height: 1.75;
     margin: 0;

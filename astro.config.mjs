@@ -5,7 +5,7 @@ import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://borinakeo.vercel.app", // TODO: update to real Vercel URL before launch
+  site: "https://borinakeo.com",
   integrations: [sitemap()],
   vite: {
     plugins: [tailwindcss()],
