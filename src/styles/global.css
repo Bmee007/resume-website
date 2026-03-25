@@ -6,36 +6,50 @@
 @import "@fontsource/geist-sans/700.css";
 
 @theme {
-  /* Legacy tokens — kept for non-hero sections */
-  --color-surface: #1E293B;
-  --color-border:  #334155;
-  --color-text:    #F8FAFC;
-  --color-accent:  #10B981;
-  --font-heading:  "Geist Sans", sans-serif;
-  --font-body:     "Geist Sans", sans-serif;
-  --glow-accent:    0 0 12px rgba(16, 185, 129, 0.35);
-  --glow-accent-sm: 0 0 8px rgba(16, 185, 129, 0.4);
+  --color-surface:  oklch(0.195 0.006 60);
+  --color-border:   oklch(0.28  0.006 60);
+  --color-text:     oklch(0.94  0.01  70);
+  --color-accent:   oklch(0.82  0.08  55);
+  --font-heading:   "Geist Sans", sans-serif;
+  --font-body:      "Geist Sans", sans-serif;
 }
 
-/* ── HSL design tokens ─────────────────────────────────────── */
+/* ── Design tokens ─────────────────────────────────────────── */
 :root {
-  --background:          260 87% 3%;
-  --foreground:          40 6% 95%;
-  --primary:             121 95% 76%;
-  --primary-foreground:  0 0% 5%;
-  --hero-heading:        40 10% 96%;
-  --hero-sub:            40 6% 82%;
-  --secondary:           240 4% 16%;
-  --muted:               240 4% 16%;
-  --border-hsl:          240 4% 20%;
+  /* Backgrounds */
+  --background:         oklch(0.145 0.006 60);
+  --secondary:          oklch(0.195 0.006 60);
+  --muted:              oklch(0.195 0.006 60);
+
+  /* Foreground */
+  --foreground:         oklch(0.94  0.01  70);
+  --fg-muted:           color-mix(in oklch, oklch(0.94 0.01 70) 55%, transparent);
+  --fg-subtle:          color-mix(in oklch, oklch(0.94 0.01 70) 38%, transparent);
+
+  /* Hero text */
+  --hero-heading:       oklch(0.97  0.008 70);
+  --hero-sub:           oklch(0.70  0.012 60);
+
+  /* Accent — warm sandy orange */
+  --primary:            oklch(0.82  0.08  55);
+  --primary-foreground: oklch(0.145 0.006 60);
+  --primary-dim:        color-mix(in oklch, oklch(0.82 0.08 55) 18%, transparent);
+
+  /* Structure */
+  --border:             oklch(0.28  0.006 60);
+  --border-hsl:         oklch(0.28  0.006 60);
+
+  /* Easing */
+  --ease-expo-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-expo-in-out: cubic-bezier(0.87, 0, 0.13, 1);
 }
 
 /* ── Base reset ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: "Geist Sans", sans-serif;
   scroll-behavior: smooth;
 }
@@ -45,39 +59,14 @@ body {
   min-height: 100vh;
 }
 
-/* ── Liquid Glass ──────────────────────────────────────────── */
+/* ── Card surfaces (replaces liquid-glass) ─────────────────── */
 .liquid-glass {
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: none;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  position: relative;
+  background: var(--secondary);
+  border: 1px solid var(--border);
 }
 
 .liquid-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1.4px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.45)  0%,
-    rgba(255, 255, 255, 0.15) 20%,
-    rgba(255, 255, 255, 0)    40%,
-    rgba(255, 255, 255, 0)    60%,
-    rgba(255, 255, 255, 0.15) 80%,
-    rgba(255, 255, 255, 0.45) 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box,
-                linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: 0;
+  content: none;
 }
 
 /* ── Button variants ───────────────────────────────────────── */
@@ -85,53 +74,36 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-family: "Geist Sans", sans-serif;
   font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: background 0.2s;
+  transition: opacity 0.25s var(--ease-expo-out);
 }
-.btn-hero:hover { background: hsl(var(--primary) / 0.9); }
+.btn-hero:hover { opacity: 0.82; }
 
 .btn-hero-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.01);
-  background-blend-mode: luminosity;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  color: hsl(var(--foreground));
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--foreground);
   font-family: "Geist Sans", sans-serif;
   font-weight: 400;
   cursor: pointer;
-  border: none;
-  transition: background 0.2s;
+  transition: border-color 0.25s var(--ease-expo-out),
+              background   0.25s var(--ease-expo-out);
   position: relative;
   overflow: hidden;
 }
-.btn-hero-secondary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1.4px;
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
-    rgba(255,255,255,0)    40%, rgba(255,255,255,0)    60%,
-    rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%
-  );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box,
-                linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  border-radius: inherit;
+.btn-hero-secondary::before { content: none; }
+.btn-hero-secondary:hover {
+  border-color: var(--primary);
+  background: var(--primary-dim);
 }
-.btn-hero-secondary:hover { background: rgba(255, 255, 255, 0.05); }
 
 /* ── Marquee ───────────────────────────────────────────────── */
 @keyframes marquee {

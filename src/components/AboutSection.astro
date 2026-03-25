@@ -7,167 +7,132 @@ const stats = [
 ---
 
 <section id="about" class="about-root">
-
-  <!-- Background layer -->
-  <div class="section-bg" aria-hidden="true"></div>
-
   <div class="about-container section-animate">
+
     <div class="about-header">
-      <h2>About Me</h2>
-      <p class="about-tagline">ERP &amp; WMS transformation leader with AI at the core</p>
+      <p class="section-eyebrow">About</p>
+      <h2>ERP &amp; WMS transformation leader<br/>with AI at the core</h2>
     </div>
+
     <div class="about-grid">
       <div class="about-bio-col">
-        <div class="liquid-glass about-bio-card rounded-2xl">
-          <div class="about-bio-inner">
-            <!-- Positioning statement (ABOUT-03) -->
-            <p class="about-position">
-              With over a decade of enterprise systems leadership, I bridge the gap between complex ERP/WMS platforms and the AI technologies that make them intelligent — turning operational data into strategic advantage.
-            </p>
-            <!-- Bio prose (ABOUT-01, ABOUT-02) — mentions D365, Manhattan DFIO, IBM AS400 -->
-            <p class="about-bio">
-              I lead enterprise-scale digital transformation programs where legacy infrastructure meets modern AI — from migrating IBM AS400 environments to Microsoft Dynamics 365 (D365), to implementing Manhattan DFIO for warehouse operations serving Fortune 500 distribution networks.
-            </p>
-            <p class="about-bio">
-              My work bridges operational expertise and emerging technology: I design and deploy Azure OpenAI integrations, Power Automate workflows, and custom ML models that make ERP and WMS systems intelligent. The result is measurable: faster fulfillment cycles, reduced inventory variance, and supply chains that predict rather than react.
-            </p>
-          </div>
+        <div class="about-bio-card">
+          <p class="about-position">
+            With over a decade of enterprise systems leadership, I bridge the gap between complex ERP/WMS platforms and the AI technologies that make them intelligent — turning operational data into strategic advantage.
+          </p>
+          <p class="about-bio">
+            I lead enterprise-scale digital transformation programs where legacy infrastructure meets modern AI — from migrating IBM AS400 environments to Microsoft Dynamics 365 (D365), to implementing Manhattan DFIO for warehouse operations serving Fortune 500 distribution networks.
+          </p>
+          <p class="about-bio">
+            My work bridges operational expertise and emerging technology: I design and deploy Azure OpenAI integrations, Power Automate workflows, and custom ML models that make ERP and WMS systems intelligent. The result is measurable: faster fulfillment cycles, reduced inventory variance, and supply chains that predict rather than react.
+          </p>
         </div>
       </div>
+
       <div class="about-stats-col">
         {stats.map(stat => (
-          <div class="liquid-glass stat-box rounded-2xl">
-            <div class="stat-inner">
-              <span class="stat-value">{stat.value}</span>
-              <span class="stat-label">{stat.label}</span>
-            </div>
+          <div class="stat-box">
+            <span class="stat-value">{stat.value}</span>
+            <span class="stat-label">{stat.label}</span>
           </div>
         ))}
       </div>
     </div>
+
   </div>
 </section>
 
 <style>
-  /* ── Scroll-triggered reveal ──────────────────────────── */
   .section-animate {
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 500ms ease, transform 500ms ease;
+    transform: translateY(24px);
+    transition: opacity 600ms var(--ease-expo-out, ease),
+                transform 600ms var(--ease-expo-out, ease);
   }
   .section-animate.is-visible {
     opacity: 1;
     transform: translateY(0);
   }
   @media (prefers-reduced-motion: reduce) {
-    .section-animate {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
+    .section-animate { opacity: 1; transform: none; transition: none; }
   }
 
   .about-root {
-    position: relative;
-    overflow: hidden;
-    padding: 5rem 1.5rem;
-    min-height: 100vh;
-    background: transparent;
+    padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem);
   }
 
   .about-container {
-    position: relative;
-    z-index: 1;
     max-width: 72rem;
     margin: 0 auto;
   }
 
-  /* ── Background layer ─────────────────────────────────── */
-  .section-bg {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: url('/images/bg-about.jpg');
-    background-size: cover;
-    background-position: center;
-    opacity: 0;
-    transition: opacity 0.8s ease;
-  }
-
-  .section-bg.is-visible {
-    opacity: 0.5;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .section-bg { transition: none; }
-    .section-bg.is-visible { opacity: 0.5; }
+  /* ── Header ───────────────────────────────────────────────── */
+  .section-eyebrow {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin: 0 0 1rem;
   }
 
   .about-header {
-    margin-bottom: 3rem;
+    margin-bottom: 3.5rem;
   }
 
   .about-header h2 {
     font-size: clamp(1.75rem, 4vw, 2.75rem);
     font-weight: 600;
-    color: hsl(var(--foreground));
+    color: var(--foreground);
     margin: 0;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
   }
 
-  .about-tagline {
-    font-size: 1.125rem;
-    color: hsl(var(--foreground) / 0.6);
-    margin-top: 0.5rem;
-    margin-bottom: 0;
-  }
-
+  /* ── Grid ─────────────────────────────────────────────────── */
   .about-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    gap: 3rem;
   }
 
   @media (min-width: 768px) {
-    .about-grid {
-      grid-template-columns: 3fr 2fr;
-    }
+    .about-grid { grid-template-columns: 3fr 2fr; }
   }
 
+  /* ── Bio ──────────────────────────────────────────────────── */
   .about-bio-col {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
   }
 
   .about-bio-card {
-    padding: 0;
-  }
-
-  .about-bio-inner {
-    position: relative;
-    z-index: 1;
-    padding: 1.75rem;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+    padding: 2rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
   }
 
   .about-position {
-    font-size: 1rem;
+    font-size: 1.0625rem;
     font-weight: 400;
-    color: hsl(var(--foreground) / 0.88);
-    line-height: 1.75;
+    color: var(--foreground);
+    line-height: 1.7;
     margin: 0;
   }
 
   .about-bio {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 400;
-    color: hsl(var(--foreground) / 0.88);
+    color: var(--fg-muted);
     line-height: 1.75;
     margin: 0;
   }
 
+  /* ── Stats ────────────────────────────────────────────────── */
   .about-stats-col {
     display: flex;
     flex-direction: column;
@@ -176,46 +141,40 @@ const stats = [
 
   .stat-box {
     padding: 1.5rem 1.75rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
     display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .stat-inner {
-    position: relative;
-    z-index: 1;
-    text-align: center;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
   .stat-value {
-    display: block;
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 700;
-    color: hsl(var(--primary));
-    line-height: 1.1;
+    color: var(--primary);
+    line-height: 1.0;
+    letter-spacing: -0.02em;
   }
 
   .stat-label {
-    display: block;
     font-size: 0.875rem;
-    color: hsl(var(--foreground) / 0.7);
-    margin-top: 0.25rem;
+    color: var(--fg-muted);
     font-weight: 400;
   }
 </style>
 
 <script>
-  // Background reveal — fire-once IntersectionObserver matching BaseLayout pattern
-  const aboutBgObserver = new IntersectionObserver(
+  const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          aboutBgObserver.unobserve(entry.target);
+          observer.unobserve(entry.target);
         }
       });
     },
     { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
   );
-  document.querySelectorAll('#about .section-bg').forEach((el) => aboutBgObserver.observe(el));
+  document.querySelectorAll('#about .section-animate').forEach((el) => observer.observe(el));
 </script>
