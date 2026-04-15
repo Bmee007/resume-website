@@ -1,0 +1,86 @@
+---
+// Loader.astro — Intro sequence: BK monogram + bar fill → fade out
+---
+
+<div id="loader" aria-hidden="true">
+  <span class="loader-bk">BK</span>
+  <div class="loader-bar-track">
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<style>
+  #loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99990;
+    background: var(--background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    pointer-events: all;
+    transition: opacity 0.4s var(--ease-expo-out);
+  }
+
+  #loader.is-done {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loader-bk {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-style: italic;
+    font-size: 3rem;
+    color: var(--cream);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    opacity: 0;
+    transform: translateY(12px);
+    animation: loader-text-in 0.5s var(--ease-expo-out) 0.1s forwards;
+  }
+
+  .loader-bar-track {
+    width: 120px;
+    height: 1px;
+    background: var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+    opacity: 0;
+    animation: loader-track-in 0.3s ease 0.3s forwards;
+  }
+
+  .loader-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--amber);
+    border-radius: 1px;
+    animation: loader-fill 0.8s var(--ease-smooth) 0.4s forwards;
+  }
+
+  @keyframes loader-text-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes loader-track-in {
+    to { opacity: 1; }
+  }
+
+  @keyframes loader-fill {
+    to { width: 100%; }
+  }
+</style>
+
+<script>
+  const loader = document.getElementById('loader');
+  if (loader) {
+    // Total intro: ~1.4s (0.4s start + 0.8s fill + 0.2s hold)
+    setTimeout(() => {
+      loader.classList.add('is-done');
+      document.body.classList.add('loaded');
+      // Remove from DOM after fade
+      setTimeout(() => loader.remove(), 500);
+    }, 1400);
+  }
+</script>

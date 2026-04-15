@@ -1,0 +1,135 @@
+---
+// CustomCursor.astro — lerp-based trailing cursor for mouse devices
+---
+
+<div id="custom-cursor" aria-hidden="true"></div>
+<div id="custom-cursor-dot" aria-hidden="true"></div>
+
+<style>
+  #custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px solid var(--amber);
+    pointer-events: none;
+    z-index: 99998;
+    opacity: 0;
+    transition:
+      width    0.3s var(--ease-expo-out),
+      height   0.3s var(--ease-expo-out),
+      background 0.3s ease,
+      border-color 0.3s ease,
+      opacity  0.4s ease;
+    mix-blend-mode: exclusion;
+    will-change: transform;
+  }
+
+  #custom-cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    pointer-events: none;
+    z-index: 99999;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    will-change: transform;
+  }
+
+  /* Visible on mouse-capable devices only */
+  @media (pointer: fine) {
+    #custom-cursor     { opacity: 1; }
+    #custom-cursor-dot { opacity: 1; }
+  }
+
+  /* Hover state — expand ring, fill slightly */
+  #custom-cursor.is-hovering {
+    width: 56px;
+    height: 56px;
+    border-color: transparent;
+    background: color-mix(in oklch, var(--amber) 14%, transparent);
+  }
+
+  /* Link state — show text cursor indicator */
+  #custom-cursor.is-link {
+    width: 64px;
+    height: 64px;
+    border-color: transparent;
+    background: color-mix(in oklch, var(--amber) 10%, transparent);
+  }
+</style>
+
+<script>
+  // Only run on fine-pointer (mouse) devices
+  if (!window.matchMedia('(pointer: fine)').matches) {
+    // Remove elements entirely on touch devices
+    document.getElementById('custom-cursor')?.remove();
+    document.getElementById('custom-cursor-dot')?.remove();
+  } else {
+    const ring = document.getElementById('custom-cursor');
+    const dot  = document.getElementById('custom-cursor-dot');
+
+    let mouseX = window.innerWidth  / 2;
+    let mouseY = window.innerHeight / 2;
+    let ringX  = mouseX;
+    let ringY  = mouseY;
+
+    // Update mouse position immediately
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      // Dot follows instantly
+      if (dot) {
+        dot.style.transform = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
+      }
+    });
+
+    // Ring follows with lerp (smooth lag)
+    function animateCursor() {
+      ringX += (mouseX - ringX) * 0.10;
+      ringY += (mouseY - ringY) * 0.10;
+      if (ring) {
+        ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`;
+      }
+      requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Hover state on interactive elements
+    const selectors = 'a, button, [data-cursor-hover], input, textarea, label';
+    document.querySelectorAll(selectors).forEach((el) => {
+      el.addEventListener('mouseenter', () => ring?.classList.add('is-hovering'));
+      el.addEventListener('mouseleave', () => ring?.classList.remove('is-hovering'));
+    });
+
+    // Handle dynamically added elements via delegation
+    document.addEventListener('mouseover', (e) => {
+      const target = e.target as Element;
+      if (target.closest('a, button, [data-cursor-hover]')) {
+        ring?.classList.add('is-hovering');
+      }
+    });
+    document.addEventListener('mouseout', (e) => {
+      const target = e.target as Element;
+      if (target.closest('a, button, [data-cursor-hover]')) {
+        ring?.classList.remove('is-hovering');
+      }
+    });
+
+    // Hide when leaving window
+    document.addEventListener('mouseleave', () => {
+      if (ring) ring.style.opacity = '0';
+      if (dot)  dot.style.opacity  = '0';
+    });
+    document.addEventListener('mouseenter', () => {
+      if (ring) ring.style.opacity = '';
+      if (dot)  dot.style.opacity  = '';
+    });
+  }
+</script>
