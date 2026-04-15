@@ -1,405 +1,367 @@
 ---
-// HeroSection.astro
+// HeroSection.astro — Dark luxury editorial redesign
+const techs = [
+  "Microsoft Dynamics 365",
+  "Manhattan DFIO",
+  "Azure OpenAI",
+  "IBM AS400",
+  "Power Automate",
+  "AI Builder",
+  "Python / ML",
+  "Microsoft Copilot",
+  "Claude",
+  "Google Gemini",
+  "Microsoft Dynamics 365",
+  "Manhattan DFIO",
+  "Azure OpenAI",
+  "IBM AS400",
+  "Power Automate",
+  "AI Builder",
+  "Python / ML",
+  "Microsoft Copilot",
+  "Claude",
+  "Google Gemini",
+];
 ---
 
 <section id="hero" class="hero-root">
 
-  <!-- Video background — subtle, not the hero -->
-  <div class="hero-video-wrap" aria-hidden="true">
-    <video autoplay muted loop playsinline class="hero-video">
-      <source src="/hero-video.mp4" type="video/mp4" />
-    </video>
-    <div class="hero-overlay"></div>
+  <!-- Gradient orb backgrounds -->
+  <div class="hero-bg" aria-hidden="true">
+    <div id="hero-orb" class="hero-orb hero-orb--primary"></div>
+    <div class="hero-orb hero-orb--secondary"></div>
   </div>
 
+  <!-- Main content -->
   <div class="hero-content">
 
-    <!-- Role label -->
-    <div class="hero-label">
-      <span class="label-dot" aria-hidden="true"></span>
-      AI + ERP Integration Leader
+    <!-- Role badge -->
+    <div id="hero-label" class="hero-label">
+      <span class="label-line" aria-hidden="true"></span>
+      <span class="label-text">ERP &amp; WMS AI Integration Leader</span>
     </div>
 
-    <!-- Two-column split -->
-    <div class="hero-split">
+    <!-- Massive split-text name — GSAP animates chars -->
+    <h1 id="hero-name" class="hero-name display-serif" aria-label="Borina Keo">
+      Borina Keo
+    </h1>
 
-      <div class="hero-left">
-        <h1 class="hero-heading">
-          Borina Keo
-        </h1>
-        <p class="hero-title">ERP &amp; WMS AI Integration Leader</p>
+    <!-- Position descriptor -->
+    <p id="hero-title" class="hero-title">
+      Bridging <em class="accent-word">Microsoft Dynamics 365</em>,
+      Manhattan DFIO, and <em class="accent-word">AI</em> —
+      turning legacy ERP &amp; WMS systems into intelligent operations.
+    </p>
 
-        <p class="hero-sub">
-          Bridging Microsoft Dynamics 365, Manhattan DFIO, and AI — turning legacy ERP &amp; WMS systems into intelligent, automated operations.
-        </p>
+    <!-- Tagline -->
+    <p id="hero-sub" class="hero-sub">
+      15+ years of enterprise systems leadership. Quantified outcomes
+      across Fortune 500 distribution networks.
+    </p>
 
-        <div class="hero-ctas">
-          <a href="#contact" class="btn-hero hero-cta-primary">
-            Contact Me
-          </a>
-          <a href="#about" class="btn-hero-secondary hero-cta-secondary">
-            View My Work
-          </a>
-        </div>
-
-        <div class="hero-social-links">
-          <a href="https://www.linkedin.com/in/borinakeo" target="_blank" rel="noopener noreferrer"
-             aria-label="LinkedIn profile" class="social-icon-link">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
-          </a>
-          <a href="https://github.com/Bmee007" target="_blank" rel="noopener noreferrer"
-             aria-label="GitHub profile" class="social-icon-link">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
-            </svg>
-          </a>
-        </div>
-      </div>
-
-      <!-- Portrait -->
-      <div class="hero-right">
-        <div class="hero-photo-wrap">
-          <img
-            src="/borina-photo.jpg"
-            alt="Borina Keo — ERP &amp; WMS AI Integration Leader"
-            class="hero-photo"
-            width="320"
-            height="320"
-          />
-        </div>
-      </div>
-
+    <!-- CTAs -->
+    <div id="hero-ctas" class="hero-ctas">
+      <a href="#contact" class="btn-amber" data-magnetic>
+        <span>Let's Connect</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="#about" class="btn-ghost" data-magnetic>
+        View My Work
+      </a>
     </div>
 
-    <!-- Tech marquee -->
-    <div class="hero-social-proof">
-      <span class="proof-label">Technologies &amp; platforms</span>
-      <div class="marquee-viewport">
-        <div class="marquee-track">
-          {[
-            { name: "Microsoft D365",    icon: "/icons/microsoft.svg" },
-            { name: "Manhattan DFIO",    icon: null, abbr: "MH" },
-            { name: "Azure OpenAI",      icon: "/icons/microsoft-azure.svg" },
-            { name: "IBM AS400",         icon: "/icons/ibm.svg" },
-            { name: "Power Automate",    icon: "/icons/microsoft.svg" },
-            { name: "AI Builder",        icon: "/icons/ai-builder.svg" },
-            { name: "Python / ML",       icon: "/icons/python.svg" },
-            { name: "Microsoft Copilot", icon: "/icons/microsoft.svg" },
-            { name: "Claude",            icon: "/icons/claude.svg" },
-            { name: "Google Gemini",     icon: "/icons/google-gemini.svg" },
-            { name: "Microsoft D365",    icon: "/icons/microsoft.svg" },
-            { name: "Manhattan DFIO",    icon: null, abbr: "MH" },
-            { name: "Azure OpenAI",      icon: "/icons/microsoft-azure.svg" },
-            { name: "IBM AS400",         icon: "/icons/ibm.svg" },
-            { name: "Power Automate",    icon: "/icons/microsoft.svg" },
-            { name: "AI Builder",        icon: "/icons/ai-builder.svg" },
-            { name: "Python / ML",       icon: "/icons/python.svg" },
-            { name: "Microsoft Copilot", icon: "/icons/microsoft.svg" },
-            { name: "Claude",            icon: "/icons/claude.svg" },
-            { name: "Google Gemini",     icon: "/icons/google-gemini.svg" },
-          ].map((tech) => (
-            <div class="brand-item">
-              <span class="brand-icon">
-                {tech.icon
-                  ? <img src={tech.icon} alt={tech.name} class="brand-icon-img" />
-                  : tech.abbr}
-              </span>
-              <span class="brand-name">{tech.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+    <!-- Social links -->
+    <div id="hero-social" class="hero-social">
+      <a
+        href="https://www.linkedin.com/in/borinakeo"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="LinkedIn profile"
+        class="social-link"
+        data-cursor-hover
+      >LinkedIn</a>
+      <span class="social-sep" aria-hidden="true">/</span>
+      <a
+        href="https://github.com/Bmee007"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="GitHub profile"
+        class="social-link"
+        data-cursor-hover
+      >GitHub</a>
     </div>
 
   </div>
+
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator" aria-hidden="true">
+    <span class="scroll-line"></span>
+    <span class="scroll-label">scroll</span>
+  </div>
+
+  <!-- Tech marquee -->
+  <div class="hero-marquee">
+    <div class="marquee-viewport">
+      <div class="marquee-track">
+        {techs.map((tech) => (
+          <span class="marquee-item">{tech}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <style>
+  /* ── Root ─────────────────────────────────────────────────── */
   .hero-root {
     position: relative;
     min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    grid-template-rows: 1fr auto auto;
     overflow: hidden;
   }
 
-  /* ── Video — very subtle, texture only ───────────────────── */
-  .hero-video-wrap {
+  /* ── Background orbs ──────────────────────────────────────── */
+  .hero-bg {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
   }
 
-  .hero-video {
+  .hero-orb {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.12;
+    border-radius: 50%;
+    filter: blur(70px);
+    animation: orb-float 10s ease-in-out infinite alternate;
   }
 
-  .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklch, var(--background) 30%, transparent) 0%,
-      var(--background) 100%
+  .hero-orb--primary {
+    width: clamp(400px, 65vw, 800px);
+    height: clamp(400px, 65vw, 800px);
+    top: -20%;
+    right: -15%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--amber-glow) 20%, transparent) 0%,
+      color-mix(in oklch, var(--amber-glow)  5%, transparent) 45%,
+      transparent 70%
     );
+  }
+
+  .hero-orb--secondary {
+    width: clamp(250px, 35vw, 500px);
+    height: clamp(250px, 35vw, 500px);
+    bottom: 5%;
+    left: -8%;
+    background: radial-gradient(
+      circle,
+      color-mix(in oklch, var(--amber)  8%, transparent) 0%,
+      transparent 65%
+    );
+    animation-delay: -5s;
+    animation-duration: 14s;
+  }
+
+  @keyframes orb-float {
+    0%   { transform: scale(1) translateY(0); opacity: 0.6; }
+    100% { transform: scale(1.06) translateY(-24px); opacity: 1; }
   }
 
   /* ── Content ──────────────────────────────────────────────── */
   .hero-content {
     position: relative;
     z-index: 1;
+    padding: clamp(7rem, 14vw, 11rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 5vw, 4rem);
+    max-width: 80rem;
+    margin: 0 auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
-    padding: 6rem clamp(1.5rem, 4vw, 3rem) 4rem;
-    width: 100%;
-    max-width: 72rem;
-    margin: 0 auto;
+    gap: 1.75rem;
+    align-self: center;
   }
 
   /* ── Role label ───────────────────────────────────────────── */
   .hero-label {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--primary);
-    align-self: flex-start;
+    gap: 1rem;
+    opacity: 0; /* animated by GSAP */
   }
 
-  .label-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--primary);
+  .label-line {
+    display: block;
+    width: 2.5rem;
+    height: 1px;
+    background: var(--amber);
     flex-shrink: 0;
   }
 
-  /* ── Two-column split ─────────────────────────────────────── */
-  .hero-split {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    align-items: center;
-  }
-
-  @media (min-width: 768px) {
-    .hero-split { grid-template-columns: 1fr 1fr; }
-  }
-
-  /* ── Left column ──────────────────────────────────────────── */
-  .hero-left {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: center;
-    text-align: center;
-  }
-
-  @media (min-width: 768px) {
-    .hero-left {
-      align-items: flex-start;
-      text-align: left;
-    }
-  }
-
-  /* ── Heading ──────────────────────────────────────────────── */
-  .hero-heading {
-    font-size: clamp(2.75rem, 8vw, 5.5rem);
+  .label-text {
+    font-size: 0.75rem;
     font-weight: 600;
-    line-height: 1.0;
-    color: var(--hero-heading);
-    margin: 0;
-    letter-spacing: -0.03em;
-    animation: hero-fade-in 700ms var(--ease-expo-out) forwards;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
   }
 
+  /* ── Hero name ────────────────────────────────────────────── */
+  .hero-name {
+    font-size: clamp(4rem, 11vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--cream);
+    margin: 0;
+    /* overflow: hidden applied per-char by GSAP splitter */
+  }
+
+  /* ── Title & sub ──────────────────────────────────────────── */
   .hero-title {
     font-size: clamp(1rem, 2vw, 1.25rem);
     font-weight: 400;
-    color: var(--primary);
-    margin: -0.5rem 0 0;
-    letter-spacing: 0.01em;
-    opacity: 0;
-    animation: hero-fade-in 700ms var(--ease-expo-out) 80ms forwards;
-  }
-
-  @keyframes hero-fade-in {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Subheading ───────────────────────────────────────────── */
-  .hero-sub {
-    font-size: 1.0625rem;
-    max-width: 30rem;
-    color: var(--hero-sub);
+    color: var(--fg-muted);
     margin: 0;
-    line-height: 1.65;
-    opacity: 0;
-    animation: hero-fade-in 700ms var(--ease-expo-out) 160ms forwards;
+    max-width: 44rem;
+    line-height: 1.6;
+    opacity: 0; /* GSAP */
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .hero-heading, .hero-title, .hero-sub {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
+  .accent-word {
+    font-style: normal;
+    color: var(--amber);
+  }
+
+  .hero-sub {
+    font-size: clamp(0.875rem, 1.4vw, 1rem);
+    color: var(--fg-subtle);
+    margin: 0;
+    max-width: 32rem;
+    line-height: 1.75;
+    opacity: 0; /* GSAP */
   }
 
   /* ── CTAs ─────────────────────────────────────────────────── */
   .hero-ctas {
     display: flex;
-    align-items: center;
-    gap: 0.875rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  @media (min-width: 768px) {
-    .hero-ctas { justify-content: flex-start; }
-  }
-
-  .hero-cta-primary,
-  .hero-cta-secondary {
-    padding: 0.6875rem 1.375rem;
-    font-size: 0.9375rem;
-    text-decoration: none;
-    border-radius: 0.375rem;
-    white-space: nowrap;
-  }
-
-  /* ── Social links ─────────────────────────────────────────── */
-  .hero-social-links {
-    display: flex;
-    align-items: center;
     gap: 1rem;
-  }
-
-  .social-icon-link {
-    color: var(--fg-subtle);
-    transition: color 0.2s var(--ease-expo-out);
-    display: inline-flex;
-  }
-
-  .social-icon-link:hover { color: var(--primary); }
-
-  /* ── Right column: photo ──────────────────────────────────── */
-  .hero-right {
-    display: flex;
-    justify-content: center;
+    flex-wrap: wrap;
     align-items: center;
-    order: -1;
+    opacity: 0; /* GSAP */
   }
 
-  @media (min-width: 768px) {
-    .hero-right { order: 0; }
-  }
-
-  .hero-photo-wrap {
-    position: relative;
-    display: inline-block;
-  }
-
-  .hero-photo {
-    width: 100%;
-    max-width: 260px;
-    aspect-ratio: 1 / 1;
-    border-radius: 50%;
-    object-fit: cover;
-    outline: 2px solid var(--primary);
-    outline-offset: 4px;
-    display: block;
-    color: transparent;
-    background-color: var(--secondary);
-  }
-
-  /* ── Marquee ──────────────────────────────────────────────── */
-  .hero-social-proof {
+  /* ── Social ───────────────────────────────────────────────── */
+  .hero-social {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    width: 100%;
-    max-width: 56rem;
-    overflow: hidden;
-    align-self: center;
+    gap: 0.75rem;
+    opacity: 0; /* GSAP */
   }
 
-  .proof-label {
+  .social-link {
     font-size: 0.8125rem;
-    color: var(--fg-subtle);
-    white-space: nowrap;
-    flex-shrink: 0;
-    text-transform: uppercase;
+    font-weight: 500;
     letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .social-link:hover { color: var(--amber); }
+
+  .social-sep {
+    color: var(--border-strong);
+    font-size: 0.875rem;
+    user-select: none;
+  }
+
+  /* ── Scroll indicator ─────────────────────────────────────── */
+  .scroll-indicator {
+    position: absolute;
+    bottom: clamp(6rem, 10vw, 8rem);
+    left: clamp(1.5rem, 5vw, 4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 1;
+  }
+
+  .scroll-line {
+    display: block;
+    width: 1px;
+    height: 3.5rem;
+    background: linear-gradient(to bottom, var(--amber), transparent);
+    animation: scroll-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes scroll-pulse {
+    0%, 100% { transform: scaleY(0.4); transform-origin: top; opacity: 0.5; }
+    50%       { transform: scaleY(1);   transform-origin: top; opacity: 1; }
+  }
+
+  .scroll-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  /* ── Tech marquee ─────────────────────────────────────────── */
+  .hero-marquee {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border);
   }
 
   .marquee-viewport {
     overflow: hidden;
-    flex: 1;
     mask-image: linear-gradient(
       to right,
       transparent 0%,
-      #fff 10%,
-      #fff 90%,
+      black 8%,
+      black 92%,
       transparent 100%
     );
   }
 
-  .brand-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    white-space: nowrap;
-  }
-
-  .brand-icon {
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 0.25rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    color: var(--fg-muted);
-    flex-shrink: 0;
-    padding: 0.25rem;
-    background: var(--secondary);
-    border: 1px solid var(--border);
-  }
-
-  .brand-icon-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  .brand-name {
-    font-size: 0.9375rem;
+  .marquee-item {
+    font-size: 0.75rem;
     font-weight: 500;
-    color: var(--fg-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    padding: 0 2rem;
+    white-space: nowrap;
+    position: relative;
   }
 
-  @media (max-width: 640px) {
-    .hero-social-proof {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 0.75rem;
-    }
-    .proof-label { align-self: center; }
+  .marquee-item::after {
+    content: '·';
+    position: absolute;
+    right: 0;
+    color: var(--border-strong);
+    transform: translateX(50%);
+  }
+
+  /* ── Reduced motion overrides ─────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-orb           { animation: none; }
+    .scroll-line        { animation: none; }
+    .hero-label,
+    #hero-title,
+    #hero-sub,
+    #hero-ctas,
+    #hero-social        { opacity: 1 !important; }
+    .hero-name          { opacity: 1 !important; }
   }
 </style>

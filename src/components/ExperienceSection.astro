@@ -1,4 +1,5 @@
 ---
+// ExperienceSection.astro — Typographic timeline redesign
 const experiences = [
   {
     title: "AI & ERP Integration Lead",
@@ -6,8 +7,8 @@ const experiences = [
     dateRange: "2023 – Present",
     featured: false,
     bullets: [
-      "Architected Power Automate + AI Builder workflows, automating 16 manual processes across finance and ops",
-      "Led Azure OpenAI pilot for supply chain demand forecasting, achieving 12% forecast accuracy improvement",
+      "Architected Power Automate + AI Builder workflows, automating <em>16 manual processes</em> across finance and ops",
+      "Led Azure OpenAI pilot for supply chain demand forecasting, achieving <em>12% forecast accuracy improvement</em>",
     ],
   },
   {
@@ -16,9 +17,9 @@ const experiences = [
     dateRange: "2019 – 2023",
     featured: true,
     bullets: [
-      "Directed full Microsoft Dynamics 365 migration from IBM AS400, cutting operational costs by 30%",
-      "Integrated Azure OpenAI into D365 procurement workflows, reducing cycle time by 33%",
-      "Led 45-person cross-functional team through 18-month ERP modernization program",
+      "Directed full Microsoft Dynamics 365 migration from IBM AS400, cutting operational costs by <em>30%</em>",
+      "Integrated Azure OpenAI into D365 procurement workflows, reducing cycle time by <em>33%</em>",
+      "Led <em>45-person</em> cross-functional team through 18-month ERP modernization program",
     ],
   },
   {
@@ -27,8 +28,8 @@ const experiences = [
     dateRange: "2016 – 2019",
     featured: true,
     bullets: [
-      "Deployed Manhattan DFIO across 9 distribution centers, increasing warehouse throughput by 15%",
-      "Integrated AI-driven pick optimization into Manhattan DFIO, reducing labor costs by 5%",
+      "Deployed Manhattan DFIO across <em>9 distribution centers</em>, increasing warehouse throughput by <em>15%</em>",
+      "Integrated AI-driven pick optimization into Manhattan DFIO, reducing labor costs by <em>5%</em>",
       "Partnered with C-suite stakeholders to align WMS roadmap with 5-year supply chain strategy",
     ],
   },
@@ -36,30 +37,33 @@ const experiences = [
 ---
 
 <section id="experience" class="exp-root">
-  <div class="exp-container section-animate">
 
-    <div class="exp-header">
-      <p class="section-eyebrow">Career</p>
-      <h2>Experience</h2>
+  <span class="section-num" aria-hidden="true">03</span>
+
+  <div class="exp-container">
+
+    <div class="exp-header" data-reveal-heading>
+      <span class="eyebrow-accent">Career</span>
+      <h2 class="display-serif exp-heading">Experience</h2>
       <p class="exp-tagline">Quantified impact across ERP, WMS, and AI transformation</p>
     </div>
 
-    <div class="timeline-track">
+    <div class="timeline">
       {experiences.map((entry) => (
-        <div class:list={["timeline-entry", entry.featured && "is-featured"]}>
-          <div class:list={["entry-card", entry.featured ? "entry-card--featured" : "entry-card--standard"]}>
+        <div class:list={["timeline-entry", entry.featured && "is-featured"]} data-reveal>
+          <div class="entry-year" aria-hidden="true">
+            {entry.dateRange.split('–')[0].trim()}
+          </div>
+          <div class="entry-card">
             <div class="entry-inner">
               <div class="entry-header">
-                <h3 class="entry-title">{entry.title}</h3>
-                <div class="entry-meta">
-                  <span class="entry-company">{entry.company}</span>
-                  <span class="entry-sep" aria-hidden="true">·</span>
-                  <span class="entry-dates">{entry.dateRange}</span>
-                </div>
+                <span class="entry-company">{entry.company}</span>
+                <span class="entry-dates">{entry.dateRange}</span>
               </div>
+              <h3 class="entry-title">{entry.title}</h3>
               <ul class="entry-bullets">
                 {entry.bullets.map((bullet) => (
-                  <li>{bullet}</li>
+                  <li set:html={bullet}></li>
                 ))}
               </ul>
             </div>
@@ -72,46 +76,27 @@ const experiences = [
 </section>
 
 <style>
-  .section-animate {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 600ms var(--ease-expo-out, ease),
-                transform 600ms var(--ease-expo-out, ease);
-  }
-  .section-animate.is-visible { opacity: 1; transform: translateY(0); }
-  @media (prefers-reduced-motion: reduce) {
-    .section-animate { opacity: 1; transform: none; transition: none; }
-  }
-
   .exp-root {
-    padding: clamp(4rem, 8vw, 7rem) clamp(1.5rem, 4vw, 3rem);
+    position: relative;
+    padding: clamp(6rem, 10vw, 9rem) clamp(1.5rem, 5vw, 4rem);
+    overflow: hidden;
   }
 
   .exp-container {
-    max-width: 72rem;
+    max-width: 80rem;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   /* ── Header ───────────────────────────────────────────────── */
-  .section-eyebrow {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--primary);
-    margin: 0 0 1rem;
-  }
-
   .exp-header {
-    margin-bottom: 3rem;
+    margin-bottom: clamp(3rem, 5vw, 5rem);
   }
 
-  .exp-header h2 {
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
-    font-weight: 600;
-    color: var(--foreground);
-    margin: 0 0 0.5rem;
-    letter-spacing: -0.02em;
+  .exp-heading {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    margin: 0 0 0.75rem;
   }
 
   .exp-tagline {
@@ -121,107 +106,121 @@ const experiences = [
   }
 
   /* ── Timeline ─────────────────────────────────────────────── */
-  .timeline-track {
-    position: relative;
-    padding-left: 2.5rem;
+  .timeline {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.5rem;
   }
 
-  .timeline-track::before {
-    content: '';
-    position: absolute;
-    left: 0.5rem;
-    top: 1.25rem;
-    bottom: 1.25rem;
-    width: 1px;
-    background: var(--border);
-  }
-
-  /* Entry dot */
   .timeline-entry {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
     position: relative;
   }
 
-  .timeline-entry::before {
-    content: '';
-    position: absolute;
-    left: -2.125rem;
-    top: 1.25rem;
-    width: 7px;
-    height: 7px;
-    border-radius: 9999px;
-    background: var(--border);
-    z-index: 1;
-    transition: background 0.2s;
+  @media (min-width: 640px) {
+    .timeline-entry {
+      grid-template-columns: 5rem 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
   }
 
-  .timeline-entry.is-featured::before {
-    background: var(--primary);
+  /* ── Year anchor ──────────────────────────────────────────── */
+  .entry-year {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    color: oklch(0.22 0.010 55);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    padding-top: 1.5rem;
+    transition: color 0.3s ease;
+    display: none;
   }
 
-  /* Cards */
+  @media (min-width: 640px) {
+    .entry-year {
+      display: block;
+      text-align: right;
+    }
+  }
+
+  .timeline-entry:hover .entry-year {
+    color: var(--amber);
+  }
+
+  .timeline-entry.is-featured .entry-year {
+    color: color-mix(in oklch, var(--amber) 50%, oklch(0.22 0.010 55));
+  }
+
+  .timeline-entry.is-featured:hover .entry-year {
+    color: var(--amber);
+  }
+
+  /* ── Entry card ───────────────────────────────────────────── */
   .entry-card {
-    border-radius: 0.5rem;
-    transition: border-color 0.25s var(--ease-expo-out, ease);
-  }
-
-  .entry-card--standard {
-    background: var(--secondary);
+    background: var(--surface);
     border: 1px solid var(--border);
-  }
-
-  .entry-card--featured {
-    background: var(--secondary);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--primary);
+    border-radius: 0.75rem;
+    transition:
+      border-color 0.25s var(--ease-expo-out),
+      transform    0.25s var(--ease-expo-out),
+      box-shadow   0.25s var(--ease-expo-out);
   }
 
   .entry-card:hover {
-    border-color: color-mix(in oklch, var(--primary) 40%, var(--border));
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
   }
 
-  .entry-card--featured:hover {
-    border-left-color: var(--primary);
+  .timeline-entry.is-featured .entry-card {
+    border-left: 2px solid var(--amber);
+    box-shadow: inset 2px 0 20px color-mix(in oklch, var(--amber) 6%, transparent);
   }
 
   .entry-inner {
     padding: 1.75rem;
-  }
-
-  .entry-header { margin-bottom: 1rem; }
-
-  .entry-title {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--foreground);
-    margin: 0 0 0.375rem;
-  }
-
-  .entry-meta {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.875rem;
+  }
+
+  /* ── Entry meta ───────────────────────────────────────────── */
+  .entry-header {
+    display: flex;
     align-items: center;
-    gap: 0.375rem 0.625rem;
+    gap: 0.875rem;
+    flex-wrap: wrap;
   }
 
   .entry-company {
-    font-size: 0.9375rem;
-    color: var(--fg-muted);
-  }
-
-  .entry-sep {
-    color: var(--fg-subtle);
     font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
   }
 
   .entry-dates {
-    font-size: 0.875rem;
-    color: var(--primary);
+    font-size: 0.8125rem;
+    color: var(--amber);
     font-weight: 500;
+    letter-spacing: 0.02em;
   }
 
+  .entry-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--cream);
+    margin: 0;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Bullets ──────────────────────────────────────────────── */
   .entry-bullets {
     margin: 0;
     padding-left: 1.125rem;
@@ -233,21 +232,49 @@ const experiences = [
   .entry-bullets li {
     font-size: 0.9375rem;
     color: var(--fg-muted);
-    line-height: 1.65;
+    line-height: 1.7;
+  }
+
+  /* Highlighted metric numbers */
+  .entry-bullets li :global(em) {
+    font-style: normal;
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  /* ── Reveal ───────────────────────────────────────────────── */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity   0.7s var(--ease-expo-out),
+      transform 0.7s var(--ease-expo-out);
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  [data-reveal-heading] {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition:
+      opacity   0.8s var(--ease-expo-out),
+      transform 0.8s var(--ease-expo-out);
+  }
+
+  [data-reveal-heading].is-visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal],
+    [data-reveal-heading] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 </style>
-
-<script>
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { rootMargin: '-10% 0px -10% 0px', threshold: 0 }
-  );
-  document.querySelectorAll('#experience .section-animate').forEach((el) => observer.observe(el));
-</script>
