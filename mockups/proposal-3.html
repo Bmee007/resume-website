@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1400">
+<title>Proposal 3 – AI Impact Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Sans:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: oklch(0.08 0.008 60);
+    --surface: oklch(0.12 0.008 60);
+    --surface-raised: oklch(0.16 0.009 58);
+    --border: oklch(0.22 0.010 55);
+    --border-strong: oklch(0.32 0.014 52);
+    --amber: oklch(0.75 0.18 52);
+    --cream: oklch(0.96 0.012 80);
+    --fg: oklch(0.90 0.010 70);
+    --fg-muted: oklch(0.60 0.010 65);
+    --fg-subtle: oklch(0.42 0.008 65);
+    --green: oklch(0.72 0.18 145);
+    --blue: oklch(0.65 0.17 240);
+  }
+  body {
+    background: var(--bg);
+    font-family: 'Geist Sans', 'Inter', sans-serif;
+    color: var(--cream);
+    width: 1400px;
+    height: 820px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .orb {
+    position: absolute; border-radius: 50%; pointer-events: none;
+  }
+  .orb-1 {
+    width: 700px; height: 700px;
+    top: -220px; right: -80px;
+    background: radial-gradient(circle, oklch(0.65 0.20 50 / 0.16) 0%, transparent 70%);
+    filter: blur(65px);
+  }
+  .orb-2 {
+    width: 380px; height: 380px;
+    bottom: -100px; left: -70px;
+    background: radial-gradient(circle, oklch(0.75 0.18 52 / 0.07) 0%, transparent 65%);
+    filter: blur(55px);
+  }
+
+  nav {
+    position: absolute; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 3rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px); z-index: 10;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif; font-style: italic;
+    font-size: 1.5rem; color: var(--amber);
+    border: 1px solid var(--border-strong); padding: 0.25rem 0.6rem;
+  }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-link {
+    font-size: 0.8125rem; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg-muted);
+  }
+
+  .proposal-badge {
+    position: absolute; top: 1.25rem; left: 50%; transform: translateX(-50%);
+    background: color-mix(in oklch, var(--amber) 12%, transparent);
+    border: 1px solid color-mix(in oklch, var(--amber) 35%, transparent);
+    color: var(--amber); font-size: 0.6875rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.3rem 0.875rem; z-index: 20;
+  }
+
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+    height: 100%;
+    padding: 6.5rem 3rem 2rem;
+    align-items: center;
+    position: relative; z-index: 1;
+  }
+
+  .eyebrow { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+  .eyebrow-line { width: 2.5rem; height: 1px; background: var(--amber); }
+  .eyebrow-text {
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber);
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 5.75rem; line-height: 0.92;
+    letter-spacing: -0.03em; color: var(--cream); margin-bottom: 1.25rem;
+  }
+  .hero-desc {
+    font-size: 1rem; color: var(--fg-muted);
+    line-height: 1.65; max-width: 34rem; margin-bottom: 1.25rem;
+  }
+  .accent { color: var(--amber); font-style: normal; }
+  .hero-sub {
+    font-size: 0.875rem; color: var(--fg-subtle); margin-bottom: 1.75rem; line-height: 1.75;
+  }
+  .ctas { display: flex; gap: 1rem; align-items: center; }
+  .btn-amber {
+    background: var(--amber); color: var(--bg);
+    font-size: 0.875rem; font-weight: 600; letter-spacing: 0.04em;
+    padding: 0.75rem 1.75rem; border: none; cursor: pointer;
+  }
+  .btn-ghost {
+    background: transparent; color: var(--cream);
+    font-size: 0.875rem; font-weight: 500; letter-spacing: 0.04em;
+    padding: 0.75rem 1.75rem; border: 1px solid var(--border-strong); cursor: pointer;
+  }
+
+  /* Bento Grid */
+  .bento {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    height: 520px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.125rem 1.25rem;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    transition: opacity 0.3s;
+  }
+  .card:hover { border-color: var(--border-strong); }
+  .card:hover::before { opacity: 1; }
+
+  /* Card: big metric - spans 2 rows */
+  .card-metric-big {
+    grid-row: span 2;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .card-tag {
+    font-size: 0.6rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-subtle); margin-bottom: 0.5rem;
+  }
+  .big-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 4.5rem; line-height: 1;
+    color: var(--amber); margin-bottom: 0.5rem;
+  }
+  .big-label {
+    font-size: 0.9375rem; font-weight: 600;
+    color: var(--cream); line-height: 1.35; margin-bottom: 0.5rem;
+  }
+  .big-sub { font-size: 0.75rem; color: var(--fg-muted); line-height: 1.5; }
+
+  /* Decorative bar chart */
+  .mini-bars {
+    display: flex; align-items: flex-end; gap: 3px;
+    height: 48px; margin-top: auto; margin-bottom: 1rem;
+  }
+  .bar {
+    flex: 1; background: color-mix(in oklch, var(--amber) 20%, transparent);
+    border-radius: 1px 1px 0 0; min-height: 4px;
+  }
+  .bar.hi { background: var(--amber); }
+
+  /* Card: AI alert */
+  .card-alert { display: flex; flex-direction: column; gap: 0.625rem; }
+  .alert-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .alert-title {
+    font-size: 0.6875rem; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg-muted);
+  }
+  .alert-badge {
+    font-size: 0.5625rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--green); border: 1px solid color-mix(in oklch, var(--green) 40%, transparent);
+    padding: 0.15rem 0.4rem;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .pulse-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .alert-item {
+    display: flex; align-items: flex-start; gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    background: var(--surface-raised);
+    border-left: 2px solid var(--amber);
+  }
+  .alert-icon { font-size: 0.75rem; flex-shrink: 0; margin-top: 0.05rem; }
+  .alert-text { font-size: 0.75rem; color: var(--fg); line-height: 1.45; }
+  .alert-meta { font-size: 0.625rem; color: var(--fg-subtle); margin-top: 0.2rem; }
+
+  /* Card: skill bars */
+  .card-skills { display: flex; flex-direction: column; gap: 0.5rem; }
+  .skill-row { display: flex; flex-direction: column; gap: 0.3rem; }
+  .skill-top { display: flex; justify-content: space-between; align-items: center; }
+  .skill-name { font-size: 0.75rem; font-weight: 500; color: var(--fg-muted); }
+  .skill-pct { font-size: 0.6875rem; font-weight: 600; color: var(--amber); }
+  .skill-bar-bg {
+    height: 3px; background: var(--border);
+    border-radius: 2px; overflow: hidden;
+  }
+  .skill-bar-fill {
+    height: 100%; background: var(--amber); border-radius: 2px;
+  }
+  .skill-bar-fill.blue { background: var(--blue); }
+  .skill-bar-fill.green { background: var(--green); }
+
+  /* Card: typing demo */
+  .card-ai { display: flex; flex-direction: column; gap: 0.5rem; }
+  .ai-prompt {
+    font-size: 0.75rem; color: var(--fg-subtle);
+    padding: 0.4rem 0.625rem;
+    background: oklch(0.10 0.007 58);
+    border: 1px solid var(--border);
+    border-radius: 0;
+  }
+  .ai-response {
+    font-size: 0.8125rem; color: var(--fg);
+    padding: 0.5rem 0.625rem;
+    background: var(--surface-raised);
+    border-left: 2px solid var(--amber);
+    line-height: 1.55;
+  }
+  .ai-dots { display: flex; gap: 3px; align-items: center; margin-top: 0.25rem; }
+  .dot-anim {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--amber); opacity: 0.5;
+    animation: dotPulse 1.4s ease-in-out infinite;
+  }
+  .dot-anim:nth-child(2) { animation-delay: 0.2s; }
+  .dot-anim:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotPulse {
+    0%,80%,100% { transform: scale(0.7); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+  .ai-status {
+    font-size: 0.625rem; font-weight: 500; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--amber); display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  /* Card: years/counter */
+  .card-yrs { display: flex; flex-direction: column; justify-content: center; gap: 0.25rem; }
+  .yr-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem; line-height: 1; color: var(--amber);
+  }
+  .yr-label { font-size: 0.875rem; font-weight: 600; color: var(--cream); }
+  .yr-sub { font-size: 0.75rem; color: var(--fg-muted); margin-top: 0.25rem; line-height: 1.45; }
+
+  /* Marquee */
+  .marquee-bar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    border-top: 1px solid var(--border); padding: 0.875rem 0;
+    overflow: hidden; z-index: 1;
+  }
+  .marquee-inner { display: flex; white-space: nowrap; }
+  .marquee-item {
+    font-size: 0.6875rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-subtle); padding: 0 1.75rem;
+  }
+
+  /* Hover tooltip hint */
+  .hover-hint {
+    position: absolute; bottom: 0.6rem; right: 0.75rem;
+    font-size: 0.5625rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-subtle); opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="proposal-badge">Proposal 3 — AI Impact Dashboard</div>
+
+<nav>
+  <div class="logo">BK</div>
+  <div class="nav-links">
+    <span class="nav-link">About</span>
+    <span class="nav-link">Skills</span>
+    <span class="nav-link">Experience</span>
+    <span class="nav-link">Projects</span>
+    <span class="nav-link">Contact</span>
+  </div>
+</nav>
+
+<div class="hero-layout">
+  <div>
+    <div class="eyebrow">
+      <span class="eyebrow-line"></span>
+      <span class="eyebrow-text">ERP & WMS AI Integration Leader</span>
+    </div>
+    <h1>Borina<br>Keo</h1>
+    <p class="hero-desc">
+      Bridging <span class="accent">Microsoft Dynamics 365</span>,
+      Manhattan DFIO, and <span class="accent">AI</span> —
+      turning legacy ERP & WMS systems into intelligent operations.
+    </p>
+    <p class="hero-sub">15+ years of enterprise systems leadership.<br>Quantified outcomes across Fortune 500 distribution networks.</p>
+    <div class="ctas">
+      <button class="btn-amber">Let's Connect →</button>
+      <button class="btn-ghost">View My Work</button>
+    </div>
+  </div>
+
+  <div class="bento">
+
+    <!-- Big metric: cost savings -->
+    <div class="card card-metric-big">
+      <div class="card-tag">Documented Impact</div>
+      <div class="mini-bars">
+        <div class="bar" style="height:30%"></div>
+        <div class="bar" style="height:45%"></div>
+        <div class="bar" style="height:55%"></div>
+        <div class="bar" style="height:40%"></div>
+        <div class="bar" style="height:65%"></div>
+        <div class="bar" style="height:72%"></div>
+        <div class="bar hi" style="height:88%"></div>
+        <div class="bar hi" style="height:95%"></div>
+        <div class="bar hi" style="height:100%"></div>
+      </div>
+      <div class="big-num">$2.4M</div>
+      <div class="big-label">Operational cost reduction<br>via AI automation</div>
+      <div class="big-sub">Across D365 + Manhattan DFIO integrations<br>over 3 enterprise deployments</div>
+      <div class="hover-hint">Hover to explore ↗</div>
+    </div>
+
+    <!-- AI Alert feed -->
+    <div class="card card-alert">
+      <div class="alert-header">
+        <div class="alert-title">D365 AI Monitor</div>
+        <div class="alert-badge"><span class="pulse-dot"></span>Live</div>
+      </div>
+      <div class="alert-item">
+        <div class="alert-icon">⚡</div>
+        <div>
+          <div class="alert-text">Demand spike detected: SKU-7842 +340%</div>
+          <div class="alert-meta">Azure OpenAI · 2s ago · auto-routed to procurement</div>
+        </div>
+      </div>
+      <div class="alert-item" style="border-left-color: var(--green); opacity:0.7;">
+        <div class="alert-icon">✓</div>
+        <div>
+          <div class="alert-text">BOL-93241 classified & matched to PO</div>
+          <div class="alert-meta">GPT-4o · 8s ago · 0.24s processing time</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Years expertise -->
+    <div class="card card-yrs">
+      <div class="card-tag">Experience</div>
+      <div class="yr-num">15+</div>
+      <div class="yr-label">Years Enterprise Leadership</div>
+      <div class="yr-sub">Microsoft Dynamics 365 · Manhattan WMS<br>Fortune 500 distribution networks</div>
+    </div>
+
+    <!-- AI typing demo -->
+    <div class="card card-ai">
+      <div class="card-tag">Copilot Studio · Live</div>
+      <div class="ai-prompt">"What's the inventory status for Dock 4B?"</div>
+      <div class="ai-response">
+        Dock 4B is at <strong style="color:var(--amber)">87% capacity</strong>. 3 inbound
+        shipments pending. Reorder triggered for SKU-3801.
+        <span style="display:inline-block; width:6px; height:11px; background:var(--amber); vertical-align:text-bottom; animation:blink 1s step-end infinite;"></span>
+      </div>
+      <div class="ai-status">
+        <span class="ai-dots">
+          <span class="dot-anim"></span>
+          <span class="dot-anim"></span>
+          <span class="dot-anim"></span>
+        </span>
+        Processing next query
+      </div>
+    </div>
+
+    <!-- Skills bar -->
+    <div class="card card-skills" style="grid-column: span 2;">
+      <div class="card-tag" style="margin-bottom:0.25rem;">Core Competencies</div>
+      <div class="skill-row">
+        <div class="skill-top"><span class="skill-name">Microsoft Dynamics 365</span><span class="skill-pct">98%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill" style="width:98%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-top"><span class="skill-name">Azure OpenAI / AI Builder</span><span class="skill-pct" style="color:var(--blue)">91%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill blue" style="width:91%"></div></div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-top"><span class="skill-name">Manhattan DFIO / WMS</span><span class="skill-pct" style="color:var(--green)">95%</span></div>
+        <div class="skill-bar-bg"><div class="skill-bar-fill green" style="width:95%"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="marquee-bar">
+  <div class="marquee-inner">
+    <span class="marquee-item">Microsoft Dynamics 365</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Manhattan DFIO</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Azure OpenAI</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">IBM AS400</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Power Automate</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">AI Builder</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Python / ML</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Microsoft Copilot</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Claude</span>
+    <span class="marquee-item">·</span>
+    <span class="marquee-item">Google Gemini</span>
+  </div>
+</div>
+
+<style>
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+</style>
+</body>
+</html>
