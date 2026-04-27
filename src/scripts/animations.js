@@ -46,6 +46,11 @@ function initHeroAnimation() {
   const nameEl = document.getElementById('hero-name');
   if (!nameEl) return;
 
+  // Set GSAP starting state here (not in CSS) so elements are visible if JS fails
+  gsap.set(['#hero-label', '#hero-title', '#hero-sub', '#hero-ctas', '#hero-social'], {
+    opacity: 0,
+  });
+
   // Manual character split (no SplitText plugin)
   const text = nameEl.textContent ?? '';
   nameEl.innerHTML = text
@@ -261,14 +266,9 @@ function initHeroParallax() {
 // ── Master init ──────────────────────────────────────────────
 export function initAll() {
   // Skip all animations if prefers-reduced-motion
+  // Hero elements are visible by default (opacity set via gsap.set in initHeroAnimation,
+  // not in CSS), so no manual override needed here.
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    // Make all GSAP-opacity-0 elements visible immediately
-    document.querySelectorAll(
-      '#hero-label, #hero-title, #hero-sub, #hero-ctas, #hero-social, #hero-name'
-    ).forEach((el) => {
-      el.style.opacity = '1';
-    });
-    // CSS [data-reveal] fallback handles the rest via .is-visible class
     document.querySelectorAll('[data-reveal], [data-reveal-heading]').forEach((el) => {
       el.classList.add('is-visible');
     });
