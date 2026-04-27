@@ -4,8 +4,9 @@
 import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Flip } from 'gsap/Flip';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip);
 
 // ── Lenis smooth scroll ──────────────────────────────────────
 function initLenis() {
@@ -263,6 +264,263 @@ function initHeroParallax() {
   });
 }
 
+// ── Ask Borina Keo section ───────────────────────────────────
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+const LAYOUTS = {
+  metric:     'card-metric-big',
+  alert:      'card-alert',
+  experience: 'card-yrs',
+  skills:     'card-skills',
+  ai:         'card-ai',
+};
+
+function applyLayout(highlightCard) {
+  if (!highlightCard || !LAYOUTS[highlightCard]) return;
+
+  const cards = document.querySelectorAll('#ask-bento .bento-card');
+  if (!cards.length) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    cards.forEach((c) => c.classList.remove('bento-hero'));
+    document.getElementById(LAYOUTS[highlightCard])?.classList.add('bento-hero');
+    return;
+  }
+
+  const state = Flip.getState(cards);
+  cards.forEach((c) => c.classList.remove('bento-hero'));
+  document.getElementById(LAYOUTS[highlightCard])?.classList.add('bento-hero');
+  Flip.from(state, { duration: 0.6, ease: 'expo.out', stagger: 0.05, absolute: true });
+}
+
+function updateCardContent(updates) {
+  if (!updates) return;
+
+  function fadeSwap(el, apply) {
+    if (!el) return;
+    gsap.to(el, {
+      opacity: 0, duration: 0.2,
+      onComplete: () => { apply(); gsap.to(el, { opacity: 1, duration: 0.35 }); },
+    });
+  }
+
+  if (updates.metric) {
+    const { value, label, sub } = updates.metric;
+    if (value) fadeSwap(document.getElementById('metric-value'), () => {
+      document.getElementById('metric-value').textContent = value;
+    });
+    if (label) fadeSwap(document.getElementById('metric-label'), () => {
+      document.getElementById('metric-label').textContent = label;
+    });
+    if (sub) fadeSwap(document.getElementById('metric-sub'), () => {
+      document.getElementById('metric-sub').textContent = sub;
+    });
+  }
+
+  if (updates.alert_items && Array.isArray(updates.alert_items)) {
+    const alertList = document.getElementById('alert-list');
+    fadeSwap(alertList, () => {
+      alertList.innerHTML = updates.alert_items.map((item, i) => `
+        <div class="alert-item${i > 0 ? ' alert-item--green' : ''}">
+          <div class="alert-icon" aria-hidden="true">${escapeHtml(item.icon)}</div>
+          <div>
+            <div class="alert-text">${escapeHtml(item.text)}</div>
+            <div class="alert-meta">${escapeHtml(item.meta)}</div>
+          </div>
+        </div>
+      `).join('');
+    });
+  }
+
+  if (updates.skills && Array.isArray(updates.skills)) {
+    const skillList = document.getElementById('skill-list');
+    fadeSwap(skillList, () => {
+      skillList.innerHTML = updates.skills.map((skill) => `
+        <div class="skill-row">
+          <div class="skill-top">
+            <span class="skill-name">${escapeHtml(skill.name)}</span>
+            <span class="skill-pct${skill.color && skill.color !== 'amber' ? ` skill-pct--${skill.color}` : ''}">${escapeHtml(String(skill.pct))}%</span>
+          </div>
+          <div class="skill-bar-bg">
+            <div class="skill-bar-fill skill-bar-fill--${escapeHtml(skill.color || 'amber')}" style="width:${Number(skill.pct) || 0}%"></div>
+          </div>
+        </div>
+      `).join('');
+    });
+  }
+
+  if (updates.ai_response) {
+    fadeSwap(document.getElementById('ai-response-text'), () => {
+      document.getElementById('ai-response-text').textContent = updates.ai_response;
+    });
+  }
+}
+
+async function streamAnswer(prompt, abortController) {
+  const aiResponseEl = document.getElementById('ai-response-text');
+  const aiDotsEl     = document.getElementById('ai-dots');
+  const statusEl     = document.getElementById('ask-status');
+
+  if (aiDotsEl) aiDotsEl.style.display = 'flex';
+  if (aiResponseEl) aiResponseEl.textContent = '';
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+      signal: abortController.signal,
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText     = '';
+    let displayedText = '';
+    let buffer       = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+
+        if (raw === '[DONE]') {
+          if (aiDotsEl) aiDotsEl.style.display = 'none';
+          try {
+            const parsed = JSON.parse(fullText);
+            if (parsed.highlight_card) applyLayout(parsed.highlight_card);
+            if (parsed.updates) updateCardContent(parsed.updates);
+            if (statusEl) statusEl.textContent = '';
+          } catch {
+            /* malformed JSON — show what we streamed */
+          }
+          continue;
+        }
+
+        try {
+          const { delta, error } = JSON.parse(raw);
+          if (error) throw new Error(error);
+          if (delta) {
+            fullText += delta;
+            // Progressively extract "text" field while streaming
+            const match = fullText.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+            if (match) {
+              const extracted = match[1]
+                .replace(/\\n/g, '\n')
+                .replace(/\\"/g, '"')
+                .replace(/\\\\/g, '\\');
+              if (extracted !== displayedText && aiResponseEl) {
+                displayedText = extracted;
+                aiResponseEl.textContent = extracted;
+              }
+            }
+          }
+        } catch (e) {
+          if (!(e instanceof SyntaxError)) throw e;
+        }
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    if (aiDotsEl) aiDotsEl.style.display = 'none';
+    if (statusEl) statusEl.textContent = 'Something went wrong — please try again.';
+  }
+}
+
+export function initAskSection() {
+  const bento = document.getElementById('ask-bento');
+  if (!bento) return;
+
+  // Scroll-triggered card entrance
+  ScrollTrigger.batch('.bento-card', {
+    start: 'top 85%',
+    once: true,
+    onEnter: (batch) => gsap.fromTo(batch,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: 'expo.out' }
+    ),
+  });
+
+  const input   = document.getElementById('ask-input');
+  const sendBtn = document.getElementById('ask-send');
+  const statusEl  = document.getElementById('ask-status');
+  const aiPromptEl = document.getElementById('ai-prompt-text');
+  const aiDotsEl  = document.getElementById('ai-dots');
+
+  let currentAbort = null;
+
+  // Enable/disable send on input
+  input?.addEventListener('input', () => {
+    if (sendBtn) sendBtn.disabled = !input.value.trim();
+  });
+
+  // Chip clicks
+  document.querySelectorAll('.ask-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const prompt = chip.dataset.prompt;
+      if (!prompt) return;
+      if (input) input.value = prompt;
+      if (sendBtn) sendBtn.disabled = false;
+      sendQuestion(prompt);
+    });
+  });
+
+  // Send button
+  sendBtn?.addEventListener('click', () => {
+    const prompt = input?.value.trim();
+    if (prompt) sendQuestion(prompt);
+  });
+
+  // Enter key
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      const prompt = input.value.trim();
+      if (prompt) { e.preventDefault(); sendQuestion(prompt); }
+    }
+  });
+
+  async function sendQuestion(prompt) {
+    if (currentAbort) { currentAbort.abort(); currentAbort = null; }
+
+    if (sendBtn) sendBtn.disabled = true;
+    if (statusEl) statusEl.textContent = 'Thinking…';
+
+    // Update AI card prompt display immediately
+    if (aiPromptEl) {
+      gsap.to(aiPromptEl, {
+        opacity: 0, duration: 0.15,
+        onComplete: () => {
+          aiPromptEl.textContent = `"${prompt}"`;
+          gsap.to(aiPromptEl, { opacity: 1, duration: 0.25 });
+        },
+      });
+    }
+
+    currentAbort = new AbortController();
+    await streamAnswer(prompt, currentAbort);
+
+    currentAbort = null;
+    if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
+    if (aiDotsEl) aiDotsEl.style.display = 'none';
+    if (statusEl && statusEl.textContent === 'Thinking…') statusEl.textContent = '';
+  }
+}
+
 // ── Master init ──────────────────────────────────────────────
 export function initAll() {
   // Skip all animations if prefers-reduced-motion
@@ -286,13 +544,15 @@ export function initAll() {
       if (document.body.classList.contains('loaded')) {
         observer.disconnect();
         initHeroAnimation();
+        initAskSection();
       }
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     // Fallback: also try after 1.6s in case mutation observer missed it
-    setTimeout(() => initHeroAnimation(), 1600);
+    setTimeout(() => { initHeroAnimation(); initAskSection(); }, 1600);
   } else {
     initHeroAnimation();
+    initAskSection();
   }
 
   initScrollReveal();
