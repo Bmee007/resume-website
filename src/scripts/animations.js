@@ -405,6 +405,7 @@ async function fetchImage(prompt, abortController) {
     const reader  = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
+    let urlReceived = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -421,6 +422,7 @@ async function fetchImage(prompt, abortController) {
           const { url, error } = JSON.parse(raw);
           if (error) throw new Error(error);
           if (url && img) {
+            urlReceived = true;
             img.onload = () => {
               stopTimer();
               if (skeleton) skeleton.style.display = 'none';
@@ -434,6 +436,12 @@ async function fetchImage(prompt, abortController) {
           if (!(e instanceof SyntaxError)) throw e;
         }
       }
+    }
+
+    // Stream ended without a URL — server timed out or returned an error
+    if (!urlReceived) {
+      stopTimer();
+      showImageError();
     }
   } catch (err) {
     stopTimer();
