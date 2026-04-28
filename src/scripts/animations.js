@@ -423,14 +423,16 @@ async function fetchImage(prompt, abortController) {
           if (error) throw new Error(error);
           if (url && img) {
             urlReceived = true;
-            img.onload = () => {
-              stopTimer();
-              if (skeleton) skeleton.style.display = 'none';
-              img.style.display = 'block';
-            };
-            img.onerror = () => { stopTimer(); showImageError(); };
-            img.src = url;
             img.alt = `AI-generated visual for: ${prompt}`;
+            img.src = url;
+            // img.decode() fetches and decodes even when display:none (unlike onload+lazy)
+            img.decode()
+              .then(() => {
+                stopTimer();
+                if (skeleton) skeleton.style.display = 'none';
+                img.style.display = 'block';
+              })
+              .catch(() => { stopTimer(); showImageError(); });
           }
         } catch (e) {
           if (!(e instanceof SyntaxError)) throw e;
