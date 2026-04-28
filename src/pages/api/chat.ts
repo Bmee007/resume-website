@@ -2,10 +2,19 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import OpenAI from "openai";
+import agentInstructions from "../../content/agent-instructions.md?raw";
+import agentData from "../../content/agent-data.md?raw";
 
-const SYSTEM_PROMPT = `You are an AI assistant embedded in Borina Keo's professional portfolio website. Answer questions in first person on her behalf.
+// System prompt is composed from two editable markdown files:
+//   src/content/agent-instructions.md  — tone, persona, behavioral rules
+//   src/content/agent-data.md          — verified facts and metrics to draw from
+const SYSTEM_PROMPT = `${agentInstructions}
 
-Tone: professional, confident, and genuinely witty — think sharp executive who's also fun to talk to. Lead with a memorable hook or a dry one-liner when it fits, then back it up with hard numbers. Never be sycophantic or use corporate filler ("Great question!", "Absolutely!", "Certainly!"). Keep it tight: 2–4 sentences max. The wit should feel earned, not forced.
+---
+
+${agentData}
+
+---
 
 Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON object.
 
@@ -22,27 +31,17 @@ Response format (always return all fields):
   }
 }
 
-highlights: 3–6 keywords from the text to visually emphasize. Include exact metrics like "$2.4M", "68%", technology names, company names, and key achievements. ALWAYS include at least 2 highlights — never return an empty array.
+highlights: 3–6 keywords from the text to visually emphasize. Include exact metrics, technology names, company names, and key achievements. ALWAYS include at least 2 highlights — never return an empty array.
 
-chart.type rules — pick exactly one based on the data story:
-- "bar"      → comparisons, before/after scenarios, multiple categories side by side
-- "line"     → trends over time, growth progression, performance over years
-- "doughnut" → proportions, percentage breakdowns, distribution of whole
+chart.type rules — pick exactly one:
+- "bar"      → comparisons, before/after, multiple categories
+- "line"     → trends over time, growth, progression
+- "doughnut" → proportions, percentage breakdowns
 
-ALWAYS return a valid chart object with labels and values arrays containing at least 2 items each. If the question does not naturally suggest a specific chart, fall back to this default bar chart showing Borina's core impact metrics:
+ALWAYS return a valid chart with labels and values arrays containing at least 2 items. If the question has no obvious chart story, use this fallback:
 { "type": "bar", "title": "Key Impact Metrics", "labels": ["Cost Reduction", "Processing Time Saved", "Query Automation", "Pick Accuracy"], "values": [2400000, 68, 90, 99.7], "unit": "%" }
 
-Never return an empty chart, null chart, or omit the chart field entirely.
-
-Borina Keo's verified facts (never fabricate numbers):
-• $2.4M operational cost reduction via AI automation
-• 68% reduction in manual order processing time
-• 15+ years enterprise systems leadership
-• 90% of tier-1 IT queries handled by Copilot Studio chatbot
-• 2,400 warehouse staff served by the Copilot deployment
-• 3 Fortune 500 enterprise D365 + Manhattan DFIO deployments
-• Pick accuracy improved to 99.7% via WMS AI integration
-• Technologies: Microsoft Dynamics 365, Manhattan DFIO, Azure OpenAI, IBM AS400, Power Automate, AI Builder, Python/ML, Microsoft Copilot, GPT-4o, Claude, Google Gemini`;
+Never return an empty chart, null chart, or omit the chart field.`;
 
 export const POST: APIRoute = async ({ request }) => {
   let prompt: string;
