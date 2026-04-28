@@ -5,6 +5,7 @@ import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Flip } from 'gsap/Flip';
+import Chart from 'chart.js/auto';
 
 gsap.registerPlugin(ScrollTrigger, Flip);
 
@@ -274,102 +275,152 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-const LAYOUTS = {
-  metric:     'card-metric-big',
-  alert:      'card-alert',
-  experience: 'card-yrs',
-  skills:     'card-skills',
-  ai:         'card-ai',
-};
+let chartInstance = null;
 
-function applyLayout(highlightCard) {
-  if (!highlightCard || !LAYOUTS[highlightCard]) return;
-
-  const cards = document.querySelectorAll('#ask-bento .bento-card');
-  if (!cards.length) return;
-
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    cards.forEach((c) => c.classList.remove('bento-hero'));
-    document.getElementById(LAYOUTS[highlightCard])?.classList.add('bento-hero');
-    return;
-  }
-
-  const state = Flip.getState(cards);
-  cards.forEach((c) => c.classList.remove('bento-hero'));
-  document.getElementById(LAYOUTS[highlightCard])?.classList.add('bento-hero');
-  Flip.from(state, { duration: 0.6, ease: 'expo.out', stagger: 0.05, absolute: true });
+function highlightText(text, highlights) {
+  if (!Array.isArray(highlights) || !highlights.length) return escapeHtml(text);
+  const sorted = [...highlights]
+    .filter((kw) => kw && typeof kw === 'string' && kw.trim())
+    .sort((a, b) => b.length - a.length);
+  if (!sorted.length) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const pattern = sorted
+    .map((kw) => escapeHtml(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  return escaped.replace(new RegExp(`(${pattern})`, 'gi'), '<span class="hl">$1</span>');
 }
 
-function updateCardContent(updates) {
-  if (!updates) return;
+function renderChart(chartData) {
+  if (!chartData) return;
+  const canvas   = document.getElementById('answer-chart');
+  const skeleton = document.getElementById('chart-skeleton');
+  const titleEl  = document.getElementById('chart-title');
+  if (!canvas) return;
 
-  function fadeSwap(el, apply) {
-    if (!el) return;
-    gsap.to(el, {
-      opacity: 0, duration: 0.2,
-      onComplete: () => { apply(); gsap.to(el, { opacity: 1, duration: 0.35 }); },
-    });
-  }
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  if (titleEl) titleEl.textContent = chartData.title || '';
 
-  if (updates.metric) {
-    const { value, label, sub } = updates.metric;
-    if (value) fadeSwap(document.getElementById('metric-value'), () => {
-      document.getElementById('metric-value').textContent = value;
-    });
-    if (label) fadeSwap(document.getElementById('metric-label'), () => {
-      document.getElementById('metric-label').textContent = label;
-    });
-    if (sub) fadeSwap(document.getElementById('metric-sub'), () => {
-      document.getElementById('metric-sub').textContent = sub;
-    });
-  }
+  canvas.style.display = 'block';
+  if (skeleton) skeleton.style.display = 'none';
 
-  if (updates.alert_items && Array.isArray(updates.alert_items)) {
-    const alertList = document.getElementById('alert-list');
-    fadeSwap(alertList, () => {
-      alertList.innerHTML = updates.alert_items.map((item, i) => `
-        <div class="alert-item${i > 0 ? ' alert-item--green' : ''}">
-          <div class="alert-icon" aria-hidden="true">${escapeHtml(item.icon)}</div>
-          <div>
-            <div class="alert-text">${escapeHtml(item.text)}</div>
-            <div class="alert-meta">${escapeHtml(item.meta)}</div>
-          </div>
-        </div>
-      `).join('');
-    });
-  }
+  const AMBER       = '#d49820';
+  const AMBER_ALPHA = 'rgba(212,152,32,0.18)';
+  const BLUE        = '#5b8fd9';
+  const GREEN       = '#4caf88';
+  const ORANGE      = '#e07030';
+  const GRID_COLOR  = 'rgba(255,255,255,0.06)';
+  const TEXT_COLOR  = 'rgba(255,255,255,0.45)';
+  const isDoughnut  = chartData.type === 'doughnut';
+  const palette     = [AMBER, BLUE, GREEN, ORANGE];
 
-  if (updates.skills && Array.isArray(updates.skills)) {
-    const skillList = document.getElementById('skill-list');
-    fadeSwap(skillList, () => {
-      skillList.innerHTML = updates.skills.map((skill) => `
-        <div class="skill-row">
-          <div class="skill-top">
-            <span class="skill-name">${escapeHtml(skill.name)}</span>
-            <span class="skill-pct${skill.color && skill.color !== 'amber' ? ` skill-pct--${skill.color}` : ''}">${escapeHtml(String(skill.pct))}%</span>
-          </div>
-          <div class="skill-bar-bg">
-            <div class="skill-bar-fill skill-bar-fill--${escapeHtml(skill.color || 'amber')}" style="width:${Number(skill.pct) || 0}%"></div>
-          </div>
-        </div>
-      `).join('');
-    });
-  }
+  chartInstance = new Chart(canvas, {
+    type: chartData.type || 'bar',
+    data: {
+      labels: chartData.labels || [],
+      datasets: [{
+        data:            chartData.values || [],
+        backgroundColor: isDoughnut ? palette : AMBER_ALPHA,
+        borderColor:     isDoughnut ? palette : AMBER,
+        borderWidth: 1.5,
+        borderRadius: chartData.type === 'bar' ? 3 : 0,
+        tension: 0.35,
+        fill: chartData.type === 'line',
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.parsed?.y ?? ctx.parsed;
+              return ` ${v} ${chartData.unit || ''}`.trimEnd();
+            },
+          },
+        },
+      },
+      scales: isDoughnut ? {} : {
+        x: {
+          grid:   { color: GRID_COLOR },
+          ticks:  { color: TEXT_COLOR, font: { size: 10 } },
+          border: { color: GRID_COLOR },
+        },
+        y: {
+          grid:         { color: GRID_COLOR },
+          ticks:        { color: TEXT_COLOR, font: { size: 10 } },
+          border:       { color: GRID_COLOR },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
 
-  if (updates.ai_response) {
-    fadeSwap(document.getElementById('ai-response-text'), () => {
-      document.getElementById('ai-response-text').textContent = updates.ai_response;
+async function fetchImage(prompt, abortController) {
+  const img      = document.getElementById('generated-image');
+  const skeleton = document.getElementById('image-skeleton');
+
+  if (skeleton) { skeleton.style.display = 'block'; skeleton.classList.remove('skeleton-error'); }
+  if (img) { img.style.display = 'none'; img.src = ''; }
+
+  try {
+    const res = await fetch('/api/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+      signal: abortController.signal,
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const reader  = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') continue;
+        try {
+          const { url, error } = JSON.parse(raw);
+          if (error) throw new Error(error);
+          if (url && img) {
+            img.onload = () => {
+              if (skeleton) skeleton.style.display = 'none';
+              img.style.display = 'block';
+            };
+            img.onerror = () => {
+              if (skeleton) skeleton.classList.add('skeleton-error');
+            };
+            img.src = url;
+            img.alt = `AI-generated visual for: ${prompt}`;
+          }
+        } catch (e) {
+          if (!(e instanceof SyntaxError)) throw e;
+        }
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    if (skeleton) skeleton.classList.add('skeleton-error');
   }
 }
 
 async function streamAnswer(prompt, abortController) {
-  const aiResponseEl = document.getElementById('ai-response-text');
-  const aiDotsEl     = document.getElementById('ai-dots');
+  const answerTextEl = document.getElementById('answer-text');
+  const answerDotsEl = document.getElementById('answer-dots');
   const statusEl     = document.getElementById('ask-status');
 
-  if (aiDotsEl) aiDotsEl.style.display = 'flex';
-  if (aiResponseEl) aiResponseEl.textContent = '';
+  if (answerDotsEl) answerDotsEl.style.display = 'flex';
+  if (answerTextEl) answerTextEl.textContent = '';
 
   try {
     const res = await fetch('/api/chat', {
@@ -378,19 +429,17 @@ async function streamAnswer(prompt, abortController) {
       body: JSON.stringify({ prompt }),
       signal: abortController.signal,
     });
-
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText     = '';
+    const reader      = res.body.getReader();
+    const decoder     = new TextDecoder();
+    let fullText      = '';
     let displayedText = '';
-    let buffer       = '';
+    let buffer        = '';
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() ?? '';
@@ -400,15 +449,15 @@ async function streamAnswer(prompt, abortController) {
         const raw = line.slice(6).trim();
 
         if (raw === '[DONE]') {
-          if (aiDotsEl) aiDotsEl.style.display = 'none';
+          if (answerDotsEl) answerDotsEl.style.display = 'none';
           try {
             const parsed = JSON.parse(fullText);
-            if (parsed.highlight_card) applyLayout(parsed.highlight_card);
-            if (parsed.updates) updateCardContent(parsed.updates);
+            if (parsed.text && answerTextEl) {
+              answerTextEl.innerHTML = highlightText(parsed.text, parsed.highlights);
+            }
+            if (parsed.chart) renderChart(parsed.chart);
             if (statusEl) statusEl.textContent = '';
-          } catch {
-            /* malformed JSON — show what we streamed */
-          }
+          } catch { /* malformed JSON — keep streamed text */ }
           continue;
         }
 
@@ -417,16 +466,15 @@ async function streamAnswer(prompt, abortController) {
           if (error) throw new Error(error);
           if (delta) {
             fullText += delta;
-            // Progressively extract "text" field while streaming
             const match = fullText.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
             if (match) {
               const extracted = match[1]
                 .replace(/\\n/g, '\n')
                 .replace(/\\"/g, '"')
                 .replace(/\\\\/g, '\\');
-              if (extracted !== displayedText && aiResponseEl) {
+              if (extracted !== displayedText && answerTextEl) {
                 displayedText = extracted;
-                aiResponseEl.textContent = extracted;
+                answerTextEl.textContent = extracted;
               }
             }
           }
@@ -437,17 +485,15 @@ async function streamAnswer(prompt, abortController) {
     }
   } catch (err) {
     if (err.name === 'AbortError') return;
-    if (aiDotsEl) aiDotsEl.style.display = 'none';
+    if (answerDotsEl) answerDotsEl.style.display = 'none';
     if (statusEl) statusEl.textContent = 'Something went wrong — please try again.';
   }
 }
 
 export function initAskSection() {
-  const bento = document.getElementById('ask-bento');
-  if (!bento) return;
+  if (!document.getElementById('panel-answer')) return;
 
-  // Scroll-triggered card entrance
-  ScrollTrigger.batch('.bento-card', {
+  ScrollTrigger.batch('.ask-panel', {
     start: 'top 85%',
     once: true,
     onEnter: (batch) => gsap.fromTo(batch,
@@ -456,67 +502,68 @@ export function initAskSection() {
     ),
   });
 
-  const input   = document.getElementById('ask-input');
-  const sendBtn = document.getElementById('ask-send');
-  const statusEl  = document.getElementById('ask-status');
-  const aiPromptEl = document.getElementById('ai-prompt-text');
-  const aiDotsEl  = document.getElementById('ai-dots');
-
+  const input    = document.getElementById('ask-input');
+  const sendBtn  = document.getElementById('ask-send');
+  const statusEl = document.getElementById('ask-status');
   let currentAbort = null;
 
-  // Enable/disable send on input
   input?.addEventListener('input', () => {
     if (sendBtn) sendBtn.disabled = !input.value.trim();
   });
 
-  // Chip clicks
   document.querySelectorAll('.ask-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
-      const prompt = chip.dataset.prompt;
-      if (!prompt) return;
-      if (input) input.value = prompt;
+      const p = chip.dataset.prompt;
+      if (!p) return;
+      if (input) input.value = p;
       if (sendBtn) sendBtn.disabled = false;
-      sendQuestion(prompt);
+      sendQuestion(p);
     });
   });
 
-  // Send button
   sendBtn?.addEventListener('click', () => {
-    const prompt = input?.value.trim();
-    if (prompt) sendQuestion(prompt);
+    const p = input?.value.trim();
+    if (p) sendQuestion(p);
   });
 
-  // Enter key
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      const prompt = input.value.trim();
-      if (prompt) { e.preventDefault(); sendQuestion(prompt); }
+      const p = input.value.trim();
+      if (p) { e.preventDefault(); sendQuestion(p); }
     }
   });
 
   async function sendQuestion(prompt) {
     if (currentAbort) { currentAbort.abort(); currentAbort = null; }
-
     if (sendBtn) sendBtn.disabled = true;
     if (statusEl) statusEl.textContent = 'Thinking…';
 
-    // Update AI card prompt display immediately
-    if (aiPromptEl) {
-      gsap.to(aiPromptEl, {
-        opacity: 0, duration: 0.15,
-        onComplete: () => {
-          aiPromptEl.textContent = `"${prompt}"`;
-          gsap.to(aiPromptEl, { opacity: 1, duration: 0.25 });
-        },
-      });
-    }
+    const answerTextEl  = document.getElementById('answer-text');
+    const answerDotsEl  = document.getElementById('answer-dots');
+    const imgEl         = document.getElementById('generated-image');
+    const chartCanvas   = document.getElementById('answer-chart');
+    const imgSkeleton   = document.getElementById('image-skeleton');
+    const chartSkeleton = document.getElementById('chart-skeleton');
+    const chartTitleEl  = document.getElementById('chart-title');
+
+    if (answerTextEl)  answerTextEl.textContent = '';
+    if (answerDotsEl)  answerDotsEl.style.display = 'flex';
+    if (imgEl)         { imgEl.style.display = 'none'; imgEl.src = ''; }
+    if (chartCanvas)   chartCanvas.style.display = 'none';
+    if (imgSkeleton)   { imgSkeleton.style.display = 'block'; imgSkeleton.classList.remove('skeleton-error'); }
+    if (chartSkeleton) { chartSkeleton.style.display = 'block'; chartSkeleton.classList.remove('skeleton-error'); }
+    if (chartTitleEl)  chartTitleEl.textContent = '';
 
     currentAbort = new AbortController();
-    await streamAnswer(prompt, currentAbort);
+
+    await Promise.allSettled([
+      streamAnswer(prompt, currentAbort),
+      fetchImage(prompt, currentAbort),
+    ]);
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
-    if (aiDotsEl) aiDotsEl.style.display = 'none';
+    if (answerDotsEl) answerDotsEl.style.display = 'none';
     if (statusEl && statusEl.textContent === 'Thinking…') statusEl.textContent = '';
   }
 }
@@ -539,17 +586,21 @@ export function initAll() {
   // Hero animation fires after loader's 1.4s delay
   const loader = document.getElementById('loader');
   if (loader) {
-    // Loader fires body.loaded at 1.4s — watch for it
+    let heroInited = false;
+    function runHeroInits() {
+      if (heroInited) return;
+      heroInited = true;
+      initHeroAnimation();
+      initAskSection();
+    }
     const observer = new MutationObserver(() => {
       if (document.body.classList.contains('loaded')) {
         observer.disconnect();
-        initHeroAnimation();
-        initAskSection();
+        runHeroInits();
       }
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    // Fallback: also try after 1.6s in case mutation observer missed it
-    setTimeout(() => { initHeroAnimation(); initAskSection(); }, 1600);
+    setTimeout(runHeroInits, 1600);
   } else {
     initHeroAnimation();
     initAskSection();

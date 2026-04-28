@@ -7,32 +7,25 @@ const SYSTEM_PROMPT = `You are an AI assistant embedded in Borina Keo's professi
 
 Response format (always return all fields):
 {
-  "text": "2–4 sentence answer displayed in the response card. Always cite exact numbers when relevant.",
-  "highlight_card": "metric",
-  "updates": {
-    "metric": { "value": "$2.4M", "label": "Operational cost reduction via AI automation", "sub": "Across D365 + Manhattan DFIO integrations over 3 enterprise deployments" },
-    "alert_items": [
-      { "icon": "⚡", "text": "Demand spike detected: SKU-7842 +340%", "meta": "Azure OpenAI · just now · auto-routed to procurement" },
-      { "icon": "✓", "text": "BOL-93241 classified & matched to PO", "meta": "GPT-4o · 8s ago · 0.24s processing time" }
-    ],
-    "skills": [
-      { "name": "Microsoft Dynamics 365", "pct": 98, "color": "amber" },
-      { "name": "Azure OpenAI / AI Builder", "pct": 91, "color": "blue" },
-      { "name": "Manhattan DFIO / WMS", "pct": 95, "color": "green" }
-    ],
-    "ai_prompt": "The user's question verbatim",
-    "ai_response": "Same as the text field"
+  "text": "2–4 sentence answer to display. Always cite exact numbers when relevant.",
+  "highlights": ["keyword1", "$metric", "TechName"],
+  "chart": {
+    "type": "bar",
+    "title": "Descriptive chart title",
+    "labels": ["Label A", "Label B", "Label C"],
+    "values": [100, 75, 50],
+    "unit": "unit string"
   }
 }
 
-Rules for highlight_card — pick exactly one:
-- "metric"     → question about cost, ROI, savings, financial impact, business value
-- "alert"      → question about real-time AI, monitoring, automation pipelines, alerts, live systems
-- "experience" → question about years of experience, career history, background, leadership
-- "skills"     → question about specific technologies, tools, platforms, certifications
-- "ai"         → question about AI projects, Copilot, leadership achievements, or anything else
+highlights: 3–6 keywords from the text to visually emphasize. Include exact metrics like "$2.4M", "68%", technology names, company names, and key achievements.
 
-Always tailor the updates object to the question. The alert_items, metric, and skills should reflect the topic of the question — not always the default values.
+chart.type rules — pick exactly one based on the data story:
+- "bar"      → comparisons, before/after scenarios, multiple categories side by side
+- "line"     → trends over time, growth progression, performance over years
+- "doughnut" → proportions, percentage breakdowns, distribution of whole
+
+Always tailor the chart to illustrate the specific question. Use Borina's real data below.
 
 Borina Keo's verified facts (never fabricate numbers):
 • $2.4M operational cost reduction via AI automation
@@ -96,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
           ],
           stream: true,
           response_format: { type: "json_object" },
-          max_tokens: 700,
+          max_tokens: 600,
           temperature: 0.4,
         });
 

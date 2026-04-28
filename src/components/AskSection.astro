@@ -60,111 +60,41 @@
       <div id="ask-status" class="ask-status" aria-live="polite" aria-atomic="true"></div>
     </div>
 
-    <!-- RIGHT: bento dashboard -->
-    <div id="ask-bento" class="ask-bento">
+    <!-- RIGHT: 3 panels -->
+    <div class="ask-panels">
 
-      <!-- Big metric card — default hero (spans 2 rows) -->
-      <div id="card-metric-big" class="bento-card bento-hero" data-card="metric">
-        <div class="card-tag">Documented Impact</div>
-        <div class="mini-bars" aria-hidden="true">
-          <div class="bar" style="height:30%"></div>
-          <div class="bar" style="height:45%"></div>
-          <div class="bar" style="height:55%"></div>
-          <div class="bar" style="height:40%"></div>
-          <div class="bar" style="height:65%"></div>
-          <div class="bar" style="height:72%"></div>
-          <div class="bar bar--hi" style="height:88%"></div>
-          <div class="bar bar--hi" style="height:95%"></div>
-          <div class="bar bar--hi" style="height:100%"></div>
-        </div>
-        <div id="metric-value" class="big-num">$2.4M</div>
-        <div id="metric-label" class="big-label">Operational cost reduction<br />via AI automation</div>
-        <div id="metric-sub" class="big-sub">Across D365 + Manhattan DFIO integrations<br />over 3 enterprise deployments</div>
-      </div>
-
-      <!-- AI Alert feed -->
-      <div id="card-alert" class="bento-card" data-card="alert">
-        <div class="alert-header">
-          <div class="alert-title">D365 AI Monitor</div>
-          <div class="alert-badge">
-            <span class="pulse-dot" aria-hidden="true"></span>Live
-          </div>
-        </div>
-        <div id="alert-list">
-          <div class="alert-item">
-            <div class="alert-icon" aria-hidden="true">⚡</div>
-            <div>
-              <div class="alert-text">Demand spike detected: SKU-7842 +340%</div>
-              <div class="alert-meta">Azure OpenAI · just now · auto-routed to procurement</div>
-            </div>
-          </div>
-          <div class="alert-item alert-item--green">
-            <div class="alert-icon" aria-hidden="true">✓</div>
-            <div>
-              <div class="alert-text">BOL-93241 classified &amp; matched to PO</div>
-              <div class="alert-meta">GPT-4o · 8s ago · 0.24s processing time</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Years experience -->
-      <div id="card-yrs" class="bento-card" data-card="experience">
-        <div class="card-tag">Experience</div>
-        <div class="yr-num">15+</div>
-        <div class="yr-label">Years Enterprise Leadership</div>
-        <div class="yr-sub">Microsoft Dynamics 365 · Manhattan WMS<br />Fortune 500 distribution networks</div>
-      </div>
-
-      <!-- AI response card -->
-      <div id="card-ai" class="bento-card" data-card="ai" aria-live="polite">
-        <div class="card-tag">Copilot Studio · Live</div>
-        <div class="ai-prompt" id="ai-prompt-text">"What can Borina Keo do for my business?"</div>
-        <div class="ai-response" id="ai-response-text">
-          Ask a question to see the AI respond in real time.
-        </div>
-        <div class="ai-dots" id="ai-dots" aria-hidden="true">
+      <!-- Panel 1: streamed text answer -->
+      <div id="panel-answer" class="ask-panel panel-answer" aria-live="polite">
+        <span class="panel-tag">Answer</span>
+        <div id="answer-text" class="answer-text">Ask a question to see the response here.</div>
+        <div id="answer-dots" class="ai-dots" aria-hidden="true">
           <span class="dot-anim"></span>
           <span class="dot-anim"></span>
           <span class="dot-anim"></span>
         </div>
       </div>
 
-      <!-- Skills — always spans full row -->
-      <div id="card-skills" class="bento-card bento-full-row" data-card="skills">
-        <div class="card-tag">Core Competencies</div>
-        <div id="skill-list" class="skill-list">
-          <div class="skill-row">
-            <div class="skill-top">
-              <span class="skill-name">Microsoft Dynamics 365</span>
-              <span class="skill-pct">98%</span>
-            </div>
-            <div class="skill-bar-bg">
-              <div class="skill-bar-fill skill-bar-fill--amber" style="width:98%"></div>
-            </div>
+      <!-- Row 2: image + chart -->
+      <div class="ask-panels-row2">
+        <div id="panel-image" class="ask-panel panel-image">
+          <span class="panel-tag">Visual</span>
+          <div class="image-wrap">
+            <div id="image-skeleton" class="panel-skeleton" style="display:none"></div>
+            <img id="generated-image" class="generated-img" alt="" loading="lazy" />
           </div>
-          <div class="skill-row">
-            <div class="skill-top">
-              <span class="skill-name">Azure OpenAI / AI Builder</span>
-              <span class="skill-pct skill-pct--blue">91%</span>
-            </div>
-            <div class="skill-bar-bg">
-              <div class="skill-bar-fill skill-bar-fill--blue" style="width:91%"></div>
-            </div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top">
-              <span class="skill-name">Manhattan DFIO / WMS</span>
-              <span class="skill-pct skill-pct--green">95%</span>
-            </div>
-            <div class="skill-bar-bg">
-              <div class="skill-bar-fill skill-bar-fill--green" style="width:95%"></div>
-            </div>
+        </div>
+        <div id="panel-chart" class="ask-panel panel-chart">
+          <span class="panel-tag">Metrics</span>
+          <p id="chart-title" class="chart-title"></p>
+          <div class="chart-wrap">
+            <div id="chart-skeleton" class="panel-skeleton" style="display:none"></div>
+            <canvas id="answer-chart"></canvas>
           </div>
         </div>
       </div>
 
-    </div><!-- /#ask-bento -->
+    </div>
+
   </div><!-- /.ask-split -->
 </section>
 
@@ -326,16 +256,20 @@
     line-height: 1.4;
   }
 
-  /* ── RIGHT: bento grid ───────────────────────────────────── */
-  .ask-bento {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+  /* ── RIGHT: 3 panels ────────────────────────────────────── */
+  .ask-panels {
+    display: flex;
+    flex-direction: column;
     gap: 0.75rem;
-    height: 520px;
   }
 
-  .bento-card {
+  .ask-panels-row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .ask-panel {
     background: var(--surface, oklch(0.12 0.008 60));
     border: 1px solid var(--border);
     padding: 1.125rem 1.25rem;
@@ -343,227 +277,46 @@
     overflow: hidden;
   }
 
-  .bento-card::before {
+  .ask-panel::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--amber), transparent);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
 
-  .bento-card:hover::before {
-    opacity: 1;
-  }
+  .ask-panel:hover::before { opacity: 1; }
 
-  /* Hero slot: spans 2 rows (default: card-metric-big) */
-  .bento-hero {
-    grid-row: span 2;
-  }
-
-  /* Full-width bottom row (always: card-skills) */
-  .bento-full-row {
-    grid-column: span 2;
-  }
-
-  /* ── Card: tag ───────────────────────────────────────────── */
-  .card-tag {
+  .panel-tag {
+    display: block;
     font-size: 0.6rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--fg-subtle);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.625rem;
   }
 
-  /* ── Card: metric ────────────────────────────────────────── */
-  #card-metric-big {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-
-  .mini-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 48px;
-    margin-top: auto;
-    margin-bottom: 1rem;
-  }
-
-  .bar {
-    flex: 1;
-    background: color-mix(in oklch, var(--amber) 20%, transparent);
-    border-radius: 1px 1px 0 0;
-    min-height: 4px;
-  }
-
-  .bar--hi {
-    background: var(--amber);
-  }
-
-  .big-num {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: 4.5rem;
-    line-height: 1;
-    color: var(--amber);
-    margin-bottom: 0.5rem;
-  }
-
-  .big-label {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--cream);
-    line-height: 1.35;
-    margin-bottom: 0.5rem;
-  }
-
-  .big-sub {
-    font-size: 0.75rem;
-    color: var(--fg-muted);
-    line-height: 1.5;
-  }
-
-  /* ── Card: alert ─────────────────────────────────────────── */
-  #card-alert {
-    display: flex;
-    flex-direction: column;
-    gap: 0.625rem;
-  }
-
-  .alert-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .alert-title {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--fg-muted);
-  }
-
-  .alert-badge {
-    font-size: 0.5625rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--green);
-    border: 1px solid color-mix(in oklch, var(--green) 40%, transparent);
-    padding: 0.15rem 0.4rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .pulse-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--green);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.3; }
-  }
-
-  .alert-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 0.5rem 0.625rem;
-    background: var(--surface-raised, oklch(0.16 0.009 58));
-    border-left: 2px solid var(--amber);
-  }
-
-  .alert-item--green {
-    border-left-color: var(--green);
-    opacity: 0.75;
-  }
-
-  .alert-icon {
-    font-size: 0.75rem;
-    flex-shrink: 0;
-    margin-top: 0.05rem;
-  }
-
-  .alert-text {
-    font-size: 0.75rem;
-    color: var(--fg);
-    line-height: 1.45;
-  }
-
-  .alert-meta {
-    font-size: 0.625rem;
-    color: var(--fg-subtle);
-    margin-top: 0.2rem;
-  }
-
-  /* ── Card: years ─────────────────────────────────────────── */
-  #card-yrs {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.25rem;
-  }
-
-  .yr-num {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: 3.5rem;
-    line-height: 1;
-    color: var(--amber);
-  }
-
-  .yr-label {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--cream);
-  }
-
-  .yr-sub {
-    font-size: 0.75rem;
-    color: var(--fg-muted);
-    margin-top: 0.25rem;
-    line-height: 1.45;
-  }
-
-  /* ── Card: AI response ───────────────────────────────────── */
-  #card-ai {
+  /* ── Panel 1: answer ─────────────────────────────────────── */
+  .panel-answer {
+    min-height: 160px;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    overflow: hidden;
   }
 
-  .ai-prompt {
-    font-size: 0.75rem;
-    color: var(--fg-subtle);
-    padding: 0.4rem 0.625rem;
-    background: oklch(0.10 0.007 58);
-    border: 1px solid var(--border);
-    line-height: 1.4;
-  }
-
-  .ai-response {
-    font-size: 0.8125rem;
+  .answer-text {
+    font-size: 0.9rem;
     color: var(--fg);
-    padding: 0.5rem 0.625rem;
-    background: var(--surface-raised, oklch(0.16 0.009 58));
-    border-left: 2px solid var(--amber);
-    line-height: 1.55;
+    line-height: 1.65;
     flex: 1;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 5;
+  }
+
+  :global(.hl) {
+    color: var(--amber);
+    font-weight: 600;
   }
 
   .ai-dots {
@@ -589,64 +342,82 @@
     40%           { transform: scale(1);   opacity: 1; }
   }
 
-  /* ── Card: skills ────────────────────────────────────────── */
-  #card-skills {
+  /* ── Panels 2 & 3: image + chart ─────────────────────────── */
+  .panel-image,
+  .panel-chart {
+    height: 220px;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
   }
 
-  .skill-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  .image-wrap {
+    position: relative;
     flex: 1;
-    justify-content: space-around;
-  }
-
-  .skill-row {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .skill-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .skill-name {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--fg-muted);
-  }
-
-  .skill-pct {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    color: var(--amber);
-  }
-
-  .skill-pct--blue  { color: var(--blue); }
-  .skill-pct--green { color: var(--green); }
-
-  .skill-bar-bg {
-    height: 3px;
-    background: var(--border);
-    border-radius: 2px;
     overflow: hidden;
   }
 
-  .skill-bar-fill {
+  .generated-img {
+    width: 100%;
     height: 100%;
-    border-radius: 2px;
-    transition: width 0.6s ease;
+    object-fit: cover;
+    display: none;
   }
 
-  .skill-bar-fill--amber { background: var(--amber); }
-  .skill-bar-fill--blue  { background: var(--blue); }
-  .skill-bar-fill--green { background: var(--green); }
+  .chart-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+    margin: 0 0 0.5rem;
+    line-height: 1.3;
+  }
+
+  .chart-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #answer-chart {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    display: none;
+  }
+
+  /* ── Skeleton shimmer ────────────────────────────────────── */
+  .panel-skeleton {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--surface, oklch(0.12 0.008 60)) 0%,
+      oklch(0.17 0.012 60) 50%,
+      var(--surface, oklch(0.12 0.008 60)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+
+  .panel-skeleton.skeleton-error {
+    animation: none;
+    background: var(--surface, oklch(0.12 0.008 60));
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel-skeleton.skeleton-error::after {
+    content: '⚠';
+    font-size: 1.5rem;
+    opacity: 0.3;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
 
   /* ── Mobile ──────────────────────────────────────────────── */
   @media (max-width: 767px) {
@@ -658,17 +429,13 @@
       position: static;
     }
 
-    .ask-bento {
-      height: auto;
-      grid-template-rows: auto;
+    .ask-panels-row2 {
+      grid-template-columns: 1fr;
     }
 
-    .bento-hero {
-      grid-row: span 1;
-    }
-
-    .big-num {
-      font-size: 3.5rem;
+    .panel-image,
+    .panel-chart {
+      height: 180px;
     }
   }
 </style>
