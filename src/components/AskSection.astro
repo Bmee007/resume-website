@@ -83,7 +83,13 @@
         <div id="panel-image" class="ask-panel panel-image">
           <span class="panel-tag">Visual</span>
           <div class="image-wrap">
-            <div id="image-skeleton" class="panel-skeleton" style="display:none"></div>
+            <div id="image-skeleton" class="panel-skeleton" style="display:none">
+              <div class="skeleton-status">
+                <span class="skeleton-label">Generating visual</span>
+                <span class="skeleton-sep" aria-hidden="true">·</span>
+                <span id="image-timer" class="skeleton-timer">0s</span>
+              </div>
+            </div>
             <div id="image-error" class="panel-error" style="display:none" aria-live="polite">
               <span class="panel-error-icon" aria-hidden="true">⚠</span>
               <span class="panel-error-msg">Image generation failed. Try rephrasing your question or ask again.</span>
@@ -440,6 +446,41 @@
     font-size: 0.75rem;
     color: var(--fg-muted);
     line-height: 1.55;
+  }
+
+  /* ── Skeleton generation status ─────────────────────────── */
+  .skeleton-status {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    z-index: 1;
+  }
+
+  .skeleton-label {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .skeleton-sep {
+    color: var(--border-strong);
+    font-size: 0.75rem;
+  }
+
+  .skeleton-timer {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--amber);
+    font-variant-numeric: tabular-nums;
+    min-width: 2ch;
   }
 
   /* ── Skeleton shimmer ────────────────────────────────────── */

@@ -377,10 +377,21 @@ async function fetchImage(prompt, abortController) {
   const img      = document.getElementById('generated-image');
   const skeleton = document.getElementById('image-skeleton');
   const errEl    = document.getElementById('image-error');
+  const timerEl  = document.getElementById('image-timer');
 
   if (skeleton) skeleton.style.display = 'block';
   if (errEl)    errEl.style.display = 'none';
-  if (img) { img.style.display = 'none'; img.src = ''; }
+  if (img)      { img.style.display = 'none'; img.src = ''; }
+
+  // Elapsed-time counter
+  let elapsed = 0;
+  if (timerEl) timerEl.textContent = '0s';
+  const tick = setInterval(() => {
+    elapsed++;
+    if (timerEl) timerEl.textContent = `${elapsed}s`;
+  }, 1000);
+
+  const stopTimer = () => clearInterval(tick);
 
   try {
     const res = await fetch('/api/image', {
@@ -411,10 +422,11 @@ async function fetchImage(prompt, abortController) {
           if (error) throw new Error(error);
           if (url && img) {
             img.onload = () => {
+              stopTimer();
               if (skeleton) skeleton.style.display = 'none';
               img.style.display = 'block';
             };
-            img.onerror = () => showImageError();
+            img.onerror = () => { stopTimer(); showImageError(); };
             img.src = url;
             img.alt = `AI-generated visual for: ${prompt}`;
           }
@@ -424,6 +436,7 @@ async function fetchImage(prompt, abortController) {
       }
     }
   } catch (err) {
+    stopTimer();
     if (err.name === 'AbortError') return;
     showImageError();
   }
@@ -574,7 +587,9 @@ export function initAskSection() {
     if (imgErrorEl)    imgErrorEl.style.display = 'none';
     if (chartCanvas)   chartCanvas.style.display = 'none';
     if (chartErrorEl)  chartErrorEl.style.display = 'none';
-    if (imgSkeleton)   imgSkeleton.style.display = 'block';
+    if (imgSkeleton)   { imgSkeleton.style.display = 'block'; }
+    const timerReset = document.getElementById('image-timer');
+    if (timerReset) timerReset.textContent = '0s';
     if (chartSkeleton) chartSkeleton.style.display = 'block';
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
