@@ -47,11 +47,6 @@ function initHeroAnimation() {
   const nameEl = document.getElementById('hero-name');
   if (!nameEl) return;
 
-  // Set GSAP starting state here (not in CSS) so elements are visible if JS fails
-  gsap.set(['#hero-label', '#hero-title', '#hero-sub', '#hero-ctas', '#hero-social'], {
-    opacity: 0,
-  });
-
   // Manual character split (no SplitText plugin)
   const text = nameEl.textContent ?? '';
   nameEl.innerHTML = text
@@ -66,45 +61,40 @@ function initHeroAnimation() {
 
   const chars = nameEl.querySelectorAll('.char-inner');
 
+  // Use fromTo so start + end values are both explicit — avoids GSAP misreading
+  // "current state" after any prior gsap.set() call.
   const tl = gsap.timeline({ delay: 0.2 });
 
   tl
-    .from('#hero-label', {
-      opacity: 0,
-      x: -20,
-      duration: 0.7,
-      ease: 'expo.out',
-    })
-    .from(chars, {
-      yPercent: 110,
-      duration: 1.0,
-      stagger: 0.035,
-      ease: 'expo.out',
-    }, 0.1)
-    .from('#hero-title', {
-      opacity: 0,
-      y: 18,
-      duration: 0.8,
-      ease: 'expo.out',
-    }, '-=0.5')
-    .from('#hero-sub', {
-      opacity: 0,
-      y: 16,
-      duration: 0.7,
-      ease: 'expo.out',
-    }, '-=0.5')
-    .from('#hero-ctas', {
-      opacity: 0,
-      y: 14,
-      duration: 0.6,
-      ease: 'expo.out',
-    }, '-=0.4')
-    .from('#hero-social', {
-      opacity: 0,
-      y: 10,
-      duration: 0.5,
-      ease: 'expo.out',
-    }, '-=0.3');
+    .fromTo('#hero-label',
+      { opacity: 0, x: -20 },
+      { opacity: 1, x: 0, duration: 0.7, ease: 'expo.out' }
+    )
+    .fromTo(chars,
+      { yPercent: 110 },
+      { yPercent: 0, duration: 1.0, stagger: 0.035, ease: 'expo.out' },
+      0.1
+    )
+    .fromTo('#hero-title',
+      { opacity: 0, y: 18 },
+      { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out' },
+      '-=0.5'
+    )
+    .fromTo('#hero-sub',
+      { opacity: 0, y: 16 },
+      { opacity: 1, y: 0, duration: 0.7, ease: 'expo.out' },
+      '-=0.5'
+    )
+    .fromTo('#hero-ctas',
+      { opacity: 0, y: 14 },
+      { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out' },
+      '-=0.4'
+    )
+    .fromTo('#hero-social',
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.5, ease: 'expo.out' },
+      '-=0.3'
+    );
 }
 
 // ── Stat counters ────────────────────────────────────────────
