@@ -1,4 +1,5 @@
 export const prerender = false;
+export const maxDuration = 30;
 
 import type { APIRoute } from "astro";
 import OpenAI from "openai";

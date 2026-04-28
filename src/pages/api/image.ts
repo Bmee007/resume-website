@@ -1,4 +1,5 @@
 export const prerender = false;
+export const maxDuration = 60; // DALL-E 3 takes 15-25s — requires Vercel Pro
 
 import type { APIRoute } from "astro";
 import OpenAI from "openai";
