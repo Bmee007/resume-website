@@ -50,17 +50,31 @@ export const POST: APIRoute = async ({ request }) => {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const response = await client.images.generate({
-          model: "dall-e-3",
-          prompt: dallePrompt,
-          n: 1,
-          size: "1024x1024",
-          style: "natural",
-          quality: "standard",
-        });
+        let url: string | undefined;
 
-        const url = response.data[0]?.url;
-        if (!url) throw new Error("No image URL returned");
+        try {
+          const response = await client.images.generate({
+            model: "dall-e-3",
+            prompt: dallePrompt,
+            n: 1,
+            size: "1024x1024",
+            style: "natural",
+            quality: "standard",
+          });
+          url = response.data[0]?.url;
+          if (!url) throw new Error("No image URL returned");
+        } catch {
+          // DALL-E 3 failed — retry with DALL-E 2 (faster, no style/quality params, 1000 char limit)
+          const fallbackPrompt = dallePrompt.slice(0, 1000);
+          const fallback = await client.images.generate({
+            model: "dall-e-2",
+            prompt: fallbackPrompt,
+            n: 1,
+            size: "1024x1024",
+          });
+          url = fallback.data[0]?.url;
+          if (!url) throw new Error("No image URL returned from fallback");
+        }
 
         controller.enqueue(encoder.encode(`data: ${JSON.stringify({ url })}\n\n`));
         controller.enqueue(encoder.encode("data: [DONE]\n\n"));
