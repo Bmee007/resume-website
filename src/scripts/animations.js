@@ -280,18 +280,31 @@ function highlightText(text, highlights) {
   return escaped.replace(new RegExp(`(${pattern})`, 'gi'), '<span class="hl">$1</span>');
 }
 
+function showChartError() {
+  const skeleton = document.getElementById('chart-skeleton');
+  const errEl    = document.getElementById('chart-error');
+  if (skeleton) skeleton.style.display = 'none';
+  if (errEl)    errEl.style.display = 'flex';
+}
+
 function renderChart(chartData) {
-  if (!chartData) return;
   const canvas   = document.getElementById('answer-chart');
   const skeleton = document.getElementById('chart-skeleton');
   const titleEl  = document.getElementById('chart-title');
   if (!canvas) return;
 
+  if (!chartData || !Array.isArray(chartData.labels) || !Array.isArray(chartData.values)
+      || !chartData.labels.length || !chartData.values.length) {
+    showChartError();
+    return;
+  }
+
   if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
   if (titleEl) titleEl.textContent = chartData.title || '';
 
-  canvas.style.display = 'block';
-  if (skeleton) skeleton.style.display = 'none';
+  try {
+    canvas.style.display = 'block';
+    if (skeleton) skeleton.style.display = 'none';
 
   const AMBER       = '#d49820';
   const AMBER_ALPHA = 'rgba(212,152,32,0.18)';
@@ -346,13 +359,27 @@ function renderChart(chartData) {
       },
     },
   });
+  } catch {
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    canvas.style.display = 'none';
+    showChartError();
+  }
+}
+
+function showImageError() {
+  const skeleton = document.getElementById('image-skeleton');
+  const errEl    = document.getElementById('image-error');
+  if (skeleton) skeleton.style.display = 'none';
+  if (errEl)    errEl.style.display = 'flex';
 }
 
 async function fetchImage(prompt, abortController) {
   const img      = document.getElementById('generated-image');
   const skeleton = document.getElementById('image-skeleton');
+  const errEl    = document.getElementById('image-error');
 
-  if (skeleton) { skeleton.style.display = 'block'; skeleton.classList.remove('skeleton-error'); }
+  if (skeleton) skeleton.style.display = 'block';
+  if (errEl)    errEl.style.display = 'none';
   if (img) { img.style.display = 'none'; img.src = ''; }
 
   try {
@@ -387,9 +414,7 @@ async function fetchImage(prompt, abortController) {
               if (skeleton) skeleton.style.display = 'none';
               img.style.display = 'block';
             };
-            img.onerror = () => {
-              if (skeleton) skeleton.classList.add('skeleton-error');
-            };
+            img.onerror = () => showImageError();
             img.src = url;
             img.alt = `AI-generated visual for: ${prompt}`;
           }
@@ -400,17 +425,19 @@ async function fetchImage(prompt, abortController) {
     }
   } catch (err) {
     if (err.name === 'AbortError') return;
-    if (skeleton) skeleton.classList.add('skeleton-error');
+    showImageError();
   }
 }
 
 async function streamAnswer(prompt, abortController) {
-  const answerTextEl = document.getElementById('answer-text');
-  const answerDotsEl = document.getElementById('answer-dots');
-  const statusEl     = document.getElementById('ask-status');
+  const answerTextEl  = document.getElementById('answer-text');
+  const answerDotsEl  = document.getElementById('answer-dots');
+  const answerErrorEl = document.getElementById('answer-error');
+  const statusEl      = document.getElementById('ask-status');
 
-  if (answerDotsEl) answerDotsEl.style.display = 'flex';
-  if (answerTextEl) answerTextEl.textContent = '';
+  if (answerDotsEl)  answerDotsEl.style.display = 'flex';
+  if (answerTextEl)  answerTextEl.textContent = '';
+  if (answerErrorEl) answerErrorEl.style.display = 'none';
 
   try {
     const res = await fetch('/api/chat', {
@@ -475,8 +502,9 @@ async function streamAnswer(prompt, abortController) {
     }
   } catch (err) {
     if (err.name === 'AbortError') return;
-    if (answerDotsEl) answerDotsEl.style.display = 'none';
-    if (statusEl) statusEl.textContent = 'Something went wrong — please try again.';
+    if (answerDotsEl)  answerDotsEl.style.display = 'none';
+    if (answerErrorEl) answerErrorEl.style.display = 'flex';
+    if (statusEl)      statusEl.textContent = '';
   }
 }
 
@@ -530,18 +558,24 @@ export function initAskSection() {
 
     const answerTextEl  = document.getElementById('answer-text');
     const answerDotsEl  = document.getElementById('answer-dots');
+    const answerErrorEl = document.getElementById('answer-error');
     const imgEl         = document.getElementById('generated-image');
+    const imgErrorEl    = document.getElementById('image-error');
     const chartCanvas   = document.getElementById('answer-chart');
+    const chartErrorEl  = document.getElementById('chart-error');
     const imgSkeleton   = document.getElementById('image-skeleton');
     const chartSkeleton = document.getElementById('chart-skeleton');
     const chartTitleEl  = document.getElementById('chart-title');
 
     if (answerTextEl)  answerTextEl.textContent = '';
     if (answerDotsEl)  answerDotsEl.style.display = 'flex';
+    if (answerErrorEl) answerErrorEl.style.display = 'none';
     if (imgEl)         { imgEl.style.display = 'none'; imgEl.src = ''; }
+    if (imgErrorEl)    imgErrorEl.style.display = 'none';
     if (chartCanvas)   chartCanvas.style.display = 'none';
-    if (imgSkeleton)   { imgSkeleton.style.display = 'block'; imgSkeleton.classList.remove('skeleton-error'); }
-    if (chartSkeleton) { chartSkeleton.style.display = 'block'; chartSkeleton.classList.remove('skeleton-error'); }
+    if (chartErrorEl)  chartErrorEl.style.display = 'none';
+    if (imgSkeleton)   imgSkeleton.style.display = 'block';
+    if (chartSkeleton) chartSkeleton.style.display = 'block';
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
     currentAbort = new AbortController();

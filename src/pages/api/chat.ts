@@ -18,14 +18,17 @@ Response format (always return all fields):
   }
 }
 
-highlights: 3–6 keywords from the text to visually emphasize. Include exact metrics like "$2.4M", "68%", technology names, company names, and key achievements.
+highlights: 3–6 keywords from the text to visually emphasize. Include exact metrics like "$2.4M", "68%", technology names, company names, and key achievements. ALWAYS include at least 2 highlights — never return an empty array.
 
 chart.type rules — pick exactly one based on the data story:
 - "bar"      → comparisons, before/after scenarios, multiple categories side by side
 - "line"     → trends over time, growth progression, performance over years
 - "doughnut" → proportions, percentage breakdowns, distribution of whole
 
-Always tailor the chart to illustrate the specific question. Use Borina's real data below.
+ALWAYS return a valid chart object with labels and values arrays containing at least 2 items each. If the question does not naturally suggest a specific chart, fall back to this default bar chart showing Borina's core impact metrics:
+{ "type": "bar", "title": "Key Impact Metrics", "labels": ["Cost Reduction", "Processing Time Saved", "Query Automation", "Pick Accuracy"], "values": [2400000, 68, 90, 99.7], "unit": "%" }
+
+Never return an empty chart, null chart, or omit the chart field entirely.
 
 Borina Keo's verified facts (never fabricate numbers):
 • $2.4M operational cost reduction via AI automation

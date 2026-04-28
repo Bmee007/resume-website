@@ -67,6 +67,10 @@
       <div id="panel-answer" class="ask-panel panel-answer" aria-live="polite">
         <span class="panel-tag">Answer</span>
         <div id="answer-text" class="answer-text">Ask a question to see the response here.</div>
+        <div id="answer-error" class="panel-error" style="display:none">
+          <span class="panel-error-icon" aria-hidden="true">⚠</span>
+          <span class="panel-error-msg">Unable to reach the AI. Check your connection and try again, or reload the page.</span>
+        </div>
         <div id="answer-dots" class="ai-dots" aria-hidden="true">
           <span class="dot-anim"></span>
           <span class="dot-anim"></span>
@@ -80,6 +84,10 @@
           <span class="panel-tag">Visual</span>
           <div class="image-wrap">
             <div id="image-skeleton" class="panel-skeleton" style="display:none"></div>
+            <div id="image-error" class="panel-error" style="display:none" aria-live="polite">
+              <span class="panel-error-icon" aria-hidden="true">⚠</span>
+              <span class="panel-error-msg">Image generation failed. Try rephrasing your question or ask again.</span>
+            </div>
             <img id="generated-image" class="generated-img" alt="" loading="lazy" />
           </div>
         </div>
@@ -88,6 +96,10 @@
           <p id="chart-title" class="chart-title"></p>
           <div class="chart-wrap">
             <div id="chart-skeleton" class="panel-skeleton" style="display:none"></div>
+            <div id="chart-error" class="panel-error" style="display:none" aria-live="polite">
+              <span class="panel-error-icon" aria-hidden="true">⚠</span>
+              <span class="panel-error-msg">Chart data unavailable for this question. Try asking about a specific metric or outcome.</span>
+            </div>
             <canvas id="answer-chart"></canvas>
           </div>
         </div>
@@ -384,6 +396,46 @@
     width: 100% !important;
     height: 100% !important;
     display: none;
+  }
+
+  /* ── Panel error states ──────────────────────────────────── */
+  .panel-error {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    background: var(--surface, oklch(0.12 0.008 60));
+    border: 1px dashed color-mix(in oklch, var(--amber) 30%, transparent);
+  }
+
+  /* For panel-answer the error sits in flow, not absolute */
+  #panel-answer .panel-error {
+    position: static;
+    border: none;
+    padding: 0.25rem 0;
+    align-items: flex-start;
+    text-align: left;
+    background: transparent;
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .panel-error-icon {
+    font-size: 1rem;
+    opacity: 0.5;
+    flex-shrink: 0;
+    line-height: 1.5;
+  }
+
+  .panel-error-msg {
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
   }
 
   /* ── Skeleton shimmer ────────────────────────────────────── */
