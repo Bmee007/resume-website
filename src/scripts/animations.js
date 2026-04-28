@@ -539,17 +539,22 @@ export function initAll() {
   // Hero animation fires after loader's 1.4s delay
   const loader = document.getElementById('loader');
   if (loader) {
-    // Loader fires body.loaded at 1.4s — watch for it
+    let heroInited = false;
+    function runHeroInits() {
+      if (heroInited) return;
+      heroInited = true;
+      initHeroAnimation();
+      initAskSection();
+    }
     const observer = new MutationObserver(() => {
       if (document.body.classList.contains('loaded')) {
         observer.disconnect();
-        initHeroAnimation();
-        initAskSection();
+        runHeroInits();
       }
     });
     observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    // Fallback: also try after 1.6s in case mutation observer missed it
-    setTimeout(() => { initHeroAnimation(); initAskSection(); }, 1600);
+    // Fallback: if observer missed the class change, run after 1.6s
+    setTimeout(runHeroInits, 1600);
   } else {
     initHeroAnimation();
     initAskSection();
