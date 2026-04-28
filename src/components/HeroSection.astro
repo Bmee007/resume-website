@@ -190,7 +190,6 @@ const techs = [
     display: flex;
     align-items: center;
     gap: 1rem;
-    opacity: 0; /* animated by GSAP */
   }
 
   .label-line {
@@ -211,11 +210,13 @@ const techs = [
 
   /* ── Hero name ────────────────────────────────────────────── */
   .hero-name {
-    font-size: clamp(4rem, 11vw, 9rem);
+    font-size: clamp(3.5rem, 9vw, 7rem);
     line-height: 0.92;
     letter-spacing: -0.03em;
     color: var(--cream);
     margin: 0;
+    overflow-wrap: break-word;
+    word-break: break-word;
     /* overflow: hidden applied per-char by GSAP splitter */
   }
 
@@ -227,7 +228,6 @@ const techs = [
     margin: 0;
     max-width: 44rem;
     line-height: 1.6;
-    opacity: 0; /* GSAP */
   }
 
   .accent-word {
@@ -241,7 +241,6 @@ const techs = [
     margin: 0;
     max-width: 32rem;
     line-height: 1.75;
-    opacity: 0; /* GSAP */
   }
 
   /* ── CTAs ─────────────────────────────────────────────────── */
@@ -250,7 +249,6 @@ const techs = [
     gap: 1rem;
     flex-wrap: wrap;
     align-items: center;
-    opacity: 0; /* GSAP */
   }
 
   /* ── Social ───────────────────────────────────────────────── */
@@ -258,7 +256,6 @@ const techs = [
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    opacity: 0; /* GSAP */
   }
 
   .social-link {
