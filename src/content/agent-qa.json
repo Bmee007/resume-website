@@ -5,8 +5,8 @@
       "category": "behavioral",
       "question": "Tell me about a time you led a major change initiative.",
       "keywords": ["led", "change", "initiative", "leadership", "transformation", "drove", "major"],
-      "text": "Leading the AI-driven warehouse transformation at a Fortune 500 distributor was equal parts vision and grit — 2,400 staff, a legacy WMS, and a 90-day go-live window. We deployed an AI agent chatbot alongside ERP and WMS platforms, automating 90% of tier-1 IT queries almost overnight. The secret wasn't the technology — it was the change management framework that got every stakeholder from skeptic to champion before a single line of code shipped. End result: $2.4M in operational cost savings in year one.",
-      "highlights": ["$2.4M", "Fortune 500", "2,400 staff", "90%", "change management"],
+      "text": "Leading the AI-driven warehouse transformation at Kohl & Frisch was equal parts vision and grit — 2,400 staff, a legacy WMS, and a 90-day go-live window. We deployed an AI agent chatbot alongside ERP and WMS platforms, automating 90% of tier-1 IT queries almost overnight. The secret wasn't the technology — it was the change management framework that got every stakeholder from skeptic to champion before a single line of code shipped. End result: $2.4M in operational cost savings in year one.",
+      "highlights": ["$2.4M", "Kohl & Frisch", "2,400 staff", "90%", "change management"],
       "chart": {
         "type": "line",
         "title": "Change Adoption Rate Over 12 Months",
