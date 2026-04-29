@@ -275,7 +275,8 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-let chartInstance = null;
+let chartInstance    = null;
+let pendingChartData = null;
 
 function highlightText(text, highlights) {
   if (!Array.isArray(highlights) || !highlights.length) return escapeHtml(text);
@@ -288,6 +289,15 @@ function highlightText(text, highlights) {
     .map((kw) => escapeHtml(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join('|');
   return escaped.replace(new RegExp(`(${pattern})`, 'gi'), '<span class="hl">$1</span>');
+}
+
+function fmtVal(v, unit = '') {
+  const abs = Math.abs(v);
+  const n = abs >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M`
+          : abs >= 1_000    ? `${(v / 1_000).toFixed(0)}K`
+          : v % 1 === 0     ? String(v)
+          : v.toFixed(1);
+  return unit ? `${n}${unit}` : n;
 }
 
 function renderChart(chartData) {
@@ -358,60 +368,39 @@ function renderChart(chartData) {
   });
 }
 
-async function fetchImage(prompt, abortController) {
-  const img      = document.getElementById('generated-image');
+function renderVisual(prompt, chartData) {
+  const visual   = document.getElementById('generated-visual');
   const skeleton = document.getElementById('image-skeleton');
+  if (!visual) return;
+  if (skeleton) skeleton.style.display = 'none';
 
-  if (skeleton) { skeleton.style.display = 'block'; skeleton.classList.remove('skeleton-error'); }
-  if (img) { img.style.display = 'none'; img.src = ''; }
-
-  try {
-    const res = await fetch('/api/image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-      signal: abortController.signal,
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const raw = line.slice(6).trim();
-        if (raw === '[DONE]') continue;
-        try {
-          const { url, error } = JSON.parse(raw);
-          if (error) throw new Error(error);
-          if (url && img) {
-            img.onload = () => {
-              if (skeleton) skeleton.style.display = 'none';
-              img.style.display = 'block';
-            };
-            img.onerror = () => {
-              if (skeleton) skeleton.classList.add('skeleton-error');
-            };
-            img.src = url;
-            img.alt = `AI-generated visual for: ${prompt}`;
-          }
-        } catch (e) {
-          if (!(e instanceof SyntaxError)) throw e;
-        }
-      }
-    }
-  } catch (err) {
-    if (err.name === 'AbortError') return;
-    if (skeleton) skeleton.classList.add('skeleton-error');
+  if (!chartData || !chartData.values?.length) {
+    visual.style.display = 'none';
+    return;
   }
+
+  const unit   = chartData.unit || '';
+  const maxVal = Math.max(...chartData.values);
+  const heroI  = chartData.values.indexOf(maxVal);
+
+  const bars = chartData.labels.map((label, i) => {
+    const pct = Math.round((chartData.values[i] / maxVal) * 100);
+    return `<div class="vis-bar-row">
+      <span class="vis-bar-label">${escapeHtml(label)}</span>
+      <div class="vis-bar-track"><div class="vis-bar-fill" style="width:${pct}%"></div></div>
+      <span class="vis-bar-value">${escapeHtml(fmtVal(chartData.values[i], unit))}</span>
+    </div>`;
+  }).join('');
+
+  visual.innerHTML = `
+    <div class="vis-question">${escapeHtml(prompt)}</div>
+    <div class="vis-hero">
+      <div class="vis-hero-value">${escapeHtml(fmtVal(maxVal, unit))}</div>
+      <div class="vis-hero-label">${escapeHtml(chartData.labels[heroI])}</div>
+    </div>
+    <div class="vis-bars">${bars}</div>`;
+
+  visual.style.display = 'flex';
 }
 
 async function streamAnswer(prompt, abortController) {
@@ -455,7 +444,7 @@ async function streamAnswer(prompt, abortController) {
             if (parsed.text && answerTextEl) {
               answerTextEl.innerHTML = highlightText(parsed.text, parsed.highlights);
             }
-            if (parsed.chart) renderChart(parsed.chart);
+            if (parsed.chart) { renderChart(parsed.chart); pendingChartData = parsed.chart; }
             if (statusEl) statusEl.textContent = '';
           } catch { /* malformed JSON — keep streamed text */ }
           continue;
@@ -540,7 +529,7 @@ export function initAskSection() {
 
     const answerTextEl  = document.getElementById('answer-text');
     const answerDotsEl  = document.getElementById('answer-dots');
-    const imgEl         = document.getElementById('generated-image');
+    const visualEl      = document.getElementById('generated-visual');
     const chartCanvas   = document.getElementById('answer-chart');
     const imgSkeleton   = document.getElementById('image-skeleton');
     const chartSkeleton = document.getElementById('chart-skeleton');
@@ -548,18 +537,17 @@ export function initAskSection() {
 
     if (answerTextEl)  answerTextEl.textContent = '';
     if (answerDotsEl)  answerDotsEl.style.display = 'flex';
-    if (imgEl)         { imgEl.style.display = 'none'; imgEl.src = ''; }
+    if (visualEl)      visualEl.style.display = 'none';
     if (chartCanvas)   chartCanvas.style.display = 'none';
     if (imgSkeleton)   { imgSkeleton.style.display = 'block'; imgSkeleton.classList.remove('skeleton-error'); }
     if (chartSkeleton) { chartSkeleton.style.display = 'block'; chartSkeleton.classList.remove('skeleton-error'); }
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
+    pendingChartData = null;
     currentAbort = new AbortController();
 
-    await Promise.allSettled([
-      streamAnswer(prompt, currentAbort),
-      fetchImage(prompt, currentAbort),
-    ]);
+    await streamAnswer(prompt, currentAbort);
+    renderVisual(prompt, pendingChartData);
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
