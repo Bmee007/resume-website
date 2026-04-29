@@ -266,6 +266,7 @@ function escapeHtml(str) {
 }
 
 let chartInstance = null;
+let pendingLidaSpec = null;
 
 function highlightText(text, highlights) {
   if (!Array.isArray(highlights) || !highlights.length) return escapeHtml(text);
@@ -373,7 +374,7 @@ function showImageError() {
   if (errEl)    errEl.style.display = 'flex';
 }
 
-async function fetchImage(prompt, abortController) {
+async function fetchImage(prompt, abortController, lidaSpec = null) {
   const img      = document.getElementById('generated-image');
   const skeleton = document.getElementById('image-skeleton');
   const errEl    = document.getElementById('image-error');
@@ -397,7 +398,7 @@ async function fetchImage(prompt, abortController) {
     const res = await fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({ prompt, lidaSpec }),
       signal: abortController.signal,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -496,6 +497,7 @@ async function streamAnswer(prompt, abortController) {
               answerTextEl.innerHTML = highlightText(parsed.text, parsed.highlights);
             }
             if (parsed.chart) renderChart(parsed.chart);
+            if (parsed.lidaSpec) pendingLidaSpec = parsed.lidaSpec;
             if (statusEl) statusEl.textContent = '';
           } catch { /* malformed JSON — keep streamed text */ }
           continue;
@@ -604,11 +606,14 @@ export function initAskSection() {
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
     currentAbort = new AbortController();
+    pendingLidaSpec = null;
 
-    await Promise.allSettled([
-      streamAnswer(prompt, currentAbort),
-      fetchImage(prompt, currentAbort),
-    ]);
+    // Stream text first — lidaSpec arrives with the [DONE] event
+    await streamAnswer(prompt, currentAbort);
+
+    // Then fetch the infographic using the spec from GPT-4o (or prompt for DALL-E fallback)
+    await fetchImage(prompt, currentAbort, pendingLidaSpec);
+    pendingLidaSpec = null;
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
