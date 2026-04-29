@@ -265,7 +265,7 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-let chartInstance = null;
+let chartInstance    = null;
 let pendingChartData = null;
 
 function highlightText(text, highlights) {
@@ -286,6 +286,15 @@ function showChartError() {
   const errEl    = document.getElementById('chart-error');
   if (skeleton) skeleton.style.display = 'none';
   if (errEl)    errEl.style.display = 'flex';
+}
+
+function fmtVal(v, unit = '') {
+  const abs = Math.abs(v);
+  const n = abs >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M`
+          : abs >= 1_000    ? `${(v / 1_000).toFixed(0)}K`
+          : v % 1 === 0     ? String(v)
+          : v.toFixed(1);
+  return unit ? `${n}${unit}` : n;
 }
 
 function renderChart(chartData) {
@@ -367,82 +376,39 @@ function renderChart(chartData) {
   }
 }
 
-function showImageError() {
+function renderVisual(prompt, chartData) {
+  const visual   = document.getElementById('generated-visual');
   const skeleton = document.getElementById('image-skeleton');
-  const errEl    = document.getElementById('image-error');
+  if (!visual) return;
   if (skeleton) skeleton.style.display = 'none';
-  if (errEl)    errEl.style.display = 'flex';
-}
 
-async function fetchImage(abortController, chartData = null) {
-  const img      = document.getElementById('generated-image');
-  const skeleton = document.getElementById('image-skeleton');
-  const errEl    = document.getElementById('image-error');
-  const timerEl  = document.getElementById('image-timer');
-
-  if (skeleton) skeleton.style.display = 'block';
-  if (errEl)    errEl.style.display = 'none';
-  if (img)      { img.style.display = 'none'; img.src = ''; }
-
-  const stopTimer = () => {}; // SVG is instant — no timer needed
-
-  try {
-    const res = await fetch('/api/image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chartData }),
-      signal: abortController.signal,
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const reader  = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let urlReceived = false;
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() ?? '';
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const raw = line.slice(6).trim();
-        if (raw === '[DONE]') continue;
-        try {
-          const { url, error } = JSON.parse(raw);
-          if (error) throw new Error(error);
-          if (url && img) {
-            urlReceived = true;
-            img.alt = `AI-generated visual for: ${prompt}`;
-            img.src = url;
-            // img.decode() fetches and decodes even when display:none (unlike onload+lazy)
-            img.decode()
-              .then(() => {
-                stopTimer();
-                if (skeleton) skeleton.style.display = 'none';
-                img.style.display = 'block';
-              })
-              .catch(() => { stopTimer(); showImageError(); });
-          }
-        } catch (e) {
-          if (!(e instanceof SyntaxError)) throw e;
-        }
-      }
-    }
-
-    // Stream ended without a URL — server timed out or returned an error
-    if (!urlReceived) {
-      stopTimer();
-      showImageError();
-    }
-  } catch (err) {
-    stopTimer();
-    if (err.name === 'AbortError') return;
-    showImageError();
+  if (!chartData || !chartData.values?.length) {
+    visual.style.display = 'none';
+    return;
   }
+
+  const unit   = chartData.unit || '';
+  const maxVal = Math.max(...chartData.values);
+  const heroI  = chartData.values.indexOf(maxVal);
+
+  const bars = chartData.labels.map((label, i) => {
+    const pct = Math.round((chartData.values[i] / maxVal) * 100);
+    return `<div class="vis-bar-row">
+      <span class="vis-bar-label">${escapeHtml(label)}</span>
+      <div class="vis-bar-track"><div class="vis-bar-fill" style="width:${pct}%"></div></div>
+      <span class="vis-bar-value">${escapeHtml(fmtVal(chartData.values[i], unit))}</span>
+    </div>`;
+  }).join('');
+
+  visual.innerHTML = `
+    <div class="vis-question">${escapeHtml(prompt)}</div>
+    <div class="vis-hero">
+      <div class="vis-hero-value">${escapeHtml(fmtVal(maxVal, unit))}</div>
+      <div class="vis-hero-label">${escapeHtml(chartData.labels[heroI])}</div>
+    </div>
+    <div class="vis-bars">${bars}</div>`;
+
+  visual.style.display = 'flex';
 }
 
 async function streamAnswer(prompt, abortController) {
@@ -575,8 +541,7 @@ export function initAskSection() {
     const answerTextEl  = document.getElementById('answer-text');
     const answerDotsEl  = document.getElementById('answer-dots');
     const answerErrorEl = document.getElementById('answer-error');
-    const imgEl         = document.getElementById('generated-image');
-    const imgErrorEl    = document.getElementById('image-error');
+    const visualEl      = document.getElementById('generated-visual');
     const chartCanvas   = document.getElementById('answer-chart');
     const chartErrorEl  = document.getElementById('chart-error');
     const imgSkeleton   = document.getElementById('image-skeleton');
@@ -586,25 +551,18 @@ export function initAskSection() {
     if (answerTextEl)  answerTextEl.textContent = '';
     if (answerDotsEl)  answerDotsEl.style.display = 'flex';
     if (answerErrorEl) answerErrorEl.style.display = 'none';
-    if (imgEl)         { imgEl.style.display = 'none'; imgEl.src = ''; }
-    if (imgErrorEl)    imgErrorEl.style.display = 'none';
+    if (visualEl)      visualEl.style.display = 'none';
     if (chartCanvas)   chartCanvas.style.display = 'none';
     if (chartErrorEl)  chartErrorEl.style.display = 'none';
-    if (imgSkeleton)   { imgSkeleton.style.display = 'block'; }
-    const timerReset = document.getElementById('image-timer');
-    if (timerReset) timerReset.textContent = '0s';
+    if (imgSkeleton)   imgSkeleton.style.display = 'block';
     if (chartSkeleton) chartSkeleton.style.display = 'block';
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
+    pendingChartData = null;
     currentAbort = new AbortController();
-    pendingChartData = null;
 
-    // Stream text + chart first — chartData arrives with [DONE]
     await streamAnswer(prompt, currentAbort);
-
-    // Then render infographic SVG from the chart data GPT-4o returned
-    await fetchImage(currentAbort, pendingChartData);
-    pendingChartData = null;
+    renderVisual(prompt, pendingChartData);
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
