@@ -17,7 +17,7 @@
 - 13% forecast accuracy improvement from LLM-powered demand agent
 - 30% operational cost reduction from supply chain ERP transformation
 - 33% purchase cycle time reduction from AI procurement agent
-- Enterprise deployments at Kohl & Frisch (pharmaceutical distribution) and Canadian Tire (retail)
+- Enterprise deployments at Kohl & Frisch (pharmaceutical distribution)
 
 ## Agent Engineering
 
@@ -60,5 +60,5 @@
 ## Career
 
 - Current: AI & Agent Systems Lead — Kohl and Frisch
-- Enterprise clients include Kohl & Frisch (healthcare/pharma distribution) and Canadian Tire (retail)
+- Enterprise clients include Kohl & Frisch (healthcare/pharma distribution)
 - Background bridges data science, business operations, and AI systems engineering
