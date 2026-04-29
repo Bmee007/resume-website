@@ -5,6 +5,7 @@ import type { APIRoute } from "astro";
 import OpenAI from "openai";
 import agentInstructions from "../../content/agent-instructions.md?raw";
 import agentData from "../../content/agent-data.md?raw";
+import qaData from "../../content/agent-qa.json";
 
 // System prompt is composed from two editable markdown files:
 //   src/content/agent-instructions.md  — tone, persona, behavioral rules
@@ -44,6 +45,57 @@ ALWAYS return a valid chart with labels and values arrays containing at least 2 
 
 Never return an empty chart, null chart, or omit the chart field.`;
 
+// ── Q&A lookup ────────────────────────────────────────────────────────────────
+// Words too common to use as match signals
+const STOP_WORDS = new Set([
+  'a','an','the','is','are','was','were','be','been','being','have','has','had',
+  'do','does','did','will','would','could','should','may','might','can','to','of',
+  'in','for','on','with','at','by','from','as','and','but','or','not','so','just',
+  'i','me','my','we','our','you','your','he','she','it','they','them','its',
+  'what','which','who','how','why','when','where','tell','give','describe',
+  'explain','about','this','that','these','those','than','very','also','some',
+  'more','most','other','into','out','over','up','time','way','use','used',
+]);
+
+function tokenize(text: string): Set<string> {
+  return new Set(
+    text.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+  );
+}
+
+function findBestMatch(prompt: string) {
+  const promptTokens = tokenize(prompt);
+  if (promptTokens.size === 0) return null;
+
+  let bestEntry = null;
+  let bestScore = 0;
+
+  for (const qa of qaData.questions) {
+    const keywords: string[] = qa.keywords ?? [];
+    if (!keywords.length) continue;
+
+    let matched = 0;
+    for (const kw of keywords) {
+      // A keyword matches if any of its tokens appear in the prompt
+      const kwTokens = tokenize(kw);
+      if ([...kwTokens].some(t => promptTokens.has(t))) matched++;
+    }
+
+    const score = matched / keywords.length;
+    if (score > bestScore) {
+      bestScore = score;
+      bestEntry = qa;
+    }
+  }
+
+  // Require at least 35% keyword overlap to use the pre-crafted answer
+  return bestScore >= 0.35 ? bestEntry : null;
+}
+
+// ── Route ─────────────────────────────────────────────────────────────────────
 export const POST: APIRoute = async ({ request }) => {
   let prompt: string;
   try {
@@ -69,6 +121,34 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
+  const encoder = new TextEncoder();
+
+  // ── Pre-crafted Q&A lookup (no API call needed) ──
+  const match = findBestMatch(prompt.trim());
+  if (match) {
+    const payload = JSON.stringify({
+      text:       match.text,
+      highlights: match.highlights,
+      chart:      match.chart,
+    });
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ delta: payload })}\n\n`));
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        controller.close();
+      },
+    });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  }
+
+  // ── GPT-4o fallback for unrecognised questions ───
   const apiKey = import.meta.env.OPENAI_API_KEY ?? import.meta.env.OPENCODE_API_KEY;
   if (!apiKey) {
     return new Response(JSON.stringify({ error: "API not configured" }), {
@@ -84,7 +164,6 @@ export const POST: APIRoute = async ({ request }) => {
       : "https://api.openai.com/v1",
   });
 
-  const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
