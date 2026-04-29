@@ -5,55 +5,97 @@
       "category": "behavioral",
       "question": "Tell me about a time you led a major change initiative.",
       "keywords": ["led", "change", "initiative", "leadership", "transformation", "drove", "major"],
-      "text": "Leading the AI-driven warehouse transformation at a Fortune 500 distributor was equal parts vision and grit — 2,400 staff, a legacy WMS, and a 90-day go-live window. We deployed Microsoft Copilot Studio alongside D365 and Manhattan DFIO, automating 90% of tier-1 IT queries almost overnight. The secret wasn't the technology — it was the change management framework that got every stakeholder from skeptic to champion before a single line of code shipped. End result: $2.4M in operational cost savings in year one.",
-      "highlights": ["$2.4M", "Fortune 500", "2,400 staff", "90%", "Copilot Studio", "change management"],
+      "text": "Leading the AI-driven warehouse transformation at a Fortune 500 distributor was equal parts vision and grit — 2,400 staff, a legacy WMS, and a 90-day go-live window. We deployed an AI agent chatbot alongside ERP and WMS platforms, automating 90% of tier-1 IT queries almost overnight. The secret wasn't the technology — it was the change management framework that got every stakeholder from skeptic to champion before a single line of code shipped. End result: $2.4M in operational cost savings in year one.",
+      "highlights": ["$2.4M", "Fortune 500", "2,400 staff", "90%", "change management"],
       "chart": {
         "type": "line",
         "title": "Change Adoption Rate Over 12 Months",
         "labels": ["Month 1", "Month 3", "Month 6", "Month 9", "Month 12"],
         "values": [15, 42, 68, 85, 97],
         "unit": "% adoption"
-      },
-      "imagePrompt": "enterprise change management transformation dashboard with adoption metrics"
+      }
     },
     {
       "id": "behavioral-002",
       "category": "behavioral",
       "question": "Describe a situation where you had to overcome a significant technical challenge.",
       "keywords": ["overcome", "technical", "challenge", "difficult", "problem", "obstacle", "hurdle"],
-      "text": "Integrating Azure OpenAI with a 30-year-old IBM AS400 system isn't in any textbook — we had to build custom middleware that translated EBCDIC flat files into structured API payloads in real time. The hard part wasn't the code; it was convincing the business that the 6-week delay for the integration layer was worth it versus a quick-and-dirty hack. We held the line, built it right, and the system now processes 68% fewer manual orders. Legacy and AI can coexist — you just need a bridge.",
-      "highlights": ["Azure OpenAI", "IBM AS400", "68%", "middleware", "integration"],
+      "text": "Integrating Azure OpenAI with a 30-year-old legacy ERP system isn't in any textbook — we had to build custom middleware that translated flat file exports into structured API payloads in real time. The hard part wasn't the code; it was convincing the business that the 6-week delay for the integration layer was worth it versus a quick-and-dirty hack. We held the line, built it right, and the system now processes 68% fewer manual orders. Legacy and AI can coexist — you just need a bridge.",
+      "highlights": ["Azure OpenAI", "68%", "middleware", "integration", "legacy ERP"],
       "chart": {
         "type": "bar",
         "title": "Manual Order Processing: Before vs After AI Integration",
         "labels": ["Manual Entry", "Validation Errors", "Processing Time", "Staff Hours/Day"],
         "values": [100, 100, 100, 100],
         "unit": "% of baseline (pre-AI = 100)"
-      },
-      "imagePrompt": "legacy IBM AS400 mainframe connected to modern Azure OpenAI cloud architecture"
+      }
+    },
+    {
+      "id": "agent-001",
+      "category": "agent-engineering",
+      "question": "How do you build AI agents with harnesses and workflows?",
+      "keywords": ["agent", "harness", "workflow", "skills", "autonomous", "agentic", "build", "tools"],
+      "text": "Building a reliable agent starts with the harness — the execution loop that handles tool routing, error recovery, and observability before any 'intelligence' enters the picture. On top of that I layer domain skills: supply chain data retrievers, ERP write-back tools, warehouse query APIs. The workflow then orchestrates these into plan→act→observe→reflect loops. On our supply chain deployment, this architecture automated 16 end-to-end processes that previously required human coordination across 3 systems.",
+      "highlights": ["harness", "domain skills", "16 processes", "supply chain", "plan→act→observe"],
+      "chart": {
+        "type": "bar",
+        "title": "Agent Architecture Component Impact",
+        "labels": ["Tool Routing", "Error Recovery", "Domain Skills", "Memory Integration", "Security Gates"],
+        "values": [88, 76, 92, 71, 85],
+        "unit": "reliability score"
+      }
+    },
+    {
+      "id": "memory-001",
+      "category": "research",
+      "question": "Tell me about your LLM memory research.",
+      "keywords": ["memory", "llm", "episodic", "semantic", "working", "context", "recall", "research", "remember"],
+      "text": "The core problem: most agents are amnesic — every session starts from zero even if the same supplier has failed delivery windows 14 times. I'm researching three memory layers: episodic (agent interaction history with retrieval), semantic (knowledge graphs for domain facts like SKUs and SLAs), and working memory management for long-horizon supply chain planning. The goal is agents that accumulate operational judgment over time, not just raw capability.",
+      "highlights": ["episodic memory", "semantic memory", "working memory", "supply chain", "operational judgment"],
+      "chart": {
+        "type": "bar",
+        "title": "Memory Layer Impact on Agent Performance",
+        "labels": ["No Memory", "+ Working Mem", "+ Episodic", "+ Semantic", "All Layers"],
+        "values": [41, 58, 72, 79, 94],
+        "unit": "task completion score"
+      }
+    },
+    {
+      "id": "security-001",
+      "category": "agent-security",
+      "question": "What is your work on agent security?",
+      "keywords": ["security", "agent", "prompt injection", "trust", "threat", "attack", "red team", "safe", "defense"],
+      "text": "Autonomous agents have an attack surface that most security teams haven't mapped yet: tool output poisoning, cross-agent trust escalation, and prompt injection via RAG-retrieved content. My approach is threat-model first — enumerate what an adversarial input could cause the agent to do, then build harness-level defenses: input sanitization before tool calls, output validation before write-back, and least-privilege action scoping with confirmation gates on destructive operations. On the deployments I've hardened, zero privilege escalation attempts have succeeded.",
+      "highlights": ["prompt injection", "tool output poisoning", "least-privilege", "confirmation gates", "zero escalation"],
+      "chart": {
+        "type": "bar",
+        "title": "Agent Attack Surface Coverage",
+        "labels": ["Input Injection", "Tool Poisoning", "Trust Escalation", "Data Exfil", "Privilege Abuse"],
+        "values": [100, 95, 100, 88, 100],
+        "unit": "% defended"
+      }
     },
     {
       "id": "ai-engineering-001",
       "category": "ai-engineering",
       "question": "What is RAG and when would you use it?",
       "keywords": ["rag", "retrieval", "augmented", "generation", "vector", "embeddings", "knowledge base"],
-      "text": "RAG — Retrieval-Augmented Generation — is the pattern of grounding an LLM's output in real, retrievable data rather than relying on what it memorized during training. You index your source documents into a vector store, retrieve the most semantically relevant chunks at query time, and inject them into the prompt before the model generates its answer. I'd reach for RAG over fine-tuning whenever the data changes frequently (inventory, pricing, policies) or when you need citations and auditability — both non-negotiable in enterprise supply chain contexts. For static, stylistic behavior changes, fine-tuning wins; for dynamic knowledge, RAG is king.",
-      "highlights": ["RAG", "vector store", "LLM", "fine-tuning", "retrieval", "enterprise"],
+      "text": "RAG — Retrieval-Augmented Generation — is the pattern of grounding an LLM's output in real, retrievable data rather than relying on what it memorized during training. You index your source documents into a vector store, retrieve the most semantically relevant chunks at query time, and inject them into the prompt before the model generates its answer. I'd reach for RAG over fine-tuning whenever the data changes frequently (inventory, pricing, policies) or when you need citations and auditability — both non-negotiable in supply chain and healthcare contexts. For static, stylistic behavior changes, fine-tuning wins; for dynamic knowledge, RAG is king.",
+      "highlights": ["RAG", "vector store", "LLM", "fine-tuning", "retrieval", "supply chain"],
       "chart": {
         "type": "bar",
         "title": "RAG vs Fine-Tuning: When to Use Each",
         "labels": ["Dynamic Data", "Auditability", "Cost to Update", "Setup Speed", "Factual Accuracy"],
         "values": [95, 90, 85, 70, 88],
         "unit": "RAG advantage score"
-      },
-      "imagePrompt": "RAG retrieval augmented generation architecture diagram with vector database and LLM"
+      }
     },
     {
       "id": "ai-engineering-002",
       "category": "ai-engineering",
       "question": "How do you evaluate and monitor LLM performance in production?",
       "keywords": ["evaluate", "monitor", "llm", "production", "performance", "metrics", "observability"],
-      "text": "Production LLM monitoring is a different beast from traditional ML — you're tracking latency, token costs, hallucination rate, and user satisfaction simultaneously. I instrument every inference call with structured logging (model, prompt hash, token count, latency, user rating) and pipe it into a dashboard with alert thresholds on p95 latency and cost-per-query. For quality, I use a combination of LLM-as-judge (a second model evaluates outputs against a rubric) and periodic human review of flagged responses. On the Copilot Studio deployment I manage, we dropped the escalation rate from 100% to 10% in three months — that's the metric that tells you the model is actually working.",
+      "text": "Production LLM monitoring is a different beast from traditional ML — you're tracking latency, token costs, hallucination rate, and user satisfaction simultaneously. I instrument every inference call with structured logging (model, prompt hash, token count, latency, user rating) and pipe it into a dashboard with alert thresholds on p95 latency and cost-per-query. For quality, I use a combination of LLM-as-judge (a second model evaluates outputs against a rubric) and periodic human review of flagged responses. On the AI agent deployment I manage, we dropped the escalation rate from 100% to 10% in three months — that's the metric that tells you the system is actually working.",
       "highlights": ["hallucination rate", "LLM-as-judge", "token costs", "10% escalation", "production monitoring"],
       "chart": {
         "type": "line",
@@ -61,15 +103,14 @@
         "labels": ["Week 1", "Week 4", "Week 8", "Week 12"],
         "values": [62, 74, 85, 93],
         "unit": "quality score"
-      },
-      "imagePrompt": "LLM production monitoring dashboard with latency charts and quality metrics"
+      }
     },
     {
       "id": "how-to-ai-001",
       "category": "how-to-ai",
       "question": "How do I write better prompts for ChatGPT?",
       "keywords": ["prompts", "chatgpt", "prompt engineering", "better", "write", "improve", "effective"],
-      "text": "The single biggest upgrade you can make to your prompts is adding role + context + constraint — tell the model who it is, what you need, and what you don't want. Instead of 'summarize this', try 'You are a senior analyst. Summarize this 10-page report into 5 bullet points for a CFO. Omit technical jargon.' Chain-of-thought prompting (adding 'think step by step') dramatically improves accuracy on reasoning tasks. And if you want consistent output format, show an example — models are world-class pattern matchers. On the enterprise deployments I run, prompt templates with these principles cut hallucination rates by over 40% compared to free-form queries.",
+      "text": "The single biggest upgrade you can make to your prompts is adding role + context + constraint — tell the model who it is, what you need, and what you don't want. Instead of 'summarize this', try 'You are a senior analyst. Summarize this 10-page report into 5 bullet points for a CFO. Omit technical jargon.' Chain-of-thought prompting (adding 'think step by step') dramatically improves accuracy on reasoning tasks. On the enterprise agent deployments I run, prompt templates with these principles cut hallucination rates by over 40% compared to free-form queries.",
       "highlights": ["role + context + constraint", "chain-of-thought", "40%", "prompt templates", "hallucination"],
       "chart": {
         "type": "bar",
@@ -77,8 +118,7 @@
         "labels": ["Basic Prompt", "+ Role/Context", "+ Constraints", "+ Examples", "+ Chain-of-Thought"],
         "values": [52, 68, 75, 83, 91],
         "unit": "quality score / 100"
-      },
-      "imagePrompt": "prompt engineering techniques comparison chart with AI conversation interface"
+      }
     }
   ]
 }
