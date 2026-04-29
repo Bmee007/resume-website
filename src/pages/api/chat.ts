@@ -30,12 +30,6 @@ Response format (always return all fields):
     "labels": ["Label A", "Label B", "Label C"],
     "values": [100, 75, 50],
     "unit": "unit string"
-  },
-  "lidaSpec": {
-    "data": [{"label": "Label A", "value": 100}, {"label": "Label B", "value": 75}],
-    "goal": "Show a bar chart comparing enterprise AI deployment metrics",
-    "chartType": "bar",
-    "unit": "unit string"
   }
 }
 
@@ -51,12 +45,7 @@ ALWAYS return a valid chart with labels and values arrays containing at least 2 
 
 Never return an empty chart, null chart, or omit the chart field.
 
-lidaSpec: mirrors chart data in {label, value} format for the LIDA infographic service.
-- lidaSpec.data must be an array of {label, value} objects matching chart.labels/chart.values
-- lidaSpec.goal is a clear natural language sentence describing what the chart visualizes
-- lidaSpec.chartType matches chart.type
-- lidaSpec.unit matches chart.unit
-Never omit lidaSpec.`;
+`;
 
 // ── Q&A lookup ────────────────────────────────────────────────────────────────
 // Words too common to use as match signals
@@ -188,7 +177,7 @@ export const POST: APIRoute = async ({ request }) => {
           ],
           stream: true,
           response_format: { type: "json_object" },
-          max_tokens: 750,
+          max_tokens: 600,
           temperature: 0.4,
         });
 

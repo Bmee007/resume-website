@@ -266,7 +266,7 @@ function escapeHtml(str) {
 }
 
 let chartInstance = null;
-let pendingLidaSpec = null;
+let pendingChartData = null;
 
 function highlightText(text, highlights) {
   if (!Array.isArray(highlights) || !highlights.length) return escapeHtml(text);
@@ -374,7 +374,7 @@ function showImageError() {
   if (errEl)    errEl.style.display = 'flex';
 }
 
-async function fetchImage(prompt, abortController, lidaSpec = null) {
+async function fetchImage(abortController, chartData = null) {
   const img      = document.getElementById('generated-image');
   const skeleton = document.getElementById('image-skeleton');
   const errEl    = document.getElementById('image-error');
@@ -384,21 +384,13 @@ async function fetchImage(prompt, abortController, lidaSpec = null) {
   if (errEl)    errEl.style.display = 'none';
   if (img)      { img.style.display = 'none'; img.src = ''; }
 
-  // Elapsed-time counter
-  let elapsed = 0;
-  if (timerEl) timerEl.textContent = '0s';
-  const tick = setInterval(() => {
-    elapsed++;
-    if (timerEl) timerEl.textContent = `${elapsed}s`;
-  }, 1000);
-
-  const stopTimer = () => clearInterval(tick);
+  const stopTimer = () => {}; // SVG is instant — no timer needed
 
   try {
     const res = await fetch('/api/image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, lidaSpec }),
+      body: JSON.stringify({ chartData }),
       signal: abortController.signal,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -496,8 +488,7 @@ async function streamAnswer(prompt, abortController) {
             if (parsed.text && answerTextEl) {
               answerTextEl.innerHTML = highlightText(parsed.text, parsed.highlights);
             }
-            if (parsed.chart) renderChart(parsed.chart);
-            if (parsed.lidaSpec) pendingLidaSpec = parsed.lidaSpec;
+            if (parsed.chart) { renderChart(parsed.chart); pendingChartData = parsed.chart; }
             if (statusEl) statusEl.textContent = '';
           } catch { /* malformed JSON — keep streamed text */ }
           continue;
@@ -606,14 +597,14 @@ export function initAskSection() {
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
     currentAbort = new AbortController();
-    pendingLidaSpec = null;
+    pendingChartData = null;
 
-    // Stream text first — lidaSpec arrives with the [DONE] event
+    // Stream text + chart first — chartData arrives with [DONE]
     await streamAnswer(prompt, currentAbort);
 
-    // Then fetch the infographic using the spec from GPT-4o (or prompt for DALL-E fallback)
-    await fetchImage(prompt, currentAbort, pendingLidaSpec);
-    pendingLidaSpec = null;
+    // Then render infographic SVG from the chart data GPT-4o returned
+    await fetchImage(currentAbort, pendingChartData);
+    pendingChartData = null;
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
