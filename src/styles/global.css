@@ -11,58 +11,58 @@
 
 /* ── Tailwind theme tokens ──────────────────────────────────── */
 @theme {
-  --color-bg-base:       oklch(0.08 0.008 60);
-  --color-bg-surface:    oklch(0.12 0.008 60);
-  --color-bg-raised:     oklch(0.16 0.009 58);
-  --color-border-subtle: oklch(0.22 0.010 55);
-  --color-border-strong: oklch(0.32 0.014 52);
-  --color-amber:         oklch(0.75 0.18 52);
-  --color-amber-dim:     oklch(0.65 0.14 50);
-  --color-cream:         oklch(0.96 0.012 80);
-  --color-text-primary:  oklch(0.90 0.010 70);
-  --color-text-muted:    oklch(0.60 0.010 65);
-  --color-text-subtle:   oklch(0.42 0.008 65);
+  --color-bg-base:       oklch(0.97 0.008 72);
+  --color-bg-surface:    oklch(0.995 0.003 70);
+  --color-bg-raised:     oklch(1.00 0.000 0);
+  --color-border-subtle: oklch(0.87 0.007 65);
+  --color-border-strong: oklch(0.75 0.010 60);
+  --color-amber:         oklch(0.52 0.18 52);
+  --color-amber-dim:     oklch(0.44 0.16 50);
+  --color-cream:         oklch(0.12 0.010 55);
+  --color-text-primary:  oklch(0.15 0.010 55);
+  --color-text-muted:    oklch(0.40 0.010 60);
+  --color-text-subtle:   oklch(0.62 0.008 65);
   --font-display:        "DM Serif Display", Georgia, serif;
   --font-body:           "Geist Sans", sans-serif;
   /* Legacy aliases for Tailwind utilities */
-  --color-surface:       oklch(0.12 0.008 60);
-  --color-border:        oklch(0.22 0.010 55);
-  --color-text:          oklch(0.90 0.010 70);
-  --color-accent:        oklch(0.75 0.18 52);
+  --color-surface:       oklch(0.995 0.003 70);
+  --color-border:        oklch(0.87 0.007 65);
+  --color-text:          oklch(0.15 0.010 55);
+  --color-accent:        oklch(0.52 0.18 52);
   --font-heading:        "DM Serif Display", Georgia, serif;
 }
 
 /* ── Design tokens ─────────────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --background:         oklch(0.08 0.008 60);
-  --secondary:          oklch(0.12 0.008 60);
-  --surface:            oklch(0.12 0.008 60);
-  --surface-raised:     oklch(0.16 0.009 58);
-  --muted:              oklch(0.12 0.008 60);
+  --background:         oklch(0.97 0.008 72);
+  --secondary:          oklch(0.995 0.003 70);
+  --surface:            oklch(0.995 0.003 70);
+  --surface-raised:     oklch(1.00 0.000 0);
+  --muted:              oklch(0.94 0.008 70);
 
   /* Borders */
-  --border:             oklch(0.22 0.010 55);
-  --border-strong:      oklch(0.32 0.014 52);
+  --border:             oklch(0.87 0.007 65);
+  --border-strong:      oklch(0.75 0.010 60);
 
-  /* Amber accent family */
-  --amber:              oklch(0.75 0.18 52);
-  --amber-dim:          color-mix(in oklch, oklch(0.75 0.18 52) 15%, transparent);
-  --amber-glow:         oklch(0.65 0.20 50);
-  --amber-glow-spread:  color-mix(in oklch, oklch(0.65 0.20 50) 30%, transparent);
+  /* Amber accent family — deepened to bronze-gold for light backgrounds */
+  --amber:              oklch(0.52 0.18 52);
+  --amber-dim:          color-mix(in oklch, oklch(0.52 0.18 52) 12%, transparent);
+  --amber-glow:         oklch(0.44 0.20 50);
+  --amber-glow-spread:  color-mix(in oklch, oklch(0.44 0.20 50) 20%, transparent);
 
-  /* Text */
-  --cream:              oklch(0.96 0.012 80);
-  --foreground:         oklch(0.90 0.010 70);
-  --fg-muted:           oklch(0.60 0.010 65);
-  --fg-subtle:          oklch(0.42 0.008 65);
+  /* Text — dark ink on light bg */
+  --cream:              oklch(0.12 0.010 55);
+  --foreground:         oklch(0.15 0.010 55);
+  --fg-muted:           oklch(0.40 0.010 60);
+  --fg-subtle:          oklch(0.62 0.008 65);
 
   /* Legacy aliases — used in existing component var() references */
-  --primary:            oklch(0.75 0.18 52);
-  --primary-foreground: oklch(0.08 0.008 60);
-  --primary-dim:        color-mix(in oklch, oklch(0.75 0.18 52) 15%, transparent);
-  --hero-heading:       oklch(0.96 0.012 80);
-  --hero-sub:           oklch(0.60 0.010 65);
+  --primary:            oklch(0.52 0.18 52);
+  --primary-foreground: oklch(0.97 0.008 72);
+  --primary-dim:        color-mix(in oklch, oklch(0.52 0.18 52) 12%, transparent);
+  --hero-heading:       oklch(0.12 0.010 55);
+  --hero-sub:           oklch(0.40 0.010 60);
 
   /* Easing */
   --ease-expo-out:      cubic-bezier(0.16, 1, 0.3, 1);
@@ -128,7 +128,7 @@ body::after {
   font-size: clamp(6rem, 14vw, 12rem);
   line-height: 1;
   color: transparent;
-  -webkit-text-stroke: 1px oklch(0.22 0.010 55);
+  -webkit-text-stroke: 1px var(--border);
   user-select: none;
   pointer-events: none;
   position: absolute;
@@ -161,7 +161,7 @@ body::after {
 
 .card-surface:hover {
   border-color: var(--border-strong);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -172,7 +172,7 @@ body::after {
   justify-content: center;
   gap: 0.5rem;
   background: var(--amber);
-  color: oklch(0.08 0.008 60);
+  color: oklch(0.97 0.008 72);
   font-family: "Geist Sans", sans-serif;
   font-weight: 600;
   font-size: 0.9375rem;
@@ -191,7 +191,7 @@ body::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: oklch(0.85 0.16 55);
+  background: oklch(0.44 0.18 52);
   transform: translateX(-105%);
   transition: transform 0.4s var(--ease-expo-out);
 }
@@ -233,7 +233,7 @@ body::after {
   align-items: center;
   justify-content: center;
   background: var(--amber);
-  color: oklch(0.08 0.008 60);
+  color: oklch(0.97 0.008 72);
   font-family: "Geist Sans", sans-serif;
   font-weight: 600;
   border: none;
