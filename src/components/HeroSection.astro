@@ -30,15 +30,8 @@ const techs = [
 
 <section id="hero" class="hero-root">
 
-  <!-- Background image slideshow -->
+  <!-- Background image overlay system -->
   <div class="hero-bg" aria-hidden="true">
-    <div class="hero-bg-slides">
-      <div class="hero-bg-slide is-active" style="background-image: url('/images/bg-hero.png')"></div>
-      <div class="hero-bg-slide" style="background-image: url('/images/Background 2.png')"></div>
-      <div class="hero-bg-slide" style="background-image: url('/images/Background 3.png')"></div>
-      <div class="hero-bg-slide" style="background-image: url('/images/Background 4.png')"></div>
-      <div class="hero-bg-slide" style="background-image: url('/images/Background 5.png')"></div>
-    </div>
     <div class="hero-overlay"></div>
     <div class="hero-fade-bottom"></div>
   </div>
@@ -150,37 +143,18 @@ const techs = [
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 1fr auto auto;
     overflow: hidden;
+    background-image: url('/images/bg-hero.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
   }
 
-  /* ── Background slideshow ────────────────────────────────── */
+  /* ── Background overlay system ───────────────────────────── */
   .hero-bg {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 0;
-  }
-
-  .hero-bg-slides {
-    position: absolute;
-    inset: 0;
-  }
-
-  .hero-bg-slide {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    opacity: 0;
-    transition: opacity 1.5s ease-in-out;
-  }
-
-  .hero-bg-slide.is-active {
-    opacity: 1;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .hero-bg-slide { transition: none; }
   }
 
   /* Directional dark overlay: deepest at left (text) → opens toward the right (photo) */
@@ -432,14 +406,3 @@ const techs = [
   }
 </style>
 
-<script>
-  const slides = document.querySelectorAll<HTMLElement>('.hero-bg-slide');
-  if (slides.length > 1 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    let current = 0;
-    setInterval(() => {
-      slides[current].classList.remove('is-active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('is-active');
-    }, 6000);
-  }
-</script>
