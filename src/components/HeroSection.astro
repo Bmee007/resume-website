@@ -30,10 +30,10 @@ const techs = [
 
 <section id="hero" class="hero-root">
 
-  <!-- Gradient orb backgrounds -->
+  <!-- Background image overlay system -->
   <div class="hero-bg" aria-hidden="true">
-    <div id="hero-orb" class="hero-orb hero-orb--primary"></div>
-    <div class="hero-orb hero-orb--secondary"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-fade-bottom"></div>
   </div>
 
   <!-- Main content -->
@@ -143,53 +143,43 @@ const techs = [
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 1fr auto auto;
     overflow: hidden;
+    background-image: url('/images/bg-hero.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
   }
 
-  /* ── Background orbs ──────────────────────────────────────── */
+  /* ── Background overlay system ───────────────────────────── */
   .hero-bg {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    overflow: hidden;
+    z-index: 0;
   }
 
-  .hero-orb {
+  /* Directional dark overlay: deepest at left (text) → opens toward the right (photo) */
+  .hero-overlay {
     position: absolute;
-    border-radius: 50%;
-    filter: blur(70px);
-    animation: orb-float 10s ease-in-out infinite alternate;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, oklch(0.06 0.006 55 / 0.70) 0%, transparent 24%),
+      linear-gradient(
+        108deg,
+        oklch(0.05 0.005 52 / 0.95) 0%,
+        oklch(0.08 0.008 58 / 0.90) 28%,
+        oklch(0.08 0.008 60 / 0.55) 58%,
+        oklch(0.08 0.008 60 / 0.18) 100%
+      );
   }
 
-  .hero-orb--primary {
-    width: clamp(400px, 65vw, 800px);
-    height: clamp(400px, 65vw, 800px);
-    top: -20%;
-    right: -15%;
-    background: radial-gradient(
-      circle,
-      color-mix(in oklch, var(--amber-glow) 20%, transparent) 0%,
-      color-mix(in oklch, var(--amber-glow)  5%, transparent) 45%,
-      transparent 70%
-    );
-  }
-
-  .hero-orb--secondary {
-    width: clamp(250px, 35vw, 500px);
-    height: clamp(250px, 35vw, 500px);
-    bottom: 5%;
-    left: -8%;
-    background: radial-gradient(
-      circle,
-      color-mix(in oklch, var(--amber)  8%, transparent) 0%,
-      transparent 65%
-    );
-    animation-delay: -5s;
-    animation-duration: 14s;
-  }
-
-  @keyframes orb-float {
-    0%   { transform: scale(1) translateY(0); opacity: 0.6; }
-    100% { transform: scale(1.06) translateY(-24px); opacity: 1; }
+  /* Seamless bleed into the next section */
+  .hero-fade-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: clamp(14rem, 22vw, 20rem);
+    background: linear-gradient(to top, var(--background) 8%, transparent 100%);
   }
 
   /* ── Content ──────────────────────────────────────────────── */
@@ -406,7 +396,6 @@ const techs = [
 
   /* ── Reduced motion overrides ─────────────────────────────── */
   @media (prefers-reduced-motion: reduce) {
-    .hero-orb           { animation: none; }
     .scroll-line        { animation: none; }
     .hero-label,
     #hero-title,
