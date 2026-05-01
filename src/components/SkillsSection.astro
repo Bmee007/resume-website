@@ -95,7 +95,7 @@ const categories = [
                 <button class="skill-chip" data-reveal data-skill={skill}>{skill}</button>
               ))}
             </div>
-            <p class="chip-hint" aria-hidden="true">Click any skill to generate a visual</p>
+            <p class="chip-hint" aria-hidden="true">Click any skill to view a visual</p>
           </div>
         ))}
       </div>
@@ -128,13 +128,7 @@ const categories = [
       </button>
     </div>
     <div class="skill-modal-body">
-      <div class="skill-modal-skeleton" id="skill-modal-skeleton">
-        <p class="skill-modal-generating">Generating image with DALL·E…</p>
-      </div>
       <img id="skill-modal-img" class="skill-modal-img" alt="" />
-      <p id="skill-modal-error" class="skill-modal-error">
-        <span aria-hidden="true">⚠</span> Unable to generate image. Check API configuration and try again.
-      </p>
     </div>
   </div>
 </div>
@@ -422,64 +416,15 @@ const categories = [
   }
 
   .skill-modal-body {
-    position: relative;
-    min-height: 260px;
-  }
-
-  .skill-modal-skeleton {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      var(--surface) 0%,
-      var(--surface-raised) 50%,
-      var(--surface) 100%
-    );
-    background-size: 200% 100%;
-    animation: sk-shimmer 1.8s ease-in-out infinite;
-  }
-
-  .skill-modal-skeleton.is-hidden { display: none; }
-
-  .skill-modal-generating {
-    position: absolute;
-    bottom: 1.25rem;
-    left: 0;
-    right: 0;
-    text-align: center;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--amber);
-    opacity: 0.7;
+    line-height: 0;
   }
 
   .skill-modal-img {
     width: 100%;
-    display: none;
-    position: relative;
-    z-index: 1;
-  }
-
-  .skill-modal-img.is-visible { display: block; }
-
-  .skill-modal-error {
-    display: none;
-    padding: 2.5rem 1.5rem;
-    text-align: center;
-    font-size: 0.875rem;
-    color: var(--fg-muted);
-    gap: 0.5rem;
-    position: relative;
-    z-index: 1;
-  }
-
-  .skill-modal-error.is-visible { display: block; }
-
-  @keyframes sk-shimmer {
-    0%   { background-position: -200% 0; }
-    100% { background-position:  200% 0; }
+    display: block;
+    max-height: 60vh;
+    object-fit: cover;
+    object-position: center;
   }
 
   /* ── Reveal ───────────────────────────────────────────────── */
@@ -537,12 +482,37 @@ const categories = [
     });
   });
 
+  // ── Static skill → image map ─────────────────────────────────
+  const SKILL_IMAGES: Record<string, string> = {
+    "Agent Harness Design":               "/images/circuit.svg",
+    "Skills & Tool Integration":          "/images/circuit.svg",
+    "Multi-Step Workflows":               "/images/bg-experience.jpg",
+    "LLM Memory Research":                "/images/llm-memory.jpg",
+    "Agent Security & Trust":             "/images/agent-security.jpg",
+    "Prompt Injection Defense":           "/images/agent-security.jpg",
+    "Supply Chain AI":                    "/images/supply-chain.jpg",
+    "Healthcare ERP Integration":         "/images/bg-about.jpg",
+    "Retail WMS / TMS":                   "/images/supply-chain.jpg",
+    "ERP Systems (D365, AS400)":          "/images/bg-experience.jpg",
+    "Warehouse Management (DFIO)":        "/images/supply-chain.jpg",
+    "Demand Forecasting":                 "/images/bg-skills.jpg",
+    "Python · ML / Statistical Modeling": "/images/circuit.svg",
+    "Azure OpenAI · GPT-4o · Claude":     "/images/bg-hero.png",
+    "RAG & Vector Retrieval":             "/images/llm-memory.jpg",
+    "LLM Evaluation & Monitoring":        "/images/llm-memory.jpg",
+    "Power Automate · AI Builder":        "/images/circuit.svg",
+    "Data Pipeline Engineering":          "/images/circuit.svg",
+    "AI Program Leadership":              "/images/bg-projects.jpg",
+    "Cross-Functional Team Building":     "/images/bg-about.jpg",
+    "Stakeholder & C-Suite Alignment":    "/images/bg-contact.jpg",
+    "Change Management":                  "/images/bg-experience.jpg",
+    "Enterprise Architecture":            "/images/circuit.svg",
+  };
+
   // ── Modal elements ───────────────────────────────────────────
   const modal         = document.getElementById('skill-modal')!;
   const modalName     = document.getElementById('modal-skill-name')!;
-  const modalSkeleton = document.getElementById('skill-modal-skeleton')!;
   const modalImg      = document.getElementById('skill-modal-img') as HTMLImageElement;
-  const modalError    = document.getElementById('skill-modal-error')!;
   const modalClose    = document.getElementById('skill-modal-close')!;
   const modalBackdrop = document.getElementById('skill-modal-backdrop')!;
 
@@ -551,9 +521,9 @@ const categories = [
   function openModal(skillName: string) {
     lastFocused = document.activeElement as HTMLElement;
     modalName.textContent = skillName;
-    modalSkeleton.classList.remove('is-hidden');
-    modalImg.classList.remove('is-visible');
-    modalError.classList.remove('is-visible');
+    const src = SKILL_IMAGES[skillName] ?? '/images/bg-skills.jpg';
+    modalImg.src = src;
+    modalImg.alt = skillName;
     modal.setAttribute('aria-hidden', 'false');
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
@@ -567,33 +537,10 @@ const categories = [
     lastFocused?.focus();
   }
 
-  async function loadSkillImage(skillName: string) {
-    try {
-      const res = await fetch('/api/skill-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ skill: skillName }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error ?? 'No image');
-
-      modalImg.src = data.url;
-      modalImg.alt = skillName;
-      modalSkeleton.classList.add('is-hidden');
-      modalImg.classList.add('is-visible');
-    } catch {
-      modalSkeleton.classList.add('is-hidden');
-      modalError.classList.add('is-visible');
-    }
-  }
-
   // ── Chip click handlers ──────────────────────────────────────
   document.querySelectorAll<HTMLButtonElement>('.skill-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
-      const skillName = chip.dataset.skill ?? chip.textContent?.trim() ?? '';
-      openModal(skillName);
-      loadSkillImage(skillName);
+      openModal(chip.dataset.skill ?? chip.textContent?.trim() ?? '');
     });
   });
 
