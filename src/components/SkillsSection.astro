@@ -92,9 +92,10 @@ const categories = [
           >
             <div class="chip-cloud">
               {cat.skills.map((skill) => (
-                <span class="skill-chip" data-reveal>{skill}</span>
+                <button class="skill-chip" data-reveal data-skill={skill}>{skill}</button>
               ))}
             </div>
+            <p class="chip-hint" aria-hidden="true">Click any skill to generate a visual</p>
           </div>
         ))}
       </div>
@@ -102,6 +103,41 @@ const categories = [
     </div>
   </div>
 </section>
+
+<!-- Skill image modal -->
+<div
+  id="skill-modal"
+  class="skill-modal"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-skill-name"
+  tabindex="-1"
+>
+  <div class="skill-modal-backdrop" id="skill-modal-backdrop"></div>
+  <div class="skill-modal-panel">
+    <div class="skill-modal-header">
+      <div>
+        <p class="skill-modal-eyebrow">Skill Visual</p>
+        <h3 id="modal-skill-name" class="skill-modal-name"></h3>
+      </div>
+      <button class="skill-modal-close" id="skill-modal-close" aria-label="Close skill visual">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="skill-modal-body">
+      <div class="skill-modal-skeleton" id="skill-modal-skeleton">
+        <p class="skill-modal-generating">Generating image with DALL·E…</p>
+      </div>
+      <img id="skill-modal-img" class="skill-modal-img" alt="" />
+      <p id="skill-modal-error" class="skill-modal-error">
+        <span aria-hidden="true">⚠</span> Unable to generate image. Check API configuration and try again.
+      </p>
+    </div>
+  </div>
+</div>
 
 <style>
   .skills-root {
@@ -193,6 +229,7 @@ const categories = [
     color: var(--fg-muted);
     text-align: left;
     width: auto;
+    cursor: pointer;
     transition:
       color      0.2s ease,
       background 0.2s ease,
@@ -249,6 +286,15 @@ const categories = [
     padding: 0.5rem 0;
   }
 
+  .chip-hint {
+    font-size: 0.7rem;
+    color: var(--fg-subtle);
+    letter-spacing: 0.06em;
+    margin: 0.75rem 0 0;
+    text-transform: uppercase;
+  }
+
+  /* ── Skill chip (button) ──────────────────────────────────── */
   .skill-chip {
     display: inline-block;
     padding: 0.5625rem 1.125rem;
@@ -258,11 +304,14 @@ const categories = [
     font-weight: 400;
     color: var(--fg-muted);
     background: var(--background);
+    cursor: pointer;
+    font-family: inherit;
     transition:
       border-color 0.25s var(--ease-expo-out),
       color        0.25s var(--ease-expo-out),
       transform    0.25s var(--ease-expo-out),
-      box-shadow   0.25s var(--ease-expo-out);
+      box-shadow   0.25s var(--ease-expo-out),
+      opacity      0.2s ease;
   }
 
   .skill-chip:hover {
@@ -270,6 +319,167 @@ const categories = [
     color: var(--cream);
     transform: translateY(-2px);
     box-shadow: 0 4px 20px color-mix(in oklch, var(--amber) 18%, transparent);
+  }
+
+  .skill-chip.is-loading {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+  }
+
+  /* ── Skill Modal ──────────────────────────────────────────── */
+  .skill-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .skill-modal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .skill-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: oklch(0.04 0.006 55 / 0.88);
+    backdrop-filter: blur(6px);
+  }
+
+  .skill-modal-panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    max-width: 720px;
+    width: 100%;
+    overflow: hidden;
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.3s var(--ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  .skill-modal.is-open .skill-modal-panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .skill-modal-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+
+  .skill-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skill-modal-eyebrow {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 0 0.3rem;
+  }
+
+  .skill-modal-name {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(1.125rem, 3vw, 1.625rem);
+    color: var(--cream);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .skill-modal-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .skill-modal-close:hover {
+    color: var(--cream);
+    border-color: var(--amber);
+  }
+
+  .skill-modal-body {
+    position: relative;
+    min-height: 260px;
+  }
+
+  .skill-modal-skeleton {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      var(--surface) 0%,
+      var(--surface-raised) 50%,
+      var(--surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: sk-shimmer 1.8s ease-in-out infinite;
+  }
+
+  .skill-modal-skeleton.is-hidden { display: none; }
+
+  .skill-modal-generating {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--amber);
+    opacity: 0.7;
+  }
+
+  .skill-modal-img {
+    width: 100%;
+    display: none;
+    position: relative;
+    z-index: 1;
+  }
+
+  .skill-modal-img.is-visible { display: block; }
+
+  .skill-modal-error {
+    display: none;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+    gap: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .skill-modal-error.is-visible { display: block; }
+
+  @keyframes sk-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
   }
 
   /* ── Reveal ───────────────────────────────────────────────── */
@@ -310,22 +520,87 @@ const categories = [
 </style>
 
 <script>
-  // Tab switching
+  // ── Tab switching ────────────────────────────────────────────
   const tabs   = document.querySelectorAll<HTMLButtonElement>('.cat-tab');
   const panels = document.querySelectorAll<HTMLElement>('.chip-panel');
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       const idx = tab.dataset.category;
-
       tabs.forEach((t) => {
         t.classList.toggle('is-active', t === tab);
         t.setAttribute('aria-selected', String(t === tab));
       });
-
       panels.forEach((p) => {
         p.classList.toggle('is-active', p.dataset.panel === idx);
       });
     });
+  });
+
+  // ── Modal elements ───────────────────────────────────────────
+  const modal         = document.getElementById('skill-modal')!;
+  const modalName     = document.getElementById('modal-skill-name')!;
+  const modalSkeleton = document.getElementById('skill-modal-skeleton')!;
+  const modalImg      = document.getElementById('skill-modal-img') as HTMLImageElement;
+  const modalError    = document.getElementById('skill-modal-error')!;
+  const modalClose    = document.getElementById('skill-modal-close')!;
+  const modalBackdrop = document.getElementById('skill-modal-backdrop')!;
+
+  let lastFocused: HTMLElement | null = null;
+
+  function openModal(skillName: string) {
+    lastFocused = document.activeElement as HTMLElement;
+    modalName.textContent = skillName;
+    modalSkeleton.classList.remove('is-hidden');
+    modalImg.classList.remove('is-visible');
+    modalError.classList.remove('is-visible');
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    modal.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+  }
+
+  async function loadSkillImage(skillName: string) {
+    try {
+      const res = await fetch('/api/skill-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skill: skillName }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.url) throw new Error(data.error ?? 'No image');
+
+      modalImg.src = data.url;
+      modalImg.alt = skillName;
+      modalSkeleton.classList.add('is-hidden');
+      modalImg.classList.add('is-visible');
+    } catch {
+      modalSkeleton.classList.add('is-hidden');
+      modalError.classList.add('is-visible');
+    }
+  }
+
+  // ── Chip click handlers ──────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.skill-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const skillName = chip.dataset.skill ?? chip.textContent?.trim() ?? '';
+      openModal(skillName);
+      loadSkillImage(skillName);
+    });
+  });
+
+  // ── Close handlers ───────────────────────────────────────────
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
   });
 </script>
