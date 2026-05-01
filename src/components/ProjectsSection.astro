@@ -181,10 +181,31 @@ const projects = [
 
   /* ── Scroll container ─────────────────────────────────────── */
   .projects-scroll-outer {
-    overflow: hidden;
+    overflow-x: auto;
     padding: 0 clamp(1.5rem, 5vw, 4rem) clamp(4rem, 7vw, 6rem);
     position: relative;
     z-index: 1;
+    scroll-snap-type: x proximity;
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+
+  .projects-scroll-outer:active {
+    cursor: grabbing;
+  }
+
+  .projects-scroll-outer::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .projects-scroll-outer::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .projects-scroll-outer::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 2px;
   }
 
   /* Track: horizontal on desktop, vertical on mobile */
@@ -214,6 +235,7 @@ const projects = [
       transform    0.3s var(--ease-expo-out),
       box-shadow   0.3s var(--ease-expo-out);
     width: 100%;
+    scroll-snap-align: start;
   }
 
   @media (min-width: 768px) {
