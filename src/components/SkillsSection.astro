@@ -92,9 +92,10 @@ const categories = [
           >
             <div class="chip-cloud">
               {cat.skills.map((skill) => (
-                <span class="skill-chip" data-reveal>{skill}</span>
+                <button class="skill-chip" data-reveal data-skill={skill}>{skill}</button>
               ))}
             </div>
+            <p class="chip-hint" aria-hidden="true">Click any skill to view a visual</p>
           </div>
         ))}
       </div>
@@ -103,14 +104,58 @@ const categories = [
   </div>
 </section>
 
+<!-- Skill image modal -->
+<div
+  id="skill-modal"
+  class="skill-modal"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-skill-name"
+  tabindex="-1"
+>
+  <div class="skill-modal-backdrop" id="skill-modal-backdrop"></div>
+  <div class="skill-modal-panel">
+    <div class="skill-modal-header">
+      <div>
+        <p class="skill-modal-eyebrow">Skill Visual</p>
+        <h3 id="modal-skill-name" class="skill-modal-name"></h3>
+      </div>
+      <button class="skill-modal-close" id="skill-modal-close" aria-label="Close skill visual">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="skill-modal-body">
+      <img id="skill-modal-img" class="skill-modal-img" alt="" />
+    </div>
+  </div>
+</div>
+
 <style>
   .skills-root {
     position: relative;
     padding: clamp(6rem, 10vw, 9rem) clamp(1.5rem, 5vw, 4rem);
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
     overflow: hidden;
+    background-image: url('/images/Background 3.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .skills-root::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+      var(--background) 0%,
+      oklch(0.07 0.007 58 / 0.82) 14%,
+      oklch(0.07 0.007 58 / 0.82) 86%,
+      var(--background) 100%
+    );
+    pointer-events: none;
+    z-index: 0;
   }
 
   .skills-container {
@@ -178,6 +223,7 @@ const categories = [
     color: var(--fg-muted);
     text-align: left;
     width: auto;
+    cursor: pointer;
     transition:
       color      0.2s ease,
       background 0.2s ease,
@@ -234,6 +280,15 @@ const categories = [
     padding: 0.5rem 0;
   }
 
+  .chip-hint {
+    font-size: 0.7rem;
+    color: var(--fg-subtle);
+    letter-spacing: 0.06em;
+    margin: 0.75rem 0 0;
+    text-transform: uppercase;
+  }
+
+  /* ── Skill chip (button) ──────────────────────────────────── */
   .skill-chip {
     display: inline-block;
     padding: 0.5625rem 1.125rem;
@@ -243,11 +298,14 @@ const categories = [
     font-weight: 400;
     color: var(--fg-muted);
     background: var(--background);
+    cursor: pointer;
+    font-family: inherit;
     transition:
       border-color 0.25s var(--ease-expo-out),
       color        0.25s var(--ease-expo-out),
       transform    0.25s var(--ease-expo-out),
-      box-shadow   0.25s var(--ease-expo-out);
+      box-shadow   0.25s var(--ease-expo-out),
+      opacity      0.2s ease;
   }
 
   .skill-chip:hover {
@@ -255,6 +313,118 @@ const categories = [
     color: var(--cream);
     transform: translateY(-2px);
     box-shadow: 0 4px 20px color-mix(in oklch, var(--amber) 18%, transparent);
+  }
+
+  .skill-chip.is-loading {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+  }
+
+  /* ── Skill Modal ──────────────────────────────────────────── */
+  .skill-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .skill-modal.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .skill-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: oklch(0.04 0.006 55 / 0.88);
+    backdrop-filter: blur(6px);
+  }
+
+  .skill-modal-panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    max-width: 720px;
+    width: 100%;
+    overflow: hidden;
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.3s var(--ease-expo-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  .skill-modal.is-open .skill-modal-panel {
+    transform: translateY(0) scale(1);
+  }
+
+  .skill-modal-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  }
+
+  .skill-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .skill-modal-eyebrow {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 0 0.3rem;
+  }
+
+  .skill-modal-name {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(1.125rem, 3vw, 1.625rem);
+    color: var(--cream);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .skill-modal-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--fg-muted);
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .skill-modal-close:hover {
+    color: var(--cream);
+    border-color: var(--amber);
+  }
+
+  .skill-modal-body {
+    line-height: 0;
+  }
+
+  .skill-modal-img {
+    width: 100%;
+    display: block;
+    max-height: 60vh;
+    object-fit: cover;
+    object-position: center;
   }
 
   /* ── Reveal ───────────────────────────────────────────────── */
@@ -295,22 +465,89 @@ const categories = [
 </style>
 
 <script>
-  // Tab switching
+  // ── Tab switching ────────────────────────────────────────────
   const tabs   = document.querySelectorAll<HTMLButtonElement>('.cat-tab');
   const panels = document.querySelectorAll<HTMLElement>('.chip-panel');
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       const idx = tab.dataset.category;
-
       tabs.forEach((t) => {
         t.classList.toggle('is-active', t === tab);
         t.setAttribute('aria-selected', String(t === tab));
       });
-
       panels.forEach((p) => {
         p.classList.toggle('is-active', p.dataset.panel === idx);
       });
     });
+  });
+
+  // ── Static skill → image map ─────────────────────────────────
+  const SKILL_IMAGES: Record<string, string> = {
+    "Agent Harness Design":               "/images/circuit.svg",
+    "Skills & Tool Integration":          "/images/circuit.svg",
+    "Multi-Step Workflows":               "/images/bg-experience.jpg",
+    "LLM Memory Research":                "/images/llm-memory.jpg",
+    "Agent Security & Trust":             "/images/agent-security.jpg",
+    "Prompt Injection Defense":           "/images/agent-security.jpg",
+    "Supply Chain AI":                    "/images/supply-chain.jpg",
+    "Healthcare ERP Integration":         "/images/bg-about.jpg",
+    "Retail WMS / TMS":                   "/images/supply-chain.jpg",
+    "ERP Systems (D365, AS400)":          "/images/bg-experience.jpg",
+    "Warehouse Management (DFIO)":        "/images/supply-chain.jpg",
+    "Demand Forecasting":                 "/images/bg-skills.jpg",
+    "Python · ML / Statistical Modeling": "/images/circuit.svg",
+    "Azure OpenAI · GPT-4o · Claude":     "/images/bg-hero.png",
+    "RAG & Vector Retrieval":             "/images/llm-memory.jpg",
+    "LLM Evaluation & Monitoring":        "/images/llm-memory.jpg",
+    "Power Automate · AI Builder":        "/images/circuit.svg",
+    "Data Pipeline Engineering":          "/images/circuit.svg",
+    "AI Program Leadership":              "/images/bg-projects.jpg",
+    "Cross-Functional Team Building":     "/images/bg-about.jpg",
+    "Stakeholder & C-Suite Alignment":    "/images/bg-contact.jpg",
+    "Change Management":                  "/images/bg-experience.jpg",
+    "Enterprise Architecture":            "/images/circuit.svg",
+  };
+
+  // ── Modal elements ───────────────────────────────────────────
+  const modal         = document.getElementById('skill-modal')!;
+  const modalName     = document.getElementById('modal-skill-name')!;
+  const modalImg      = document.getElementById('skill-modal-img') as HTMLImageElement;
+  const modalClose    = document.getElementById('skill-modal-close')!;
+  const modalBackdrop = document.getElementById('skill-modal-backdrop')!;
+
+  let lastFocused: HTMLElement | null = null;
+
+  function openModal(skillName: string) {
+    lastFocused = document.activeElement as HTMLElement;
+    modalName.textContent = skillName;
+    const src = SKILL_IMAGES[skillName] ?? '/images/bg-skills.jpg';
+    modalImg.src = src;
+    modalImg.alt = skillName;
+    modal.setAttribute('aria-hidden', 'false');
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    modal.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    lastFocused?.focus();
+  }
+
+  // ── Chip click handlers ──────────────────────────────────────
+  document.querySelectorAll<HTMLButtonElement>('.skill-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      openModal(chip.dataset.skill ?? chip.textContent?.trim() ?? '');
+    });
+  });
+
+  // ── Close handlers ───────────────────────────────────────────
+  modalClose.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
   });
 </script>

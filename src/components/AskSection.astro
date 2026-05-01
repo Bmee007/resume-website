@@ -289,11 +289,11 @@
 
   .panel-tag {
     display: block;
-    font-size: 0.6rem;
-    font-weight: 600;
+    font-size: 0.75rem;
+    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--fg-subtle);
+    color: var(--fg-muted);
     margin-bottom: 0.75rem;
   }
 
@@ -364,8 +364,8 @@
 
   /* ── Stat card inner elements (dynamically injected via innerHTML — must be :global) */
   :global(.vis-question) {
-    font-size: 0.6rem;
-    color: var(--fg-subtle);
+    font-size: 0.75rem;
+    color: var(--fg-muted);
     font-style: italic;
     line-height: 1.3;
     display: -webkit-box;
@@ -381,7 +381,7 @@
   }
 
   :global(.vis-hero-value) {
-    font-size: 1.55rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--amber);
     line-height: 1;
@@ -389,9 +389,9 @@
   }
 
   :global(.vis-hero-label) {
-    font-size: 0.58rem;
-    color: var(--fg-muted);
-    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--fg);
+    margin-top: 0.25rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -408,22 +408,22 @@
 
   :global(.vis-bar-row) {
     display: grid;
-    grid-template-columns: 3.5rem 1fr 2.8rem;
-    gap: 0.35rem;
+    grid-template-columns: 5rem 1fr 3.2rem;
+    gap: 0.4rem;
     align-items: center;
   }
 
   :global(.vis-bar-label) {
-    font-size: 0.56rem;
-    color: var(--fg-muted);
+    font-size: 0.75rem;
+    color: var(--fg);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   :global(.vis-bar-track) {
-    height: 5px;
-    background: rgba(255,255,255,0.06);
+    height: 7px;
+    background: rgba(255,255,255,0.1);
     border-radius: 3px;
     overflow: hidden;
   }
@@ -435,7 +435,7 @@
   }
 
   :global(.vis-bar-value) {
-    font-size: 0.56rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--fg);
     white-space: nowrap;
@@ -443,9 +443,9 @@
   }
 
   .chart-title {
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--fg-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--fg);
     margin: 0 0 0.5rem;
     line-height: 1.3;
   }
