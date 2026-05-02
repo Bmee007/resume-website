@@ -265,8 +265,9 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-let chartInstance    = null;
-let pendingChartData = null;
+let chartInstance     = null;
+let pendingChartData  = null;
+let pendingVisualQuery = null;
 
 function highlightText(text, highlights) {
   if (!Array.isArray(highlights) || !highlights.length) return escapeHtml(text);
@@ -376,16 +377,9 @@ function renderChart(chartData) {
   }
 }
 
-function renderVisual(prompt, chartData) {
-  const visual   = document.getElementById('generated-visual');
-  const skeleton = document.getElementById('image-skeleton');
-  if (!visual) return;
-  if (skeleton) skeleton.style.display = 'none';
-
-  if (!chartData || !chartData.values?.length) {
-    visual.style.display = 'none';
-    return;
-  }
+function renderStatCard(prompt, chartData) {
+  const visual = document.getElementById('generated-visual');
+  if (!visual || !chartData?.values?.length) return false;
 
   const unit   = chartData.unit || '';
   const maxVal = Math.max(...chartData.values);
@@ -409,6 +403,43 @@ function renderVisual(prompt, chartData) {
     <div class="vis-bars">${bars}</div>`;
 
   visual.style.display = 'flex';
+  return true;
+}
+
+async function renderVisual(prompt, chartData, visualQuery) {
+  const visual   = document.getElementById('generated-visual');
+  const skeleton = document.getElementById('image-skeleton');
+  if (!visual) return;
+
+  // Try Pexels photo first if we have a query
+  if (visualQuery) {
+    try {
+      const res  = await fetch(`/api/pexels?q=${encodeURIComponent(visualQuery)}`);
+      const data = await res.json();
+      if (data.url) {
+        if (skeleton) skeleton.style.display = 'none';
+        visual.innerHTML = `
+          <img
+            src="${escapeHtml(data.url)}"
+            alt="${escapeHtml(visualQuery)}"
+            class="vis-photo"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="vis-photo-credit">
+            Photo by <a href="${escapeHtml(data.photographer_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(data.photographer)}</a> · Pexels
+          </div>`;
+        visual.style.display = 'flex';
+        return;
+      }
+    } catch { /* fall through to stat card */ }
+  }
+
+  // Fallback: stat card from chart data
+  if (skeleton) skeleton.style.display = 'none';
+  if (!renderStatCard(prompt, chartData)) {
+    visual.style.display = 'none';
+  }
 }
 
 async function streamAnswer(prompt, abortController) {
@@ -455,6 +486,7 @@ async function streamAnswer(prompt, abortController) {
               answerTextEl.innerHTML = highlightText(parsed.text, parsed.highlights);
             }
             if (parsed.chart) { renderChart(parsed.chart); pendingChartData = parsed.chart; }
+            if (parsed.visual_query) { pendingVisualQuery = parsed.visual_query; }
             if (statusEl) statusEl.textContent = '';
           } catch { /* malformed JSON — keep streamed text */ }
           continue;
@@ -558,11 +590,12 @@ export function initAskSection() {
     if (chartSkeleton) chartSkeleton.style.display = 'block';
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
-    pendingChartData = null;
+    pendingChartData   = null;
+    pendingVisualQuery = null;
     currentAbort = new AbortController();
 
     await streamAnswer(prompt, currentAbort);
-    renderVisual(prompt, pendingChartData);
+    await renderVisual(prompt, pendingChartData, pendingVisualQuery);
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
