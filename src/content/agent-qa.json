@@ -31,6 +31,51 @@
       }
     },
     {
+      "id": "behavioral-003",
+      "category": "behavioral",
+      "question": "How do you explain complex AI to non-technical stakeholders?",
+      "keywords": ["explain", "non-technical", "stakeholders", "communicate", "business", "executives", "simple", "language", "present"],
+      "text": "The rule I live by: never lead with the technology, lead with the problem it solves and the number it moves. When I pitched the Kohl & Frisch AI agent deployment to the C-suite, I didn't say 'we're building a RAG-based LLM agent' — I said 'we're going to answer 90% of warehouse staff IT questions automatically, saving thousands of hours per year, starting in 90 days.' Technical details come after you've established the business case, not before. The change management framework that brought 2,400 staff from skeptic to champion was built entirely on outcome language.",
+      "highlights": ["90%", "2,400 staff", "outcome language", "business case", "C-suite"],
+      "chart": {
+        "type": "bar",
+        "title": "What Actually Lands with Stakeholders",
+        "labels": ["Tech Details", "Model Accuracy", "Business Outcomes", "Cost Savings", "Timeline & Risk"],
+        "values": [22, 35, 91, 88, 79],
+        "unit": "engagement score / 100"
+      }
+    },
+    {
+      "id": "behavioral-004",
+      "category": "behavioral",
+      "question": "How do you stay current in the rapidly changing AI landscape?",
+      "keywords": ["current", "stay", "learn", "keep up", "landscape", "fast", "changing", "new", "trends", "research"],
+      "text": "The AI landscape moves fast enough that anyone claiming to know everything is either lying or not paying attention. My approach is deliberate: I follow primary sources — Anthropic, OpenAI, and NousResearch research papers, not just the summaries — and I test every framework I'm curious about on a real problem, not a toy dataset. LlamaIndex, AutoGen, and CrewAI are all on my bench right now. The discipline is knowing what to ignore: not every new model release is worth context-switching for, and the foundational concepts — agent harnesses, memory architecture, security threat models — are more durable than any specific tool.",
+      "highlights": ["Anthropic", "NousResearch", "LlamaIndex", "AutoGen", "CrewAI"],
+      "chart": {
+        "type": "doughnut",
+        "title": "How I Allocate Learning Time",
+        "labels": ["Framework Experiments", "Research Papers", "Production Debugging", "Community & Peers", "Tool Docs"],
+        "values": [30, 25, 20, 15, 10],
+        "unit": "% of learning time"
+      }
+    },
+    {
+      "id": "behavioral-005",
+      "category": "behavioral",
+      "question": "Tell me about a failed AI project and what you learned.",
+      "keywords": ["failed", "failure", "mistake", "wrong", "lesson", "learned", "didn't work", "went wrong", "setback"],
+      "text": "The most instructive failure I've had was a demand forecasting agent that performed beautifully in staging and fell apart in production within two weeks — not because the model was wrong, but because we hadn't accounted for data quality variance between our staging snapshot and live ERP feeds. The model was right; the data was broken. We rebuilt the pipeline with real-time validation gates before every inference call and mandatory human review for any forecast deviating more than 15% from the prior period. The lesson that stuck: AI systems fail at the data and integration layer far more often than at the model layer.",
+      "highlights": ["data quality", "staging vs production", "validation gates", "15% deviation", "integration layer"],
+      "chart": {
+        "type": "doughnut",
+        "title": "AI Production Failure Root Causes",
+        "labels": ["Data Quality", "Integration Issues", "Model Errors", "Prompt Failures", "Infrastructure"],
+        "values": [42, 28, 12, 11, 7],
+        "unit": "% of failures"
+      }
+    },
+    {
       "id": "agent-001",
       "category": "agent-engineering",
       "question": "How do you build AI agents with harnesses and workflows?",
@@ -43,6 +88,51 @@
         "labels": ["Tool Routing", "Error Recovery", "Domain Skills", "Memory Integration", "Security Gates"],
         "values": [88, 76, 92, 71, 85],
         "unit": "reliability score"
+      }
+    },
+    {
+      "id": "agent-002",
+      "category": "agent-engineering",
+      "question": "What agent orchestration frameworks have you used?",
+      "keywords": ["langchain", "llamaindex", "autogen", "crewai", "framework", "orchestration", "library", "stack"],
+      "text": "I run LangChain in production for tool-routing agents, and I'm actively experimenting with LlamaIndex for RAG-heavy pipelines, AutoGen for multi-agent conversation patterns, and CrewAI for role-based agent crews. My honest take: frameworks accelerate prototyping but can abstract away the control you need in production, which is why I pair them with a custom harness layer that handles observability, error recovery, and authorization outside the framework's scope. For supply chain agents where a bad tool call can trigger a real purchase order, that harness layer isn't optional — it's the difference between a demo and a deployment.",
+      "highlights": ["LangChain", "LlamaIndex", "AutoGen", "CrewAI", "custom harness"],
+      "chart": {
+        "type": "bar",
+        "title": "Framework Fit by Use Case",
+        "labels": ["RAG Pipelines", "Multi-Agent", "Tool Routing", "Role-Based Crews", "Custom Control"],
+        "values": [88, 82, 90, 78, 95],
+        "unit": "fit score / 100"
+      }
+    },
+    {
+      "id": "agent-003",
+      "category": "agent-engineering",
+      "question": "How do you design multi-agent systems and handle inter-agent trust?",
+      "keywords": ["multi-agent", "multiple", "agents", "trust", "orchestration", "coordinator", "delegation", "inter-agent"],
+      "text": "Multi-agent systems introduce a trust problem that single-agent architectures don't have: when Agent A delegates to Agent B, how does B know the instruction is legitimate and not a prompt injection riding along in A's output? My architecture enforces explicit trust boundaries — each agent has a declared capability scope, inter-agent messages are validated against a schema before execution, and no agent can escalate its own privileges or call tools outside its declared scope. At Kohl & Frisch, this pattern runs a coordinator agent that orchestrates 16 specialized sub-agents across finance, procurement, and warehouse operations — zero privilege escalation attempts have succeeded in production.",
+      "highlights": ["trust boundaries", "privilege scope", "coordinator agent", "16 sub-agents", "zero escalation"],
+      "chart": {
+        "type": "bar",
+        "title": "Multi-Agent Attack Surface Coverage",
+        "labels": ["Injection via Delegation", "Privilege Escalation", "Scope Creep", "Schema Bypass", "Cross-Agent Poisoning"],
+        "values": [100, 100, 95, 92, 100],
+        "unit": "% defended"
+      }
+    },
+    {
+      "id": "agent-004",
+      "category": "agent-engineering",
+      "question": "What is your tech stack for building AI agents?",
+      "keywords": ["stack", "tools", "technology", "tech", "use", "build", "framework", "language", "infrastructure", "platform"],
+      "text": "My agent stack is built for production reliability over prototype flashiness: Python at the core, Azure OpenAI and Claude as primary LLM APIs, LangChain for tool orchestration, and a custom harness layer for observability, error recovery, and authorization. For local or self-hosted inference I use OpenCode as an OpenAI-compatible server with NousResearch Hermes. RAG pipelines use semantic chunking with hybrid retrieval, and I'm actively evaluating LlamaIndex, AutoGen, and CrewAI for multi-agent patterns. The north star is always the same: if it can't survive a bad tool call without human intervention, it's not production-ready.",
+      "highlights": ["Python", "Azure OpenAI", "LangChain", "NousResearch Hermes", "OpenCode"],
+      "chart": {
+        "type": "bar",
+        "title": "Agent Stack Component Reliability",
+        "labels": ["Python Core", "LLM APIs", "LangChain", "Custom Harness", "RAG Pipeline"],
+        "values": [99, 97, 88, 95, 91],
+        "unit": "production reliability %"
       }
     },
     {
@@ -103,6 +193,171 @@
         "labels": ["Week 1", "Week 4", "Week 8", "Week 12"],
         "values": [62, 74, 85, 93],
         "unit": "quality score"
+      }
+    },
+    {
+      "id": "ai-engineering-003",
+      "category": "ai-engineering",
+      "question": "What is fine-tuning and when should you use it instead of RAG?",
+      "keywords": ["fine-tuning", "finetune", "rag", "retrieval", "when", "choose", "difference", "versus", "train"],
+      "text": "Fine-tuning vs RAG is the question I get most from teams trying to level up their LLM deployments — and the answer almost always favors RAG for enterprise use cases. Fine-tuning locks knowledge into model weights at training time, meaning every data update requires a costly retraining cycle; RAG lets you update your knowledge store without touching the model. In pharmaceutical distribution, where SKUs, pricing, and supplier data change daily, RAG isn't just preferred — it's the only architecture that survives production. I use fine-tuning selectively for stylistic behavior changes: consistent output format, domain vocabulary, or tone that rarely changes.",
+      "highlights": ["RAG", "fine-tuning", "knowledge store", "pharmaceutical distribution", "production"],
+      "chart": {
+        "type": "bar",
+        "title": "RAG vs Fine-Tuning Decision Framework",
+        "labels": ["Dynamic Data", "Auditability", "Update Cost", "Setup Speed", "Style Control"],
+        "values": [95, 88, 90, 72, 40],
+        "unit": "RAG advantage score"
+      }
+    },
+    {
+      "id": "ai-engineering-004",
+      "category": "ai-engineering",
+      "question": "How do you handle hallucinations in production LLMs?",
+      "keywords": ["hallucination", "hallucinate", "accuracy", "grounding", "factual", "wrong", "errors", "confabulation", "reliable"],
+      "text": "Hallucinations are the tax you pay for probabilistic reasoning — the question isn't whether they'll happen, but whether your system catches them before they cause damage. My defense is layered: RAG grounding to anchor outputs in retrievable facts, structured output schemas that constrain what the model can generate, and LLM-as-judge evaluation scoring every production response against a rubric. On the enterprise agent deployment I run, this combination dropped the escalation rate from 100% to 10% in three months — that's the number that tells you the guardrails are actually working.",
+      "highlights": ["RAG grounding", "LLM-as-judge", "structured output", "10% escalation", "guardrails"],
+      "chart": {
+        "type": "bar",
+        "title": "Hallucination Rate by Defense Layer",
+        "labels": ["No Defense", "+ Structured Output", "+ RAG Grounding", "+ LLM-as-Judge", "All Layers"],
+        "values": [100, 72, 48, 28, 10],
+        "unit": "% hallucination rate"
+      }
+    },
+    {
+      "id": "ai-engineering-005",
+      "category": "ai-engineering",
+      "question": "Explain zero-shot, few-shot, and chain-of-thought prompting.",
+      "keywords": ["zero-shot", "few-shot", "chain", "thought", "prompting", "cot", "examples", "reasoning", "technique"],
+      "text": "Zero-shot is asking the model cold — no examples, just instructions. Few-shot adds worked examples that show the model exactly what good output looks like, which is the fastest quality improvement available without any training cost. Chain-of-thought tells the model to reason step by step before answering, and it dramatically improves performance on anything involving logic, multi-step decisions, or domain-specific analysis. On the enterprise agent prompts I manage, combining few-shot examples with chain-of-thought reasoning cut hallucination rates by over 40% compared to basic zero-shot queries.",
+      "highlights": ["zero-shot", "few-shot", "chain-of-thought", "40%", "reasoning"],
+      "chart": {
+        "type": "bar",
+        "title": "Prompting Technique Impact on Output Quality",
+        "labels": ["Zero-Shot", "Few-Shot", "Chain-of-Thought", "Few-Shot + CoT"],
+        "values": [52, 71, 78, 91],
+        "unit": "quality score / 100"
+      }
+    },
+    {
+      "id": "ai-engineering-006",
+      "category": "ai-engineering",
+      "question": "How do you reduce LLM inference latency and cost at scale?",
+      "keywords": ["latency", "cost", "inference", "speed", "performance", "expensive", "slow", "optimize", "scale", "tokens"],
+      "text": "Inference cost and latency are the two levers that determine whether a production AI system is sustainable or a liability. I attack both simultaneously: caching frequent query patterns to avoid redundant API calls, using smaller models for classification and routing tasks while reserving GPT-4o or Claude for complex reasoning, and streaming responses to improve perceived latency even when raw speed can't improve. On the deployments I manage, query routing alone — sending 60% of requests to lighter models — cut per-query costs roughly in half without a measurable quality drop.",
+      "highlights": ["caching", "query routing", "streaming", "60%", "per-query cost"],
+      "chart": {
+        "type": "bar",
+        "title": "Cost Optimization: Relative Cost per Query",
+        "labels": ["Baseline", "+ Caching", "+ Smaller Models", "+ Streaming", "+ Query Routing"],
+        "values": [100, 78, 61, 58, 48],
+        "unit": "relative cost %"
+      }
+    },
+    {
+      "id": "ai-engineering-007",
+      "category": "ai-engineering",
+      "question": "What vector databases have you used and how do you pick one?",
+      "keywords": ["vector", "database", "embeddings", "pinecone", "weaviate", "chroma", "pgvector", "store", "similarity", "search"],
+      "text": "The right vector database depends on where you are in the product lifecycle — not which one has the best marketing. For early RAG prototypes I use ChromaDB or pgvector (no new infrastructure, no new bill), then graduate to a managed solution like Pinecone or Weaviate when latency SLAs demand it. In pharmaceutical distribution, where retrieval accuracy on supplier records and drug SKUs is non-negotiable, I prioritize hybrid search (dense + sparse retrieval) over pure vector similarity — it handles the long-tail queries that embedding search alone misses. The metric I watch is retrieval precision at k, not just cosine similarity scores.",
+      "highlights": ["ChromaDB", "pgvector", "Pinecone", "hybrid search", "retrieval precision"],
+      "chart": {
+        "type": "bar",
+        "title": "Vector DB Selection Criteria",
+        "labels": ["Query Latency", "Hybrid Search", "Managed Scale", "Cost", "Dev Speed"],
+        "values": [90, 85, 72, 68, 95],
+        "unit": "importance score / 100"
+      }
+    },
+    {
+      "id": "ai-engineering-008",
+      "category": "ai-engineering",
+      "question": "What is LoRA and when would you use parameter-efficient fine-tuning?",
+      "keywords": ["lora", "peft", "parameter", "efficient", "fine-tuning", "adapter", "qlora", "quantization", "weights", "hermes"],
+      "text": "LoRA — Low-Rank Adaptation — is what made fine-tuning accessible without a hyperscaler GPU budget. Instead of updating all model weights, LoRA injects small trainable adapter matrices into the attention layers, so you can fine-tune a large open-source model like NousResearch Hermes at a fraction of the compute cost of full fine-tuning. I reach for LoRA when I need the model to consistently produce a specific domain output format — like structured ERP field extraction — where few-shot prompting alone isn't reliable enough. QLoRA goes further with 4-bit quantization, enabling fine-tuning on a single consumer GPU.",
+      "highlights": ["LoRA", "QLoRA", "NousResearch Hermes", "ERP field extraction", "adapter layers"],
+      "chart": {
+        "type": "bar",
+        "title": "LoRA vs Full Fine-Tuning",
+        "labels": ["GPU Memory", "Training Time", "Output Quality", "Update Cost", "Deployment Size"],
+        "values": [5, 8, 90, 6, 15],
+        "unit": "% of full fine-tune baseline"
+      }
+    },
+    {
+      "id": "ai-engineering-009",
+      "category": "ai-engineering",
+      "question": "How do you handle documents that exceed the LLM context window?",
+      "keywords": ["context", "window", "long", "document", "tokens", "chunk", "truncation", "large", "exceed", "pages"],
+      "text": "Context window limits are a real engineering constraint — dump a 200-page compliance document into a 128K context and you'll hit the lost-in-the-middle problem, where the model ignores content buried in the centre. My default is RAG-first: chunk documents semantically rather than by raw token count, embed and index them, then retrieve only the relevant passages at query time. For documents where sequential reasoning matters — contracts, audit trails, order histories — I use a map-reduce pattern: summarize each chunk independently, then synthesize the summaries. In the DFIO WMS deployment this approach let us index full supplier histories without ever hitting a context limit.",
+      "highlights": ["lost-in-the-middle", "RAG-first", "semantic chunking", "map-reduce", "DFIO WMS"],
+      "chart": {
+        "type": "bar",
+        "title": "Long-Document Strategy: Retrieval Quality",
+        "labels": ["Raw Context", "Naive Chunking", "Semantic Chunking", "Hybrid RAG", "Map-Reduce"],
+        "values": [45, 62, 78, 88, 84],
+        "unit": "retrieval quality score"
+      }
+    },
+    {
+      "id": "ai-engineering-010",
+      "category": "ai-engineering",
+      "question": "What is your approach to LLM observability and tracing in production?",
+      "keywords": ["observability", "tracing", "logging", "monitor", "trace", "spans", "debug", "visibility", "production"],
+      "text": "LLM observability is what separates teams that know their system is working from teams that hope it is. I instrument every agent call with structured traces — model ID, prompt hash, token count, latency, tool calls made, and output score — then pipe everything into a dashboard with alert thresholds on p95 latency and cost-per-query. For agentic systems I trace the full reasoning chain: every tool call, every intermediate output, every retry — so when something goes wrong in a 12-step workflow, I can pinpoint exactly which step failed and why. At Kohl & Frisch, this observability stack cut mean time to diagnose production issues from hours to under 10 minutes.",
+      "highlights": ["structured traces", "p95 latency", "reasoning chain", "tool calls", "10 minutes"],
+      "chart": {
+        "type": "line",
+        "title": "Mean Time to Diagnose: Observability Impact",
+        "labels": ["Pre-Obs.", "Week 4", "Week 8", "Week 12", "Week 16"],
+        "values": [240, 120, 45, 18, 10],
+        "unit": "minutes"
+      }
+    },
+    {
+      "id": "domain-001",
+      "category": "domain",
+      "question": "What supply chain AI systems have you built?",
+      "keywords": ["supply chain", "logistics", "inventory", "procurement", "demand", "forecasting", "warehouse", "distribution", "built", "deployed"],
+      "text": "The supply chain AI work I'm most proud of isn't a single system — it's an interconnected stack of agents that each own a slice of the operational picture. The centrepiece is a coordinator agent at Kohl & Frisch orchestrating 16 end-to-end processes across demand forecasting, procurement, and warehouse operations — replacing what used to require human coordination across three separate systems. The Manhattan DFIO WMS integration drove a 13% improvement in forecast accuracy and 99.7% pick accuracy across 9 distribution centres serving 2,400 warehouse staff. That's the difference between AI as a pilot program and AI as the operational backbone.",
+      "highlights": ["16 processes", "13% forecast accuracy", "99.7% pick accuracy", "9 distribution centres", "2,400 staff"],
+      "chart": {
+        "type": "bar",
+        "title": "Supply Chain AI Deployment Impact",
+        "labels": ["Forecast Accuracy", "Pick Accuracy", "Processes Automated", "Cost Reduction", "Throughput Gain"],
+        "values": [13, 99.7, 16, 30, 15],
+        "unit": "% improvement"
+      }
+    },
+    {
+      "id": "domain-002",
+      "category": "domain",
+      "question": "How have you integrated AI into ERP, WMS, and TMS systems?",
+      "keywords": ["erp", "wms", "tms", "integrate", "integration", "dynamics", "manhattan", "legacy", "enterprise", "system"],
+      "text": "Integrating AI into ERP and WMS systems is fundamentally a data plumbing problem before it's an AI problem — the models are only as good as the structured, real-time data you feed them. At Kohl & Frisch I built middleware layers that translate flat file exports from IBM AS/400 and Manhattan DFIO into structured API payloads that Azure OpenAI agents can reason over in real time. The Dynamics 365 ERP modernization reduced operational costs by 30%, and the AI procurement agent layered on top cut purchase cycle time by 33%. The lesson: invest in the data layer first — the AI capability multiplies on top.",
+      "highlights": ["IBM AS/400", "Manhattan DFIO", "Dynamics 365", "30% cost reduction", "33% cycle time"],
+      "chart": {
+        "type": "bar",
+        "title": "ERP/WMS AI Integration: Business Impact",
+        "labels": ["Operational Costs", "Purchase Cycle", "Manual Orders", "IT Query Load", "Pick Errors"],
+        "values": [30, 33, 68, 90, 0.3],
+        "unit": "% reduction"
+      }
+    },
+    {
+      "id": "domain-003",
+      "category": "domain",
+      "question": "How do you measure ROI on AI projects?",
+      "keywords": ["roi", "return", "investment", "measure", "value", "business", "cost", "benefit", "justify", "impact"],
+      "text": "The fastest way to kill an AI project is to launch without agreeing upfront on what success looks like in dollars and hours — not accuracy scores. I frame every AI initiative around three numbers: cost of the current manual process, projected cost with AI, and the delta. On the Kohl & Frisch deployment, that framing turned a skeptical CFO into a champion: $2.4M in operational savings, 90% of tier-1 IT queries automated, and 33% reduction in purchase cycle time — all numbers we committed to before a line of code shipped. The trick is picking metrics that finance can audit, not just metrics that engineers can measure.",
+      "highlights": ["$2.4M", "90%", "33%", "finance can audit", "committed upfront"],
+      "chart": {
+        "type": "bar",
+        "title": "Kohl & Frisch AI ROI: Key Metrics",
+        "labels": ["IT Automation", "Procurement Efficiency", "Cost Reduction", "Forecast Accuracy", "Pick Accuracy"],
+        "values": [90, 33, 30, 13, 99.7],
+        "unit": "% improvement"
       }
     },
     {
