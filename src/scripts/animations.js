@@ -176,36 +176,6 @@ function initScrollReveal() {
   });
 }
 
-// ── Projects horizontal scroll ───────────────────────────────
-function initProjectsScroll() {
-  // Only on desktop
-  if (window.innerWidth < 768) return;
-
-  const section = document.getElementById('projects');
-  const track   = document.getElementById('projects-track');
-  if (!section || !track) return;
-
-  // Wait a tick for layout to settle
-  ScrollTrigger.refresh();
-
-  const totalWidth = track.scrollWidth - window.innerWidth;
-  if (totalWidth <= 0) return;
-
-  gsap.to(track, {
-    x: -totalWidth,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: () => `+=${totalWidth + window.innerWidth * 0.4}`,
-      pin: true,
-      scrub: 1.2,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-    },
-  });
-}
-
 // ── Magnetic button effect ────────────────────────────────────
 function initMagneticButtons() {
   if (!window.matchMedia('(pointer: fine)').matches) return;
@@ -378,7 +348,9 @@ function renderChart(chartData) {
 }
 
 function renderStatCard(prompt, chartData) {
-  const visual = document.getElementById('generated-visual');
+  const visual   = document.getElementById('metrics-visual');
+  const skeleton = document.getElementById('metrics-skeleton');
+  if (skeleton) skeleton.style.display = 'none';
   if (!visual || !chartData?.values?.length) return false;
 
   const unit   = chartData.unit || '';
@@ -406,12 +378,11 @@ function renderStatCard(prompt, chartData) {
   return true;
 }
 
-async function renderVisual(prompt, chartData, visualQuery) {
+async function renderVisual(prompt, visualQuery) {
   const visual   = document.getElementById('generated-visual');
   const skeleton = document.getElementById('image-skeleton');
   if (!visual) return;
 
-  // Try Pexels photo first if we have a query
   if (visualQuery) {
     try {
       const res  = await fetch(`/api/pexels?q=${encodeURIComponent(visualQuery)}`);
@@ -432,14 +403,11 @@ async function renderVisual(prompt, chartData, visualQuery) {
         visual.style.display = 'flex';
         return;
       }
-    } catch { /* fall through to stat card */ }
+    } catch { /* no photo available */ }
   }
 
-  // Fallback: stat card from chart data
   if (skeleton) skeleton.style.display = 'none';
-  if (!renderStatCard(prompt, chartData)) {
-    visual.style.display = 'none';
-  }
+  visual.style.display = 'none';
 }
 
 async function streamAnswer(prompt, abortController) {
@@ -570,23 +538,27 @@ export function initAskSection() {
     if (sendBtn) sendBtn.disabled = true;
     if (statusEl) statusEl.textContent = 'Thinking…';
 
-    const answerTextEl  = document.getElementById('answer-text');
-    const answerDotsEl  = document.getElementById('answer-dots');
-    const answerErrorEl = document.getElementById('answer-error');
-    const visualEl      = document.getElementById('generated-visual');
-    const chartCanvas   = document.getElementById('answer-chart');
-    const chartErrorEl  = document.getElementById('chart-error');
-    const imgSkeleton   = document.getElementById('image-skeleton');
-    const chartSkeleton = document.getElementById('chart-skeleton');
-    const chartTitleEl  = document.getElementById('chart-title');
+    const answerTextEl   = document.getElementById('answer-text');
+    const answerDotsEl   = document.getElementById('answer-dots');
+    const answerErrorEl  = document.getElementById('answer-error');
+    const visualEl       = document.getElementById('generated-visual');
+    const metricsVisual  = document.getElementById('metrics-visual');
+    const chartCanvas    = document.getElementById('answer-chart');
+    const chartErrorEl   = document.getElementById('chart-error');
+    const imgSkeleton    = document.getElementById('image-skeleton');
+    const metricsSkel    = document.getElementById('metrics-skeleton');
+    const chartSkeleton  = document.getElementById('chart-skeleton');
+    const chartTitleEl   = document.getElementById('chart-title');
 
     if (answerTextEl)  answerTextEl.textContent = '';
     if (answerDotsEl)  answerDotsEl.style.display = 'flex';
     if (answerErrorEl) answerErrorEl.style.display = 'none';
     if (visualEl)      visualEl.style.display = 'none';
+    if (metricsVisual) metricsVisual.style.display = 'none';
     if (chartCanvas)   chartCanvas.style.display = 'none';
     if (chartErrorEl)  chartErrorEl.style.display = 'none';
     if (imgSkeleton)   imgSkeleton.style.display = 'block';
+    if (metricsSkel)   metricsSkel.style.display = 'block';
     if (chartSkeleton) chartSkeleton.style.display = 'block';
     if (chartTitleEl)  chartTitleEl.textContent = '';
 
@@ -595,7 +567,8 @@ export function initAskSection() {
     currentAbort = new AbortController();
 
     await streamAnswer(prompt, currentAbort);
-    await renderVisual(prompt, pendingChartData, pendingVisualQuery);
+    await renderVisual(prompt, pendingVisualQuery);
+    renderStatCard(prompt, pendingChartData);
 
     currentAbort = null;
     if (sendBtn && input?.value.trim()) sendBtn.disabled = false;
@@ -647,7 +620,4 @@ export function initAll() {
   initCounters();
   initMagneticButtons();
   initHeroParallax();
-
-  // Projects scroll init after a brief paint delay
-  setTimeout(() => initProjectsScroll(), 100);
 }

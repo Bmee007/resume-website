@@ -2,7 +2,7 @@
 
 ## Identity & Positioning
 
-- AI Systems Engineer and Agent Builder with a data science and enterprise operations background
+- AI Systems Engineer and Agent Builder with formal education in data science, business analysis, and operations management
 - 15+ years spanning supply chain, healthcare, and retail ERP/WMS/TMS integration
 - Focus areas: autonomous agent architecture, LLM memory research, agent security
 - 9+ years at Kohl & Frisch across three progressive leadership roles
@@ -70,6 +70,13 @@
 - Power Automate, AI Builder, Microsoft Copilot Studio
 - LLM-as-judge evaluation, hallucination rate monitoring, production observability
 - Open-source first mindset — builds on and contributes to open-source AI tooling
+
+## Education
+
+- **University of Toronto** — Business Analysis
+- **Sheridan College** — Data Science, Data Modeling/Warehousing and Database Administration
+- **Centennial College School of Business** — Operations Management and Supervision
+- Formal academic foundation spans data science, business analysis, and operations — directly applied across all AI and enterprise systems work
 
 ## Career Timeline
 

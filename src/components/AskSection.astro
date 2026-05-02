@@ -84,9 +84,21 @@
       </div>
     </div>
 
-    <!-- Panel 3: chart -->
-    <div id="panel-chart" class="ask-panel panel-chart">
+    <!-- Panel 3: metrics (stat card) -->
+    <div id="panel-metrics" class="ask-panel panel-metrics">
       <span class="panel-tag">Metrics</span>
+      <div class="metrics-wrap">
+        <div id="metrics-skeleton" class="panel-skeleton" style="display:none"></div>
+        <div id="metrics-visual" class="metrics-visual"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Full-width chart row -->
+  <div class="ask-chart-row">
+    <div id="panel-chart" class="ask-panel panel-chart">
+      <span class="panel-tag">Chart</span>
       <p id="chart-title" class="chart-title"></p>
       <div class="chart-wrap">
         <div id="chart-skeleton" class="panel-skeleton" style="display:none"></div>
@@ -97,7 +109,6 @@
         <canvas id="answer-chart"></canvas>
       </div>
     </div>
-
   </div>
 
 </section>
@@ -339,9 +350,9 @@
     40%           { transform: scale(1);   opacity: 1; }
   }
 
-  /* ── Panels 2 & 3: image + chart ─────────────────────────── */
+  /* ── Panels 2 & 3: image + metrics ──────────────────────── */
   .panel-image,
-  .panel-chart {
+  .panel-metrics {
     display: flex;
     flex-direction: column;
   }
@@ -365,6 +376,34 @@
 
   .generated-visual:has(> .vis-photo) {
     padding: 0;
+  }
+
+  .metrics-wrap {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .metrics-visual {
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ── Full-width chart row ─────────────────────────────────── */
+  .ask-chart-row {
+    margin-top: 1rem;
+  }
+
+  .panel-chart {
+    display: flex;
+    flex-direction: column;
+    min-height: clamp(280px, 28vw, 380px);
   }
 
   /* ── Pexels photo (dynamically injected — must be :global) */
@@ -613,6 +652,10 @@
       grid-column: 1 / -1;
       min-height: clamp(220px, 24vw, 320px);
     }
+
+    .panel-chart {
+      min-height: clamp(240px, 30vw, 340px);
+    }
   }
 
   /* ── Mobile ──────────────────────────────────────────────── */
@@ -627,6 +670,10 @@
 
     #panel-answer {
       min-height: clamp(200px, 50vw, 280px);
+    }
+
+    .panel-chart {
+      min-height: clamp(260px, 65vw, 360px);
     }
 
     .ask-chips {
