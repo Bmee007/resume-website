@@ -176,36 +176,6 @@ function initScrollReveal() {
   });
 }
 
-// ── Projects horizontal scroll ───────────────────────────────
-function initProjectsScroll() {
-  // Only on desktop
-  if (window.innerWidth < 768) return;
-
-  const section = document.getElementById('projects');
-  const track   = document.getElementById('projects-track');
-  if (!section || !track) return;
-
-  // Wait a tick for layout to settle
-  ScrollTrigger.refresh();
-
-  const totalWidth = track.scrollWidth - window.innerWidth;
-  if (totalWidth <= 0) return;
-
-  gsap.to(track, {
-    x: -totalWidth,
-    ease: 'none',
-    scrollTrigger: {
-      trigger: section,
-      start: 'top top',
-      end: () => `+=${totalWidth + window.innerWidth * 0.4}`,
-      pin: true,
-      scrub: 1.2,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-    },
-  });
-}
-
 // ── Magnetic button effect ────────────────────────────────────
 function initMagneticButtons() {
   if (!window.matchMedia('(pointer: fine)').matches) return;
@@ -650,7 +620,4 @@ export function initAll() {
   initCounters();
   initMagneticButtons();
   initHeroParallax();
-
-  // Projects scroll init after a brief paint delay
-  setTimeout(() => initProjectsScroll(), 100);
 }

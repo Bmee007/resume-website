@@ -49,9 +49,9 @@ const projects = [
     </p>
   </div>
 
-  <!-- Horizontal scroll track (pinned by GSAP on desktop) -->
-  <div class="projects-scroll-outer">
-    <div id="projects-track" class="projects-track">
+  <!-- Horizontal scroll track (native CSS scroll-snap) -->
+  <div class="projects-scroll-outer" data-lenis-prevent>
+    <div class="projects-track">
 
       {projects.map((project, i) => (
         <div class="project-card">
@@ -181,13 +181,21 @@ const projects = [
 
   /* ── Scroll container ─────────────────────────────────────── */
   .projects-scroll-outer {
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: visible;
     padding: 0 clamp(1.5rem, 5vw, 4rem) clamp(4rem, 7vw, 6rem);
     position: relative;
     z-index: 1;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  /* Track: horizontal on desktop, vertical on mobile */
+  .projects-scroll-outer::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Track: vertical stack on mobile, horizontal row on desktop */
   .projects-track {
     display: flex;
     flex-direction: column;
@@ -195,10 +203,14 @@ const projects = [
   }
 
   @media (min-width: 768px) {
+    .projects-scroll-outer {
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+    }
+
     .projects-track {
       flex-direction: row;
       gap: 1.5rem;
-      width: max-content;
     }
   }
 
@@ -220,6 +232,7 @@ const projects = [
     .project-card {
       flex-shrink: 0;
       width: clamp(320px, 38vw, 460px);
+      scroll-snap-align: start;
     }
   }
 
