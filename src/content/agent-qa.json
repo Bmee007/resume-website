@@ -7,6 +7,7 @@
       "keywords": ["led", "change", "initiative", "leadership", "transformation", "drove", "major"],
       "text": "Leading the AI-driven warehouse transformation at Kohl & Frisch was equal parts vision and grit — 2,400 staff, a legacy WMS, and a 90-day go-live window. We deployed an AI agent chatbot alongside ERP and WMS platforms, automating 90% of tier-1 IT queries almost overnight. The secret wasn't the technology — it was the change management framework that got every stakeholder from skeptic to champion before a single line of code shipped. End result: $2.4M in operational cost savings in year one.",
       "highlights": ["$2.4M", "Kohl & Frisch", "2,400 staff", "90%", "change management"],
+      "visual_query": "warehouse transformation team meeting",
       "chart": {
         "type": "line",
         "title": "Change Adoption Rate Over 12 Months",
@@ -22,6 +23,7 @@
       "keywords": ["overcome", "technical", "challenge", "difficult", "problem", "obstacle", "hurdle"],
       "text": "Integrating Azure OpenAI with a 30-year-old legacy ERP system isn't in any textbook — we had to build custom middleware that translated flat file exports into structured API payloads in real time. The hard part wasn't the code; it was convincing the business that the 6-week delay for the integration layer was worth it versus a quick-and-dirty hack. We held the line, built it right, and the system now processes 68% fewer manual orders. Legacy and AI can coexist — you just need a bridge.",
       "highlights": ["Azure OpenAI", "68%", "middleware", "integration", "legacy ERP"],
+      "visual_query": "software developer programming legacy system",
       "chart": {
         "type": "bar",
         "title": "Manual Order Processing: Before vs After AI Integration",
@@ -37,6 +39,7 @@
       "keywords": ["disagree", "disagreement", "leadership", "pushback", "conflict", "decision", "manager", "opinion", "challenge"],
       "text": "Conflict with leadership on technical decisions is inevitable when you care about outcomes — the question is whether you fight it politically or make the case with data. When I disagreed with the initial ERP modernization timeline at Kohl & Frisch, I didn't just voice concern in the room — I built a risk model showing the 30% cost reduction target was unreachable without a 6-week integration buffer, then presented it to the VP directly. The decision reversed, the buffer went in, and the 30% reduction landed. Disagreement without evidence is noise; disagreement with a model is a proposal.",
       "highlights": ["30% cost reduction", "risk model", "ERP modernization", "6-week buffer", "data-backed"],
+      "visual_query": "executive business meeting discussion boardroom",
       "chart": {
         "type": "bar",
         "title": "Disagreement Approach: Decision Quality Outcome",
@@ -52,6 +55,7 @@
       "keywords": ["incomplete", "information", "uncertainty", "ambiguous", "decision", "unclear", "unknown", "missing", "imperfect"],
       "text": "The rarest skill in AI engineering isn't knowing when you have enough data — it's knowing when waiting for more data costs more than acting on what you have. When we launched the AI chatbot at Kohl & Frisch, we had 60% of the historical query data we wanted and a 90-day hard go-live. We shipped with explicit confidence intervals on the automation rate, monitored escalations daily, and expanded scope as production data confirmed the pattern. Ended up at 90% automation — higher than our incomplete-data estimate — because the decision to move unlocked the real signal: live production traffic.",
       "highlights": ["60% of data", "90-day deadline", "90% automation", "confidence intervals", "production traffic"],
+      "visual_query": "analyst reviewing data charts decision",
       "chart": {
         "type": "line",
         "title": "Automation Rate: Phased Launch vs Waiting for Perfect Data",
@@ -67,6 +71,7 @@
       "keywords": ["prioritize", "priorities", "competing", "multiple", "projects", "juggle", "bandwidth", "capacity", "overloaded"],
       "text": "Competing priorities in AI are a resource allocation problem, not a motivation problem — and the answer is always the same: make the tradeoffs explicit and let the business decide, not the engineer. When I was running the ERP modernization and WMS AI deployment simultaneously at Kohl & Frisch, I built a priority matrix mapping each workstream against revenue impact, risk of delay, and interdependencies, then walked leadership through it weekly. They owned the sequencing; I owned the execution. Both programs delivered: 30% operational cost reduction from ERP, 99.7% pick accuracy from WMS.",
       "highlights": ["priority matrix", "30% cost reduction", "99.7% pick accuracy", "leadership sequencing", "parallel programs"],
+      "visual_query": "project manager whiteboard planning priority",
       "chart": {
         "type": "bar",
         "title": "Priority Matrix: Impact vs Effort",
@@ -82,6 +87,7 @@
       "keywords": ["influence", "without", "authority", "no formal", "peers", "persuade", "buy-in", "convince", "cross-functional"],
       "text": "Influence without authority is the default mode for anyone leading AI transformation — nobody reports to the AI lead, but everything depends on them. When I needed the finance, procurement, and warehouse ops teams to adopt the agentic workflow at Kohl & Frisch, none of them had any obligation to change. I ran small pilots in each department, reported results in their language — hours saved, errors eliminated, cost per transaction — and let the numbers pull them in. By the time we had full adoption, every department head believed it was their idea, which is exactly what successful influence looks like.",
       "highlights": ["agentic workflow", "department pilots", "hours saved", "full adoption", "cross-functional"],
+      "visual_query": "team collaboration office discussion peers",
       "chart": {
         "type": "bar",
         "title": "Influence Approach: Adoption Rate Comparison",
@@ -97,6 +103,7 @@
       "keywords": ["push back", "pushback", "stakeholder", "say no", "refused", "disagreed", "request", "boundary", "scope"],
       "text": "The hardest pushback I've made was telling a senior VP the AI chatbot couldn't go live on the promised date — not because we were behind, but because integration test coverage was insufficient and a bad deployment could permanently erode staff trust. I came with three options: delay 3 weeks with full coverage, launch with a limited rollout and explicit escalation paths, or launch as planned with documented risk. They chose the limited rollout. Staff trust stayed intact, the escalation paths caught two real edge cases, and we hit full deployment 4 weeks later without a single data incident.",
       "highlights": ["limited rollout", "staff trust", "escalation paths", "3 options", "zero data incidents"],
+      "visual_query": "professional presenting risk analysis executive",
       "chart": {
         "type": "bar",
         "title": "Launch Strategy Risk vs Outcome",
@@ -112,6 +119,7 @@
       "keywords": ["trust", "new team", "new organization", "build", "relationship", "onboard", "credibility", "rapport", "joined"],
       "text": "Trust with a new team is earned in the first 90 days by doing exactly what you say and saying exactly what you'll do — no more, no less. When I transitioned into the AI & Agent Systems Lead role at Kohl & Frisch, I spent the first month in listening mode: understanding what ops teams actually needed from AI versus what had been promised to them. Then I delivered one small, visible win fast — automating the most-complained-about manual process. The team's trust in the AI program went from polite skepticism to active co-design within a quarter, which is the only foundation that produces durable adoption.",
       "highlights": ["90 days", "listening mode", "first visible win", "active co-design", "durable adoption"],
+      "visual_query": "team onboarding handshake office trust",
       "chart": {
         "type": "line",
         "title": "Team Trust Index: New AI Lead Over First Year",
@@ -127,6 +135,7 @@
       "keywords": ["mentor", "coach", "develop", "junior", "team member", "grow", "teaching", "training", "guide"],
       "text": "The best mentorship I've done wasn't teaching AI concepts — it was teaching a senior ops analyst how to critically evaluate an AI system's output, so he became the team's internal expert rather than a dependent. Over six months I ran weekly working sessions: take a real warehouse problem, design the prompt together, evaluate the output critically, iterate. He's now leading AI adoption for one of the distribution centres independently. The goal of mentorship isn't to create someone who needs you — it's to create someone who doesn't.",
       "highlights": ["ops analyst", "internal expert", "six months", "distribution centre", "independent"],
+      "visual_query": "mentor coaching employee desk one-on-one",
       "chart": {
         "type": "line",
         "title": "Mentee Progression: Dependent to Independent",
@@ -142,6 +151,7 @@
       "keywords": ["missed", "deadline", "late", "delay", "behind schedule", "overdue", "slipped", "timeline"],
       "text": "The one project I've shipped late was the demand forecasting agent — not because the AI was hard, but because we underestimated the data pipeline work to normalize feeds from nine distribution centres into a single schema. When I saw we'd miss by three weeks, I called it immediately, presented the revised timeline with a root cause analysis, and offered two options: deliver the core forecasting function first, expand data sources in wave two. We went phased. No surprises — and forecast accuracy still hit 13% improvement at launch. The lesson: transparent early beats silent on-time fiction.",
       "highlights": ["13% forecast accuracy", "9 distribution centres", "phased delivery", "transparent early", "root cause analysis"],
+      "visual_query": "project timeline planning calendar notebook",
       "chart": {
         "type": "bar",
         "title": "Stakeholder Trust: Early Transparency vs Silent Delay",
@@ -157,6 +167,7 @@
       "keywords": ["cross-functional", "expectations", "align", "different teams", "dependencies", "coordination", "communication", "handoffs"],
       "text": "Cross-functional AI projects fail at the handoffs, not in the model. When I ran the 18-month ERP migration and AI augmentation at Kohl & Frisch with a 45-person team spanning IT, finance, procurement, and warehouse ops, I established one rule: every dependency gets a named owner, a date, and a written definition of done — no verbal agreements. Weekly standups reviewed the dependency board, not project status slides. That discipline eliminated the ambiguity that kills cross-team programs, and we delivered 30% operational cost reduction on time across all four departments.",
       "highlights": ["45-person team", "18 months", "named owners", "30% cost reduction", "dependency board"],
+      "visual_query": "cross functional team alignment meeting",
       "chart": {
         "type": "bar",
         "title": "Cross-Team Success Factors: Impact Score",
@@ -172,6 +183,7 @@
       "keywords": ["bad news", "difficult conversation", "executive", "disappointing", "setback", "honest", "transparent", "problem"],
       "text": "Delivering bad news early is a leadership skill, not a failure admission — the longer you wait, the worse it gets. When a critical integration between our Azure OpenAI layer and the legacy AS/400 system stalled due to an undocumented API constraint, I briefed the COO the same day we confirmed the scope of the problem. I came with: what happened, what it means for the timeline, three options, and my recommendation. The COO picked option two, we reallocated one developer, and the delay cost 10 days instead of the 6 weeks it would have cost if I'd waited until I had a solution.",
       "highlights": ["Azure OpenAI", "AS/400", "same-day brief", "COO", "10 days vs 6 weeks"],
+      "visual_query": "serious business executive meeting conversation",
       "chart": {
         "type": "bar",
         "title": "Cost of Delay: Reporting Early vs Late",
@@ -187,6 +199,7 @@
       "keywords": ["tight timeline", "limited resources", "constrained", "fast", "deadline", "short", "budget", "pressure", "quick"],
       "text": "The Kohl & Frisch AI chatbot deployment was the definition of constrained: 90 days, a 2,400-person user base, and a team of three engineers. We survived it by ruthlessly cutting scope to the single highest-value use case — tier-1 IT query automation — and deferring everything else to wave two. The system went live on day 87, automated 90% of tier-1 queries, and generated $2.4M in operational savings. The lesson: constraints force the prioritization clarity that unlimited resources never do.",
       "highlights": ["90 days", "2,400 users", "3 engineers", "90% automation", "$2.4M"],
+      "visual_query": "small team working late deadline pressure",
       "chart": {
         "type": "bar",
         "title": "Constrained Deployment: Scope vs Outcome",
@@ -202,6 +215,7 @@
       "keywords": ["data", "changed", "mind", "wrong", "evidence", "analysis", "surprised", "assumption", "pivot"],
       "text": "I went into the WMS AI optimization project convinced the biggest pick accuracy gain would come from better routing algorithms — the data said otherwise. Six weeks of baseline instrumentation showed 73% of pick errors happened at the scan-confirmation step, not during routing. I completely reversed my technical roadmap: built an AI-assisted scan-validation layer first, tackled routing second. Pick accuracy hit 99.7%. If I'd ignored the data and shipped what I'd planned, we'd have optimized the wrong thing beautifully.",
       "highlights": ["99.7% pick accuracy", "scan-validation", "73% of errors", "roadmap reversal", "baseline instrumentation"],
+      "visual_query": "data analyst reviewing charts pivot decision",
       "chart": {
         "type": "doughnut",
         "title": "Where Pick Errors Actually Occur",
@@ -217,6 +231,7 @@
       "keywords": ["align", "multiple teams", "shared goal", "consensus", "unified", "different departments", "silos", "together"],
       "text": "Aligning IT, finance, procurement, and warehouse ops around a single AI roadmap is less about technology and more about making sure each team sees their problem in your solution. I ran a 2-day alignment workshop at the start of the ERP and AI transformation where each department mapped their top three operational pain points. The AI roadmap came out of that session, not out of my office. When people co-author the plan, they defend it in their own budget meetings — and that's how a 45-person cross-functional program stays aligned for 18 months.",
       "highlights": ["4 departments", "alignment workshop", "co-authored roadmap", "45-person team", "18 months"],
+      "visual_query": "department heads strategy workshop whiteboard",
       "chart": {
         "type": "bar",
         "title": "Co-Authored vs Top-Down Roadmap: Outcomes",
@@ -232,6 +247,7 @@
       "keywords": ["technical debt", "debt", "shipping", "velocity", "refactor", "cut corners", "quality", "tradeoff", "balance"],
       "text": "Technical debt in AI compounds through model dependencies and data pipelines — a shortcut in the data layer poisons every model trained on top of it. My rule: I'll accept UI and workflow debt to ship faster, but never data schema debt or integration debt. On the Kohl & Frisch chatbot we deferred the admin reporting dashboard by 6 weeks — acceptable. We refused to cut the input sanitization layer despite pressure to launch faster — non-negotiable, since the agent had write-back access to ERP records. Zero security incidents across 18 months in production.",
       "highlights": ["data schema debt", "input sanitization", "ERP write-back", "zero security incidents", "18 months"],
+      "visual_query": "software engineers code review desk",
       "chart": {
         "type": "bar",
         "title": "Technical Debt Risk by Layer",
@@ -247,6 +263,7 @@
       "keywords": ["ownership", "outside", "role", "beyond", "responsibility", "stepped up", "initiative", "extra", "volunteered"],
       "text": "When our WMS deployment hit a critical supplier data quality issue that technically belonged to a backlogged data engineering team, I didn't wait for the escalation chain. I allocated two weeks of my own capacity, mapped the supplier data anomalies, built the normalization rules, and handed the fixed pipeline back with documentation. The deployment stayed on schedule, pick accuracy hit 99.7%, and the data engineering team adopted the normalization pattern across three other pipelines. Ownership isn't a title — it's the decision to act when the outcome matters more than the org chart.",
       "highlights": ["99.7% pick accuracy", "supplier data", "normalization rules", "2 weeks", "3 other pipelines"],
+      "visual_query": "warehouse worker data computer initiative",
       "chart": {
         "type": "bar",
         "title": "Proactive Ownership: Ripple Effect",
@@ -262,6 +279,7 @@
       "keywords": ["production", "incident", "unexpected", "behavior", "broke", "wrong", "malfunction", "alert", "failure", "behave"],
       "text": "When the demand forecasting agent started producing anomalous outputs — recommendations 40% outside normal variance — the first thing I did was halt write-back to the ERP, not debug. Contain before you diagnose. Investigation found a corrupted supplier lead-time record had propagated through the semantic memory layer and skewed every SKU from that supplier. Fix: purge the record, retrain the affected memory slice, add a variance gate that pauses ERP write-back on any recommendation exceeding ±20% of prior-period baseline. Zero downstream procurement damage because containment came first.",
       "highlights": ["ERP write-back halted", "semantic memory", "variance gate", "±20% baseline", "zero procurement damage"],
+      "visual_query": "server monitoring dashboard alert screen",
       "chart": {
         "type": "bar",
         "title": "Incident Response: Time to Containment by Protocol",
@@ -277,6 +295,7 @@
       "keywords": ["shut down", "kill", "pivot", "cancel", "stop", "abandon", "sunset", "scrap", "believed in"],
       "text": "Killing a project you've invested in is the discipline that separates engineers from leaders. We spent four months building a custom NLP classification layer for supplier invoice routing before the data made it obvious that a fine-tuned off-the-shelf model would outperform our custom approach at 20% of the maintenance cost. Recommending we scrap the custom build was uncomfortable — it was my design. But the business case was unambiguous, and pivoting freed the team for the procurement agent that ultimately cut purchase cycle time by 33%. Ego is expensive; sunk cost fallacy is more expensive.",
       "highlights": ["33% cycle time", "procurement agent", "sunk cost fallacy", "4 months", "20% maintenance cost"],
+      "visual_query": "business pivot strategy whiteboard planning",
       "chart": {
         "type": "bar",
         "title": "Custom Build vs Off-the-Shelf: Decision Framework",
@@ -292,6 +311,7 @@
       "keywords": ["ethics", "responsible", "bias", "fair", "safe", "ethical", "privacy", "harm", "guardrails", "governance"],
       "text": "Responsible AI isn't a compliance checklist — it's an engineering discipline that gets designed in before the first line of code ships. On every agent deployment I run, I threat-model for both technical failures (hallucinations, prompt injection) and human impact failures (automated decisions affecting specific roles or suppliers disproportionately). At Kohl & Frisch, the procurement agent had a mandatory human review gate for any recommendation impacting a minority vendor — not because the model was biased, but because trust requires transparency. AI that people trust lasts; AI that people fear gets circumvented.",
       "highlights": ["threat model", "human review gate", "transparency", "prompt injection", "responsible AI"],
+      "visual_query": "ethics governance policy meeting professional",
       "chart": {
         "type": "bar",
         "title": "Responsible AI Framework: Coverage by Risk Layer",
@@ -307,6 +327,7 @@
       "keywords": ["hiring", "team", "build", "recruit", "talent", "culture", "structure", "AI team", "people", "staff"],
       "text": "Building an AI team means resisting the urge to hire only ML researchers — the highest-leverage hires have been engineers who understand the domain deeply and can learn the AI layer, not the reverse. A supply chain expert who can prompt-engineer and critically evaluate LLM outputs will outperform a pure ML engineer who doesn't know what a 3PL is. I structure AI teams around three archetypes: builders (harness and pipeline engineers), domain adapters (people who bridge AI to the business problem), and evaluators (quality and safety). At Kohl & Frisch, this model let a team of three engineers deploy a system serving 2,400 staff.",
       "highlights": ["domain expertise", "3 archetypes", "team of 3", "2,400 staff", "domain adapters"],
+      "visual_query": "diverse tech team hiring interview office",
       "chart": {
         "type": "bar",
         "title": "AI Team Role Impact Score",
@@ -322,6 +343,7 @@
       "keywords": ["success", "measure", "metrics", "know", "working", "kpi", "goal", "outcome", "effective", "value"],
       "text": "The worst metric for an AI project is model accuracy — it tells you nothing about whether the system is solving the business problem. I measure success in three layers: operational (is the process faster or cheaper?), adoption (are the people who should use it actually using it?), and trust (are users escalating less over time, not more?). At Kohl & Frisch, the chatbot's escalation rate dropping from 100% to 10% in three months was the signal that told us the system had crossed from 'tolerated' to 'trusted'. Accuracy scores stayed in the background where they belong.",
       "highlights": ["10% escalation rate", "3 months", "operational metrics", "adoption", "trust signal"],
+      "visual_query": "business metrics dashboard review success",
       "chart": {
         "type": "line",
         "title": "AI System Trust Curve: Escalation Rate Over Time",
@@ -337,6 +359,7 @@
       "keywords": ["explain", "non-technical", "stakeholders", "communicate", "business", "executives", "simple", "language", "present"],
       "text": "The rule I live by: never lead with the technology, lead with the problem it solves and the number it moves. When I pitched the Kohl & Frisch AI agent deployment to the C-suite, I didn't say 'we're building a RAG-based LLM agent' — I said 'we're going to answer 90% of warehouse staff IT questions automatically, saving thousands of hours per year, starting in 90 days.' Technical details come after you've established the business case, not before. The change management framework that brought 2,400 staff from skeptic to champion was built entirely on outcome language.",
       "highlights": ["90%", "2,400 staff", "outcome language", "business case", "C-suite"],
+      "visual_query": "business presentation executive audience meeting",
       "chart": {
         "type": "bar",
         "title": "What Actually Lands with Stakeholders",
@@ -352,6 +375,7 @@
       "keywords": ["current", "stay", "learn", "keep up", "landscape", "fast", "changing", "new", "trends", "research"],
       "text": "The AI landscape moves fast enough that anyone claiming to know everything is either lying or not paying attention. My approach is deliberate: I follow primary sources — Anthropic, OpenAI, and NousResearch research papers, not just the summaries — and I test every framework I'm curious about on a real problem, not a toy dataset. LlamaIndex, AutoGen, and CrewAI are all on my bench right now. The discipline is knowing what to ignore: not every new model release is worth context-switching for, and the foundational concepts — agent harnesses, memory architecture, security threat models — are more durable than any specific tool.",
       "highlights": ["Anthropic", "NousResearch", "LlamaIndex", "AutoGen", "CrewAI"],
+      "visual_query": "engineer reading research paper laptop learning",
       "chart": {
         "type": "doughnut",
         "title": "How I Allocate Learning Time",
@@ -367,6 +391,7 @@
       "keywords": ["failed", "failure", "mistake", "wrong", "lesson", "learned", "didn't work", "went wrong", "setback"],
       "text": "The most instructive failure I've had was a demand forecasting agent that performed beautifully in staging and fell apart in production within two weeks — not because the model was wrong, but because we hadn't accounted for data quality variance between our staging snapshot and live ERP feeds. The model was right; the data was broken. We rebuilt the pipeline with real-time validation gates before every inference call and mandatory human review for any forecast deviating more than 15% from the prior period. The lesson that stuck: AI systems fail at the data and integration layer far more often than at the model layer.",
       "highlights": ["data quality", "staging vs production", "validation gates", "15% deviation", "integration layer"],
+      "visual_query": "developer debugging code error computer screen",
       "chart": {
         "type": "doughnut",
         "title": "AI Production Failure Root Causes",
@@ -382,6 +407,7 @@
       "keywords": ["agent", "harness", "workflow", "skills", "autonomous", "agentic", "build", "tools"],
       "text": "Building a reliable agent starts with the harness — the execution loop that handles tool routing, error recovery, and observability before any 'intelligence' enters the picture. On top of that I layer domain skills: supply chain data retrievers, ERP write-back tools, warehouse query APIs. The workflow then orchestrates these into plan→act→observe→reflect loops. On our supply chain deployment, this architecture automated 16 end-to-end processes that previously required human coordination across 3 systems.",
       "highlights": ["harness", "domain skills", "16 processes", "supply chain", "plan→act→observe"],
+      "visual_query": "software engineer coding laptop workflow",
       "chart": {
         "type": "bar",
         "title": "Agent Architecture Component Impact",
@@ -397,6 +423,7 @@
       "keywords": ["langchain", "llamaindex", "autogen", "crewai", "framework", "orchestration", "library", "stack"],
       "text": "I run LangChain in production for tool-routing agents, and I'm actively experimenting with LlamaIndex for RAG-heavy pipelines, AutoGen for multi-agent conversation patterns, and CrewAI for role-based agent crews. My honest take: frameworks accelerate prototyping but can abstract away the control you need in production, which is why I pair them with a custom harness layer that handles observability, error recovery, and authorization outside the framework's scope. For supply chain agents where a bad tool call can trigger a real purchase order, that harness layer isn't optional — it's the difference between a demo and a deployment.",
       "highlights": ["LangChain", "LlamaIndex", "AutoGen", "CrewAI", "custom harness"],
+      "visual_query": "developer programming multiple screens framework",
       "chart": {
         "type": "bar",
         "title": "Framework Fit by Use Case",
@@ -412,6 +439,7 @@
       "keywords": ["multi-agent", "multiple", "agents", "trust", "orchestration", "coordinator", "delegation", "inter-agent"],
       "text": "Multi-agent systems introduce a trust problem that single-agent architectures don't have: when Agent A delegates to Agent B, how does B know the instruction is legitimate and not a prompt injection riding along in A's output? My architecture enforces explicit trust boundaries — each agent has a declared capability scope, inter-agent messages are validated against a schema before execution, and no agent can escalate its own privileges or call tools outside its declared scope. At Kohl & Frisch, this pattern runs a coordinator agent that orchestrates 16 specialized sub-agents across finance, procurement, and warehouse operations — zero privilege escalation attempts have succeeded in production.",
       "highlights": ["trust boundaries", "privilege scope", "coordinator agent", "16 sub-agents", "zero escalation"],
+      "visual_query": "network diagram server architecture nodes",
       "chart": {
         "type": "bar",
         "title": "Multi-Agent Attack Surface Coverage",
@@ -427,6 +455,7 @@
       "keywords": ["stack", "tools", "technology", "tech", "use", "build", "framework", "language", "infrastructure", "platform"],
       "text": "My agent stack is built for production reliability over prototype flashiness: Python at the core, Azure OpenAI and Claude as primary LLM APIs, LangChain for tool orchestration, and a custom harness layer for observability, error recovery, and authorization. For local or self-hosted inference I use OpenCode as an OpenAI-compatible server with NousResearch Hermes. RAG pipelines use semantic chunking with hybrid retrieval, and I'm actively evaluating LlamaIndex, AutoGen, and CrewAI for multi-agent patterns. The north star is always the same: if it can't survive a bad tool call without human intervention, it's not production-ready.",
       "highlights": ["Python", "Azure OpenAI", "LangChain", "NousResearch Hermes", "OpenCode"],
+      "visual_query": "developer workspace multiple monitors coding",
       "chart": {
         "type": "bar",
         "title": "Agent Stack Component Reliability",
@@ -442,6 +471,7 @@
       "keywords": ["memory", "llm", "episodic", "semantic", "working", "context", "recall", "research", "remember"],
       "text": "The core problem: most agents are amnesic — every session starts from zero even if the same supplier has failed delivery windows 14 times. I'm researching three memory layers: episodic (agent interaction history with retrieval), semantic (knowledge graphs for domain facts like SKUs and SLAs), and working memory management for long-horizon supply chain planning. The goal is agents that accumulate operational judgment over time, not just raw capability.",
       "highlights": ["episodic memory", "semantic memory", "working memory", "supply chain", "operational judgment"],
+      "visual_query": "researcher notebook writing thinking ideas",
       "chart": {
         "type": "bar",
         "title": "Memory Layer Impact on Agent Performance",
@@ -457,6 +487,7 @@
       "keywords": ["security", "agent", "prompt injection", "trust", "threat", "attack", "red team", "safe", "defense"],
       "text": "Autonomous agents have an attack surface that most security teams haven't mapped yet: tool output poisoning, cross-agent trust escalation, and prompt injection via RAG-retrieved content. My approach is threat-model first — enumerate what an adversarial input could cause the agent to do, then build harness-level defenses: input sanitization before tool calls, output validation before write-back, and least-privilege action scoping with confirmation gates on destructive operations. On the deployments I've hardened, zero privilege escalation attempts have succeeded.",
       "highlights": ["prompt injection", "tool output poisoning", "least-privilege", "confirmation gates", "zero escalation"],
+      "visual_query": "cybersecurity professional monitor screen",
       "chart": {
         "type": "bar",
         "title": "Agent Attack Surface Coverage",
@@ -472,6 +503,7 @@
       "keywords": ["rag", "retrieval", "augmented", "generation", "vector", "embeddings", "knowledge base"],
       "text": "RAG — Retrieval-Augmented Generation — is the pattern of grounding an LLM's output in real, retrievable data rather than relying on what it memorized during training. You index your source documents into a vector store, retrieve the most semantically relevant chunks at query time, and inject them into the prompt before the model generates its answer. I'd reach for RAG over fine-tuning whenever the data changes frequently (inventory, pricing, policies) or when you need citations and auditability — both non-negotiable in supply chain and healthcare contexts. For static, stylistic behavior changes, fine-tuning wins; for dynamic knowledge, RAG is king.",
       "highlights": ["RAG", "vector store", "LLM", "fine-tuning", "retrieval", "supply chain"],
+      "visual_query": "document search database retrieval computer",
       "chart": {
         "type": "bar",
         "title": "RAG vs Fine-Tuning: When to Use Each",
@@ -487,6 +519,7 @@
       "keywords": ["evaluate", "monitor", "llm", "production", "performance", "metrics", "observability"],
       "text": "Production LLM monitoring is a different beast from traditional ML — you're tracking latency, token costs, hallucination rate, and user satisfaction simultaneously. I instrument every inference call with structured logging (model, prompt hash, token count, latency, user rating) and pipe it into a dashboard with alert thresholds on p95 latency and cost-per-query. For quality, I use a combination of LLM-as-judge (a second model evaluates outputs against a rubric) and periodic human review of flagged responses. On the AI agent deployment I manage, we dropped the escalation rate from 100% to 10% in three months — that's the metric that tells you the system is actually working.",
       "highlights": ["hallucination rate", "LLM-as-judge", "token costs", "10% escalation", "production monitoring"],
+      "visual_query": "monitoring dashboard analytics metrics screen",
       "chart": {
         "type": "line",
         "title": "LLM Production Quality Metrics Over Time",
@@ -502,6 +535,7 @@
       "keywords": ["fine-tuning", "finetune", "rag", "retrieval", "when", "choose", "difference", "versus", "train"],
       "text": "Fine-tuning vs RAG is the question I get most from teams trying to level up their LLM deployments — and the answer almost always favors RAG for enterprise use cases. Fine-tuning locks knowledge into model weights at training time, meaning every data update requires a costly retraining cycle; RAG lets you update your knowledge store without touching the model. In pharmaceutical distribution, where SKUs, pricing, and supplier data change daily, RAG isn't just preferred — it's the only architecture that survives production. I use fine-tuning selectively for stylistic behavior changes: consistent output format, domain vocabulary, or tone that rarely changes.",
       "highlights": ["RAG", "fine-tuning", "knowledge store", "pharmaceutical distribution", "production"],
+      "visual_query": "machine learning model training GPU server",
       "chart": {
         "type": "bar",
         "title": "RAG vs Fine-Tuning Decision Framework",
@@ -517,6 +551,7 @@
       "keywords": ["hallucination", "hallucinate", "accuracy", "grounding", "factual", "wrong", "errors", "confabulation", "reliable"],
       "text": "Hallucinations are the tax you pay for probabilistic reasoning — the question isn't whether they'll happen, but whether your system catches them before they cause damage. My defense is layered: RAG grounding to anchor outputs in retrievable facts, structured output schemas that constrain what the model can generate, and LLM-as-judge evaluation scoring every production response against a rubric. On the enterprise agent deployment I run, this combination dropped the escalation rate from 100% to 10% in three months — that's the number that tells you the guardrails are actually working.",
       "highlights": ["RAG grounding", "LLM-as-judge", "structured output", "10% escalation", "guardrails"],
+      "visual_query": "AI chatbot screen quality check review",
       "chart": {
         "type": "bar",
         "title": "Hallucination Rate by Defense Layer",
@@ -532,6 +567,7 @@
       "keywords": ["zero-shot", "few-shot", "chain", "thought", "prompting", "cot", "examples", "reasoning", "technique"],
       "text": "Zero-shot is asking the model cold — no examples, just instructions. Few-shot adds worked examples that show the model exactly what good output looks like, which is the fastest quality improvement available without any training cost. Chain-of-thought tells the model to reason step by step before answering, and it dramatically improves performance on anything involving logic, multi-step decisions, or domain-specific analysis. On the enterprise agent prompts I manage, combining few-shot examples with chain-of-thought reasoning cut hallucination rates by over 40% compared to basic zero-shot queries.",
       "highlights": ["zero-shot", "few-shot", "chain-of-thought", "40%", "reasoning"],
+      "visual_query": "person typing prompt laptop thinking",
       "chart": {
         "type": "bar",
         "title": "Prompting Technique Impact on Output Quality",
@@ -547,6 +583,7 @@
       "keywords": ["latency", "cost", "inference", "speed", "performance", "expensive", "slow", "optimize", "scale", "tokens"],
       "text": "Inference cost and latency are the two levers that determine whether a production AI system is sustainable or a liability. I attack both simultaneously: caching frequent query patterns to avoid redundant API calls, using smaller models for classification and routing tasks while reserving GPT-4o or Claude for complex reasoning, and streaming responses to improve perceived latency even when raw speed can't improve. On the deployments I manage, query routing alone — sending 60% of requests to lighter models — cut per-query costs roughly in half without a measurable quality drop.",
       "highlights": ["caching", "query routing", "streaming", "60%", "per-query cost"],
+      "visual_query": "server rack data center cooling infrastructure",
       "chart": {
         "type": "bar",
         "title": "Cost Optimization: Relative Cost per Query",
@@ -562,6 +599,7 @@
       "keywords": ["vector", "database", "embeddings", "pinecone", "weaviate", "chroma", "pgvector", "store", "similarity", "search"],
       "text": "The right vector database depends on where you are in the product lifecycle — not which one has the best marketing. For early RAG prototypes I use ChromaDB or pgvector (no new infrastructure, no new bill), then graduate to a managed solution like Pinecone or Weaviate when latency SLAs demand it. In pharmaceutical distribution, where retrieval accuracy on supplier records and drug SKUs is non-negotiable, I prioritize hybrid search (dense + sparse retrieval) over pure vector similarity — it handles the long-tail queries that embedding search alone misses. The metric I watch is retrieval precision at k, not just cosine similarity scores.",
       "highlights": ["ChromaDB", "pgvector", "Pinecone", "hybrid search", "retrieval precision"],
+      "visual_query": "database search technology computer screen",
       "chart": {
         "type": "bar",
         "title": "Vector DB Selection Criteria",
@@ -577,6 +615,7 @@
       "keywords": ["lora", "peft", "parameter", "efficient", "fine-tuning", "adapter", "qlora", "quantization", "weights", "hermes"],
       "text": "LoRA — Low-Rank Adaptation — is what made fine-tuning accessible without a hyperscaler GPU budget. Instead of updating all model weights, LoRA injects small trainable adapter matrices into the attention layers, so you can fine-tune a large open-source model like NousResearch Hermes at a fraction of the compute cost of full fine-tuning. I reach for LoRA when I need the model to consistently produce a specific domain output format — like structured ERP field extraction — where few-shot prompting alone isn't reliable enough. QLoRA goes further with 4-bit quantization, enabling fine-tuning on a single consumer GPU.",
       "highlights": ["LoRA", "QLoRA", "NousResearch Hermes", "ERP field extraction", "adapter layers"],
+      "visual_query": "GPU server machine learning training workstation",
       "chart": {
         "type": "bar",
         "title": "LoRA vs Full Fine-Tuning",
@@ -592,6 +631,7 @@
       "keywords": ["context", "window", "long", "document", "tokens", "chunk", "truncation", "large", "exceed", "pages"],
       "text": "Context window limits are a real engineering constraint — dump a 200-page compliance document into a 128K context and you'll hit the lost-in-the-middle problem, where the model ignores content buried in the centre. My default is RAG-first: chunk documents semantically rather than by raw token count, embed and index them, then retrieve only the relevant passages at query time. For documents where sequential reasoning matters — contracts, audit trails, order histories — I use a map-reduce pattern: summarize each chunk independently, then synthesize the summaries. In the DFIO WMS deployment this approach let us index full supplier histories without ever hitting a context limit.",
       "highlights": ["lost-in-the-middle", "RAG-first", "semantic chunking", "map-reduce", "DFIO WMS"],
+      "visual_query": "stacked documents papers office filing",
       "chart": {
         "type": "bar",
         "title": "Long-Document Strategy: Retrieval Quality",
@@ -607,6 +647,7 @@
       "keywords": ["observability", "tracing", "logging", "monitor", "trace", "spans", "debug", "visibility", "production"],
       "text": "LLM observability is what separates teams that know their system is working from teams that hope it is. I instrument every agent call with structured traces — model ID, prompt hash, token count, latency, tool calls made, and output score — then pipe everything into a dashboard with alert thresholds on p95 latency and cost-per-query. For agentic systems I trace the full reasoning chain: every tool call, every intermediate output, every retry — so when something goes wrong in a 12-step workflow, I can pinpoint exactly which step failed and why. At Kohl & Frisch, this observability stack cut mean time to diagnose production issues from hours to under 10 minutes.",
       "highlights": ["structured traces", "p95 latency", "reasoning chain", "tool calls", "10 minutes"],
+      "visual_query": "software engineer monitoring production logs dashboard",
       "chart": {
         "type": "line",
         "title": "Mean Time to Diagnose: Observability Impact",
@@ -622,6 +663,7 @@
       "keywords": ["supply chain", "logistics", "inventory", "procurement", "demand", "forecasting", "warehouse", "distribution", "built", "deployed"],
       "text": "The supply chain AI work I'm most proud of isn't a single system — it's an interconnected stack of agents that each own a slice of the operational picture. The centrepiece is a coordinator agent at Kohl & Frisch orchestrating 16 end-to-end processes across demand forecasting, procurement, and warehouse operations — replacing what used to require human coordination across three separate systems. The Manhattan DFIO WMS integration drove a 13% improvement in forecast accuracy and 99.7% pick accuracy across 9 distribution centres serving 2,400 warehouse staff. That's the difference between AI as a pilot program and AI as the operational backbone.",
       "highlights": ["16 processes", "13% forecast accuracy", "99.7% pick accuracy", "9 distribution centres", "2,400 staff"],
+      "visual_query": "warehouse workers picking orders distribution centre",
       "chart": {
         "type": "bar",
         "title": "Supply Chain AI Deployment Impact",
@@ -637,6 +679,7 @@
       "keywords": ["erp", "wms", "tms", "integrate", "integration", "dynamics", "manhattan", "legacy", "enterprise", "system"],
       "text": "Integrating AI into ERP and WMS systems is fundamentally a data plumbing problem before it's an AI problem — the models are only as good as the structured, real-time data you feed them. At Kohl & Frisch I built middleware layers that translate flat file exports from IBM AS/400 and Manhattan DFIO into structured API payloads that Azure OpenAI agents can reason over in real time. The Dynamics 365 ERP modernization reduced operational costs by 30%, and the AI procurement agent layered on top cut purchase cycle time by 33%. The lesson: invest in the data layer first — the AI capability multiplies on top.",
       "highlights": ["IBM AS/400", "Manhattan DFIO", "Dynamics 365", "30% cost reduction", "33% cycle time"],
+      "visual_query": "pharmaceutical distribution centre warehouse",
       "chart": {
         "type": "bar",
         "title": "ERP/WMS AI Integration: Business Impact",
@@ -652,6 +695,7 @@
       "keywords": ["roi", "return", "investment", "measure", "value", "business", "cost", "benefit", "justify", "impact"],
       "text": "The fastest way to kill an AI project is to launch without agreeing upfront on what success looks like in dollars and hours — not accuracy scores. I frame every AI initiative around three numbers: cost of the current manual process, projected cost with AI, and the delta. On the Kohl & Frisch deployment, that framing turned a skeptical CFO into a champion: $2.4M in operational savings, 90% of tier-1 IT queries automated, and 33% reduction in purchase cycle time — all numbers we committed to before a line of code shipped. The trick is picking metrics that finance can audit, not just metrics that engineers can measure.",
       "highlights": ["$2.4M", "90%", "33%", "finance can audit", "committed upfront"],
+      "visual_query": "business ROI analytics meeting finance",
       "chart": {
         "type": "bar",
         "title": "Kohl & Frisch AI ROI: Key Metrics",
@@ -667,6 +711,7 @@
       "keywords": ["prompts", "chatgpt", "prompt engineering", "better", "write", "improve", "effective"],
       "text": "The single biggest upgrade you can make to your prompts is adding role + context + constraint — tell the model who it is, what you need, and what you don't want. Instead of 'summarize this', try 'You are a senior analyst. Summarize this 10-page report into 5 bullet points for a CFO. Omit technical jargon.' Chain-of-thought prompting (adding 'think step by step') dramatically improves accuracy on reasoning tasks. On the enterprise agent deployments I run, prompt templates with these principles cut hallucination rates by over 40% compared to free-form queries.",
       "highlights": ["role + context + constraint", "chain-of-thought", "40%", "prompt templates", "hallucination"],
+      "visual_query": "person typing chatbot laptop prompt",
       "chart": {
         "type": "bar",
         "title": "Prompt Technique Impact on Output Quality",
