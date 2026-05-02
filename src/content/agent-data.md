@@ -62,11 +62,14 @@
 
 ## AI & Data Science Stack
 
-- LLM APIs: Azure OpenAI, GPT-4o, Claude, Google Gemini
+- LLM APIs & Models: Azure OpenAI, GPT-4o, Claude (Anthropic), Google Gemini, NousResearch Hermes (open-source)
+- Agent frameworks: LangChain (production), actively experimenting with LlamaIndex, AutoGen, CrewAI
+- Self-hosted AI: OpenCode — self-hosted OpenAI-compatible server for local/VPS model serving
 - Python, ML/statistical modeling, data pipeline engineering
 - RAG architecture, vector retrieval, LLM evaluation and monitoring
 - Power Automate, AI Builder, Microsoft Copilot Studio
 - LLM-as-judge evaluation, hallucination rate monitoring, production observability
+- Open-source first mindset — builds on and contributes to open-source AI tooling
 
 ## Career Timeline
 
