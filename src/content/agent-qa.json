@@ -31,6 +31,306 @@
       }
     },
     {
+      "id": "behavioral-006",
+      "category": "behavioral",
+      "question": "How do you handle disagreement with a technical decision from leadership?",
+      "keywords": ["disagree", "disagreement", "leadership", "pushback", "conflict", "decision", "manager", "opinion", "challenge"],
+      "text": "Conflict with leadership on technical decisions is inevitable when you care about outcomes — the question is whether you fight it politically or make the case with data. When I disagreed with the initial ERP modernization timeline at Kohl & Frisch, I didn't just voice concern in the room — I built a risk model showing the 30% cost reduction target was unreachable without a 6-week integration buffer, then presented it to the VP directly. The decision reversed, the buffer went in, and the 30% reduction landed. Disagreement without evidence is noise; disagreement with a model is a proposal.",
+      "highlights": ["30% cost reduction", "risk model", "ERP modernization", "6-week buffer", "data-backed"],
+      "chart": {
+        "type": "bar",
+        "title": "Disagreement Approach: Decision Quality Outcome",
+        "labels": ["Gut Feeling Only", "Verbal Argument", "Risk Model", "Model + Alternatives", "Model + Stakeholder Buy-in"],
+        "values": [35, 52, 74, 88, 95],
+        "unit": "decision quality score"
+      }
+    },
+    {
+      "id": "behavioral-007",
+      "category": "behavioral",
+      "question": "Tell me about a time you made a decision with incomplete information.",
+      "keywords": ["incomplete", "information", "uncertainty", "ambiguous", "decision", "unclear", "unknown", "missing", "imperfect"],
+      "text": "The rarest skill in AI engineering isn't knowing when you have enough data — it's knowing when waiting for more data costs more than acting on what you have. When we launched the AI chatbot at Kohl & Frisch, we had 60% of the historical query data we wanted and a 90-day hard go-live. We shipped with explicit confidence intervals on the automation rate, monitored escalations daily, and expanded scope as production data confirmed the pattern. Ended up at 90% automation — higher than our incomplete-data estimate — because the decision to move unlocked the real signal: live production traffic.",
+      "highlights": ["60% of data", "90-day deadline", "90% automation", "confidence intervals", "production traffic"],
+      "chart": {
+        "type": "line",
+        "title": "Automation Rate: Phased Launch vs Waiting for Perfect Data",
+        "labels": ["Week 2", "Week 4", "Week 6", "Week 8", "Week 12"],
+        "values": [61, 72, 81, 87, 90],
+        "unit": "% queries automated"
+      }
+    },
+    {
+      "id": "behavioral-008",
+      "category": "behavioral",
+      "question": "How do you prioritize when you have competing high-priority projects?",
+      "keywords": ["prioritize", "priorities", "competing", "multiple", "projects", "juggle", "bandwidth", "capacity", "overloaded"],
+      "text": "Competing priorities in AI are a resource allocation problem, not a motivation problem — and the answer is always the same: make the tradeoffs explicit and let the business decide, not the engineer. When I was running the ERP modernization and WMS AI deployment simultaneously at Kohl & Frisch, I built a priority matrix mapping each workstream against revenue impact, risk of delay, and interdependencies, then walked leadership through it weekly. They owned the sequencing; I owned the execution. Both programs delivered: 30% operational cost reduction from ERP, 99.7% pick accuracy from WMS.",
+      "highlights": ["priority matrix", "30% cost reduction", "99.7% pick accuracy", "leadership sequencing", "parallel programs"],
+      "chart": {
+        "type": "bar",
+        "title": "Priority Matrix: Impact vs Effort",
+        "labels": ["High Impact / Low Effort", "High Impact / High Effort", "Low Impact / Low Effort", "Low Impact / High Effort"],
+        "values": [95, 78, 35, 12],
+        "unit": "priority score"
+      }
+    },
+    {
+      "id": "behavioral-009",
+      "category": "behavioral",
+      "question": "Describe a time you influenced without formal authority.",
+      "keywords": ["influence", "without", "authority", "no formal", "peers", "persuade", "buy-in", "convince", "cross-functional"],
+      "text": "Influence without authority is the default mode for anyone leading AI transformation — nobody reports to the AI lead, but everything depends on them. When I needed the finance, procurement, and warehouse ops teams to adopt the agentic workflow at Kohl & Frisch, none of them had any obligation to change. I ran small pilots in each department, reported results in their language — hours saved, errors eliminated, cost per transaction — and let the numbers pull them in. By the time we had full adoption, every department head believed it was their idea, which is exactly what successful influence looks like.",
+      "highlights": ["agentic workflow", "department pilots", "hours saved", "full adoption", "cross-functional"],
+      "chart": {
+        "type": "bar",
+        "title": "Influence Approach: Adoption Rate Comparison",
+        "labels": ["Top-Down Mandate", "Email & Slides", "Pilot + Results", "Pilot + Champion", "Embedded Partnership"],
+        "values": [42, 38, 71, 85, 93],
+        "unit": "adoption rate %"
+      }
+    },
+    {
+      "id": "behavioral-010",
+      "category": "behavioral",
+      "question": "Tell me about a time you pushed back on a stakeholder's request.",
+      "keywords": ["push back", "pushback", "stakeholder", "say no", "refused", "disagreed", "request", "boundary", "scope"],
+      "text": "The hardest pushback I've made was telling a senior VP the AI chatbot couldn't go live on the promised date — not because we were behind, but because integration test coverage was insufficient and a bad deployment could permanently erode staff trust. I came with three options: delay 3 weeks with full coverage, launch with a limited rollout and explicit escalation paths, or launch as planned with documented risk. They chose the limited rollout. Staff trust stayed intact, the escalation paths caught two real edge cases, and we hit full deployment 4 weeks later without a single data incident.",
+      "highlights": ["limited rollout", "staff trust", "escalation paths", "3 options", "zero data incidents"],
+      "chart": {
+        "type": "bar",
+        "title": "Launch Strategy Risk vs Outcome",
+        "labels": ["Full Launch (Risky)", "Limited Rollout", "3-Week Delay", "Delayed + Full Coverage"],
+        "values": [35, 82, 79, 95],
+        "unit": "outcome quality score"
+      }
+    },
+    {
+      "id": "behavioral-011",
+      "category": "behavioral",
+      "question": "How do you build trust with a new team or organization?",
+      "keywords": ["trust", "new team", "new organization", "build", "relationship", "onboard", "credibility", "rapport", "joined"],
+      "text": "Trust with a new team is earned in the first 90 days by doing exactly what you say and saying exactly what you'll do — no more, no less. When I transitioned into the AI & Agent Systems Lead role at Kohl & Frisch, I spent the first month in listening mode: understanding what ops teams actually needed from AI versus what had been promised to them. Then I delivered one small, visible win fast — automating the most-complained-about manual process. The team's trust in the AI program went from polite skepticism to active co-design within a quarter, which is the only foundation that produces durable adoption.",
+      "highlights": ["90 days", "listening mode", "first visible win", "active co-design", "durable adoption"],
+      "chart": {
+        "type": "line",
+        "title": "Team Trust Index: New AI Lead Over First Year",
+        "labels": ["Month 1", "Month 3", "Month 6", "Month 9", "Month 12"],
+        "values": [28, 52, 71, 85, 94],
+        "unit": "trust index / 100"
+      }
+    },
+    {
+      "id": "behavioral-012",
+      "category": "behavioral",
+      "question": "Describe a time you mentored or developed someone on your team.",
+      "keywords": ["mentor", "coach", "develop", "junior", "team member", "grow", "teaching", "training", "guide"],
+      "text": "The best mentorship I've done wasn't teaching AI concepts — it was teaching a senior ops analyst how to critically evaluate an AI system's output, so he became the team's internal expert rather than a dependent. Over six months I ran weekly working sessions: take a real warehouse problem, design the prompt together, evaluate the output critically, iterate. He's now leading AI adoption for one of the distribution centres independently. The goal of mentorship isn't to create someone who needs you — it's to create someone who doesn't.",
+      "highlights": ["ops analyst", "internal expert", "six months", "distribution centre", "independent"],
+      "chart": {
+        "type": "line",
+        "title": "Mentee Progression: Dependent to Independent",
+        "labels": ["Month 1", "Month 2", "Month 3", "Month 4", "Month 6"],
+        "values": [10, 28, 52, 74, 92],
+        "unit": "independence score / 100"
+      }
+    },
+    {
+      "id": "behavioral-013",
+      "category": "behavioral",
+      "question": "Tell me about a time you missed a deadline — what happened and what did you do?",
+      "keywords": ["missed", "deadline", "late", "delay", "behind schedule", "overdue", "slipped", "timeline"],
+      "text": "The one project I've shipped late was the demand forecasting agent — not because the AI was hard, but because we underestimated the data pipeline work to normalize feeds from nine distribution centres into a single schema. When I saw we'd miss by three weeks, I called it immediately, presented the revised timeline with a root cause analysis, and offered two options: deliver the core forecasting function first, expand data sources in wave two. We went phased. No surprises — and forecast accuracy still hit 13% improvement at launch. The lesson: transparent early beats silent on-time fiction.",
+      "highlights": ["13% forecast accuracy", "9 distribution centres", "phased delivery", "transparent early", "root cause analysis"],
+      "chart": {
+        "type": "bar",
+        "title": "Stakeholder Trust: Early Transparency vs Silent Delay",
+        "labels": ["Silent Late Delivery", "Quiet Scope Cut", "Early Transparency", "Phased Delivery", "Revised + Delivered"],
+        "values": [28, 45, 72, 85, 91],
+        "unit": "stakeholder trust score"
+      }
+    },
+    {
+      "id": "behavioral-014",
+      "category": "behavioral",
+      "question": "How do you set expectations when working across multiple teams?",
+      "keywords": ["cross-functional", "expectations", "align", "different teams", "dependencies", "coordination", "communication", "handoffs"],
+      "text": "Cross-functional AI projects fail at the handoffs, not in the model. When I ran the 18-month ERP migration and AI augmentation at Kohl & Frisch with a 45-person team spanning IT, finance, procurement, and warehouse ops, I established one rule: every dependency gets a named owner, a date, and a written definition of done — no verbal agreements. Weekly standups reviewed the dependency board, not project status slides. That discipline eliminated the ambiguity that kills cross-team programs, and we delivered 30% operational cost reduction on time across all four departments.",
+      "highlights": ["45-person team", "18 months", "named owners", "30% cost reduction", "dependency board"],
+      "chart": {
+        "type": "bar",
+        "title": "Cross-Team Success Factors: Impact Score",
+        "labels": ["Named Owners", "Written DoD", "Weekly Reviews", "Dependency Board", "Exec Visibility"],
+        "values": [92, 88, 85, 90, 78],
+        "unit": "impact score / 100"
+      }
+    },
+    {
+      "id": "behavioral-015",
+      "category": "behavioral",
+      "question": "Describe a time you had to deliver bad news to an executive.",
+      "keywords": ["bad news", "difficult conversation", "executive", "disappointing", "setback", "honest", "transparent", "problem"],
+      "text": "Delivering bad news early is a leadership skill, not a failure admission — the longer you wait, the worse it gets. When a critical integration between our Azure OpenAI layer and the legacy AS/400 system stalled due to an undocumented API constraint, I briefed the COO the same day we confirmed the scope of the problem. I came with: what happened, what it means for the timeline, three options, and my recommendation. The COO picked option two, we reallocated one developer, and the delay cost 10 days instead of the 6 weeks it would have cost if I'd waited until I had a solution.",
+      "highlights": ["Azure OpenAI", "AS/400", "same-day brief", "COO", "10 days vs 6 weeks"],
+      "chart": {
+        "type": "bar",
+        "title": "Cost of Delay: Reporting Early vs Late",
+        "labels": ["Same Day", "3 Days", "1 Week", "2 Weeks", "After Resolution"],
+        "values": [10, 18, 32, 55, 42],
+        "unit": "recovery days lost"
+      }
+    },
+    {
+      "id": "behavioral-016",
+      "category": "behavioral",
+      "question": "Tell me about a time you delivered under a tight timeline with limited resources.",
+      "keywords": ["tight timeline", "limited resources", "constrained", "fast", "deadline", "short", "budget", "pressure", "quick"],
+      "text": "The Kohl & Frisch AI chatbot deployment was the definition of constrained: 90 days, a 2,400-person user base, and a team of three engineers. We survived it by ruthlessly cutting scope to the single highest-value use case — tier-1 IT query automation — and deferring everything else to wave two. The system went live on day 87, automated 90% of tier-1 queries, and generated $2.4M in operational savings. The lesson: constraints force the prioritization clarity that unlimited resources never do.",
+      "highlights": ["90 days", "2,400 users", "3 engineers", "90% automation", "$2.4M"],
+      "chart": {
+        "type": "bar",
+        "title": "Constrained Deployment: Scope vs Outcome",
+        "labels": ["Features Deferred", "Days to Launch", "Users Served", "Automation Rate", "Cost Savings ($K)"],
+        "values": [12, 87, 2400, 90, 2400],
+        "unit": ""
+      }
+    },
+    {
+      "id": "behavioral-017",
+      "category": "behavioral",
+      "question": "Describe a situation where data or analysis changed your mind.",
+      "keywords": ["data", "changed", "mind", "wrong", "evidence", "analysis", "surprised", "assumption", "pivot"],
+      "text": "I went into the WMS AI optimization project convinced the biggest pick accuracy gain would come from better routing algorithms — the data said otherwise. Six weeks of baseline instrumentation showed 73% of pick errors happened at the scan-confirmation step, not during routing. I completely reversed my technical roadmap: built an AI-assisted scan-validation layer first, tackled routing second. Pick accuracy hit 99.7%. If I'd ignored the data and shipped what I'd planned, we'd have optimized the wrong thing beautifully.",
+      "highlights": ["99.7% pick accuracy", "scan-validation", "73% of errors", "roadmap reversal", "baseline instrumentation"],
+      "chart": {
+        "type": "doughnut",
+        "title": "Where Pick Errors Actually Occur",
+        "labels": ["Scan Confirmation", "Routing", "Label Errors", "System Lag", "Human Override"],
+        "values": [73, 18, 5, 3, 1],
+        "unit": "% of total errors"
+      }
+    },
+    {
+      "id": "behavioral-018",
+      "category": "behavioral",
+      "question": "Tell me about a time you aligned multiple teams around a shared goal.",
+      "keywords": ["align", "multiple teams", "shared goal", "consensus", "unified", "different departments", "silos", "together"],
+      "text": "Aligning IT, finance, procurement, and warehouse ops around a single AI roadmap is less about technology and more about making sure each team sees their problem in your solution. I ran a 2-day alignment workshop at the start of the ERP and AI transformation where each department mapped their top three operational pain points. The AI roadmap came out of that session, not out of my office. When people co-author the plan, they defend it in their own budget meetings — and that's how a 45-person cross-functional program stays aligned for 18 months.",
+      "highlights": ["4 departments", "alignment workshop", "co-authored roadmap", "45-person team", "18 months"],
+      "chart": {
+        "type": "bar",
+        "title": "Co-Authored vs Top-Down Roadmap: Outcomes",
+        "labels": ["Adoption Rate", "Budget Defense", "Timeline Adherence", "Scope Stability", "Exec Trust"],
+        "values": [91, 85, 88, 82, 90],
+        "unit": "score / 100"
+      }
+    },
+    {
+      "id": "behavioral-019",
+      "category": "behavioral",
+      "question": "How do you balance technical debt against shipping new features?",
+      "keywords": ["technical debt", "debt", "shipping", "velocity", "refactor", "cut corners", "quality", "tradeoff", "balance"],
+      "text": "Technical debt in AI compounds through model dependencies and data pipelines — a shortcut in the data layer poisons every model trained on top of it. My rule: I'll accept UI and workflow debt to ship faster, but never data schema debt or integration debt. On the Kohl & Frisch chatbot we deferred the admin reporting dashboard by 6 weeks — acceptable. We refused to cut the input sanitization layer despite pressure to launch faster — non-negotiable, since the agent had write-back access to ERP records. Zero security incidents across 18 months in production.",
+      "highlights": ["data schema debt", "input sanitization", "ERP write-back", "zero security incidents", "18 months"],
+      "chart": {
+        "type": "bar",
+        "title": "Technical Debt Risk by Layer",
+        "labels": ["UI / UX", "Workflow Logic", "Integration Layer", "Data Schema", "Security Controls"],
+        "values": [25, 40, 72, 88, 98],
+        "unit": "risk level if deferred"
+      }
+    },
+    {
+      "id": "behavioral-020",
+      "category": "behavioral",
+      "question": "Tell me about a time you took ownership outside your defined role.",
+      "keywords": ["ownership", "outside", "role", "beyond", "responsibility", "stepped up", "initiative", "extra", "volunteered"],
+      "text": "When our WMS deployment hit a critical supplier data quality issue that technically belonged to a backlogged data engineering team, I didn't wait for the escalation chain. I allocated two weeks of my own capacity, mapped the supplier data anomalies, built the normalization rules, and handed the fixed pipeline back with documentation. The deployment stayed on schedule, pick accuracy hit 99.7%, and the data engineering team adopted the normalization pattern across three other pipelines. Ownership isn't a title — it's the decision to act when the outcome matters more than the org chart.",
+      "highlights": ["99.7% pick accuracy", "supplier data", "normalization rules", "2 weeks", "3 other pipelines"],
+      "chart": {
+        "type": "bar",
+        "title": "Proactive Ownership: Ripple Effect",
+        "labels": ["Problem Fixed", "Deployment Saved", "Other Pipelines Improved", "Days of Delay Avoided"],
+        "values": [1, 1, 3, 42],
+        "unit": "count / days"
+      }
+    },
+    {
+      "id": "behavioral-021",
+      "category": "behavioral",
+      "question": "How do you handle an AI system behaving unexpectedly in production?",
+      "keywords": ["production", "incident", "unexpected", "behavior", "broke", "wrong", "malfunction", "alert", "failure", "behave"],
+      "text": "When the demand forecasting agent started producing anomalous outputs — recommendations 40% outside normal variance — the first thing I did was halt write-back to the ERP, not debug. Contain before you diagnose. Investigation found a corrupted supplier lead-time record had propagated through the semantic memory layer and skewed every SKU from that supplier. Fix: purge the record, retrain the affected memory slice, add a variance gate that pauses ERP write-back on any recommendation exceeding ±20% of prior-period baseline. Zero downstream procurement damage because containment came first.",
+      "highlights": ["ERP write-back halted", "semantic memory", "variance gate", "±20% baseline", "zero procurement damage"],
+      "chart": {
+        "type": "bar",
+        "title": "Incident Response: Time to Containment by Protocol",
+        "labels": ["No Protocol", "Alert Only", "Auto-Pause", "Contain + Diagnose", "Contain + Gate + Monitor"],
+        "values": [180, 95, 35, 22, 8],
+        "unit": "minutes to containment"
+      }
+    },
+    {
+      "id": "behavioral-022",
+      "category": "behavioral",
+      "question": "Describe a time you had to shut down or pivot a project you believed in.",
+      "keywords": ["shut down", "kill", "pivot", "cancel", "stop", "abandon", "sunset", "scrap", "believed in"],
+      "text": "Killing a project you've invested in is the discipline that separates engineers from leaders. We spent four months building a custom NLP classification layer for supplier invoice routing before the data made it obvious that a fine-tuned off-the-shelf model would outperform our custom approach at 20% of the maintenance cost. Recommending we scrap the custom build was uncomfortable — it was my design. But the business case was unambiguous, and pivoting freed the team for the procurement agent that ultimately cut purchase cycle time by 33%. Ego is expensive; sunk cost fallacy is more expensive.",
+      "highlights": ["33% cycle time", "procurement agent", "sunk cost fallacy", "4 months", "20% maintenance cost"],
+      "chart": {
+        "type": "bar",
+        "title": "Custom Build vs Off-the-Shelf: Decision Framework",
+        "labels": ["Dev Cost", "Maintenance Cost", "Performance", "Time to Production", "Team Capacity Freed"],
+        "values": [100, 100, 82, 100, 0],
+        "unit": "custom build = 100 baseline"
+      }
+    },
+    {
+      "id": "behavioral-023",
+      "category": "behavioral",
+      "question": "How do you approach AI ethics and responsible deployment?",
+      "keywords": ["ethics", "responsible", "bias", "fair", "safe", "ethical", "privacy", "harm", "guardrails", "governance"],
+      "text": "Responsible AI isn't a compliance checklist — it's an engineering discipline that gets designed in before the first line of code ships. On every agent deployment I run, I threat-model for both technical failures (hallucinations, prompt injection) and human impact failures (automated decisions affecting specific roles or suppliers disproportionately). At Kohl & Frisch, the procurement agent had a mandatory human review gate for any recommendation impacting a minority vendor — not because the model was biased, but because trust requires transparency. AI that people trust lasts; AI that people fear gets circumvented.",
+      "highlights": ["threat model", "human review gate", "transparency", "prompt injection", "responsible AI"],
+      "chart": {
+        "type": "bar",
+        "title": "Responsible AI Framework: Coverage by Risk Layer",
+        "labels": ["Hallucination Guard", "Prompt Injection Defense", "Human Review Gates", "Bias Monitoring", "Audit Trail"],
+        "values": [95, 100, 88, 82, 91],
+        "unit": "% coverage"
+      }
+    },
+    {
+      "id": "behavioral-024",
+      "category": "behavioral",
+      "question": "How do you approach building an AI team?",
+      "keywords": ["hiring", "team", "build", "recruit", "talent", "culture", "structure", "AI team", "people", "staff"],
+      "text": "Building an AI team means resisting the urge to hire only ML researchers — the highest-leverage hires have been engineers who understand the domain deeply and can learn the AI layer, not the reverse. A supply chain expert who can prompt-engineer and critically evaluate LLM outputs will outperform a pure ML engineer who doesn't know what a 3PL is. I structure AI teams around three archetypes: builders (harness and pipeline engineers), domain adapters (people who bridge AI to the business problem), and evaluators (quality and safety). At Kohl & Frisch, this model let a team of three engineers deploy a system serving 2,400 staff.",
+      "highlights": ["domain expertise", "3 archetypes", "team of 3", "2,400 staff", "domain adapters"],
+      "chart": {
+        "type": "bar",
+        "title": "AI Team Role Impact Score",
+        "labels": ["ML Researcher", "Domain Engineer", "Pipeline Builder", "Evaluator / QA", "Domain Adapter"],
+        "values": [65, 88, 84, 79, 92],
+        "unit": "impact score / 100"
+      }
+    },
+    {
+      "id": "behavioral-025",
+      "category": "behavioral",
+      "question": "How do you know when an AI project is actually successful?",
+      "keywords": ["success", "measure", "metrics", "know", "working", "kpi", "goal", "outcome", "effective", "value"],
+      "text": "The worst metric for an AI project is model accuracy — it tells you nothing about whether the system is solving the business problem. I measure success in three layers: operational (is the process faster or cheaper?), adoption (are the people who should use it actually using it?), and trust (are users escalating less over time, not more?). At Kohl & Frisch, the chatbot's escalation rate dropping from 100% to 10% in three months was the signal that told us the system had crossed from 'tolerated' to 'trusted'. Accuracy scores stayed in the background where they belong.",
+      "highlights": ["10% escalation rate", "3 months", "operational metrics", "adoption", "trust signal"],
+      "chart": {
+        "type": "line",
+        "title": "AI System Trust Curve: Escalation Rate Over Time",
+        "labels": ["Month 1", "Month 2", "Month 3", "Month 4", "Month 6"],
+        "values": [100, 74, 52, 28, 10],
+        "unit": "% escalation rate"
+      }
+    },
+    {
       "id": "behavioral-003",
       "category": "behavioral",
       "question": "How do you explain complex AI to non-technical stakeholders?",
