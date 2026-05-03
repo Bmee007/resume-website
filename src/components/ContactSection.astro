@@ -102,7 +102,11 @@
   </div>
 
   <footer class="site-footer">
-    <p>&copy; 2026 Borina Keo · he/him</p>
+    <div class="footer-brand">
+      <img src="/images/bk-logo.svg" alt="BK" class="footer-logo" />
+      <span class="footer-name">Borina Keo</span>
+    </div>
+    <p class="footer-copy">&copy; 2026 · AI Systems Engineer · Agent Builder · Supply Chain AI</p>
   </footer>
 
 </section>
@@ -203,7 +207,7 @@
     color: var(--foreground);
     font-size: 0.9375rem;
     width: 100%;
-    font-family: "Geist Sans", sans-serif;
+    font-family: "Inter", sans-serif;
     transition: border-color 0.2s var(--ease-expo-out), box-shadow 0.2s;
   }
 
@@ -256,15 +260,44 @@
   /* ── Footer ───────────────────────────────────────────────── */
   .site-footer {
     text-align: center;
-    font-size: 0.8125rem;
-    color: var(--fg-subtle);
-    letter-spacing: 0.04em;
     max-width: 80rem;
     margin: 4rem auto 0;
     padding-top: 2rem;
     border-top: 1px solid var(--border);
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+
+  .footer-logo {
+    width: 2rem;
+    height: 2rem;
+    filter: invert(55%) sepia(80%) saturate(600%) hue-rotate(355deg) brightness(105%);
+    opacity: 0.7;
+  }
+
+  .footer-name {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-size: 1.0625rem;
+    color: var(--fg-muted);
+    letter-spacing: -0.01em;
+  }
+
+  .footer-copy {
+    font-size: 0.8125rem;
+    color: var(--fg-subtle);
+    letter-spacing: 0.04em;
+    margin: 0;
   }
 
   /* ── Reveal ───────────────────────────────────────────────── */

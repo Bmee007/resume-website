@@ -36,6 +36,11 @@ const techs = [
     <div class="hero-fade-bottom"></div>
   </div>
 
+  <!-- Brand watermark -->
+  <div class="hero-brand-watermark" aria-hidden="true">
+    <img src="/images/bk-logo.svg" alt="" />
+  </div>
+
   <!-- Main content -->
   <div class="hero-content">
 
@@ -155,6 +160,24 @@ const techs = [
     inset: 0;
     pointer-events: none;
     z-index: 0;
+  }
+
+  /* ── Brand watermark ─────────────────────────────────────── */
+  .hero-brand-watermark {
+    position: absolute;
+    right: clamp(2rem, 8vw, 6rem);
+    bottom: clamp(3rem, 8vw, 5rem);
+    width: clamp(80px, 12vw, 140px);
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 1;
+    filter: invert(55%) sepia(80%) saturate(600%) hue-rotate(355deg) brightness(105%);
+  }
+
+  .hero-brand-watermark img {
+    width: 100%;
+    height: auto;
+    display: block;
   }
 
   /* Directional dark overlay: deepest at left (text) → opens toward the right (photo) */

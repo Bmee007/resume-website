@@ -5,9 +5,10 @@
 <header id="site-nav" aria-label="Site navigation">
   <div class="nav-inner">
 
-    <!-- Logo monogram -->
+    <!-- Logo -->
     <a href="#" class="nav-brand" aria-label="Back to top">
-      <span class="nav-logo" aria-hidden="true">BK</span>
+      <img src="/images/bk-logo.svg" class="nav-logo-img" alt="BK" aria-hidden="true" />
+      <span class="nav-logo-wordmark">Borina Keo</span>
     </a>
 
     <!-- Desktop nav links -->
@@ -86,26 +87,37 @@
   .nav-brand {
     display: flex;
     align-items: center;
+    gap: 0.625rem;
     text-decoration: none;
+    flex-shrink: 0;
+    color: var(--amber);
+    transition: opacity 0.2s ease;
+  }
+
+  .nav-brand:hover { opacity: 0.8; }
+
+  .nav-logo-img {
+    width: 2rem;
+    height: 2rem;
+    color: var(--amber);
+    /* SVG uses currentColor, but <img> can't inherit. Use filter instead. */
+    filter: invert(55%) sepia(80%) saturate(600%) hue-rotate(355deg) brightness(105%);
     flex-shrink: 0;
   }
 
-  .nav-logo {
-    font-family: "DM Serif Display", Georgia, serif;
+  .nav-logo-wordmark {
+    font-family: "Playfair Display", Georgia, serif;
     font-style: italic;
-    font-size: 1.25rem;
+    font-size: 1.0625rem;
     font-weight: 400;
-    color: var(--amber);
-    letter-spacing: -0.02em;
+    color: var(--cream);
+    letter-spacing: -0.01em;
     line-height: 1;
-    border: 1px solid var(--border);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    transition: border-color 0.2s ease;
+    white-space: nowrap;
   }
 
-  .nav-brand:hover .nav-logo {
-    border-color: var(--amber);
+  @media (max-width: 480px) {
+    .nav-logo-wordmark { display: none; }
   }
 
   /* ── Desktop links ────────────────────────────────────────── */
@@ -244,7 +256,7 @@
   }
 
   .mobile-link {
-    font-family: "DM Serif Display", Georgia, serif;
+    font-family: "Playfair Display", Georgia, serif;
     font-style: italic;
     font-weight: 400;
     font-size: clamp(2rem, 8vw, 2.75rem);

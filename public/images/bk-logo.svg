@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Outer ring -->
+  <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="1.5"/>
+  <!-- Inner ring accent -->
+  <circle cx="32" cy="32" r="26" stroke="currentColor" stroke-width="0.5" opacity="0.35"/>
+  <!-- BK letterform -->
+  <!-- B: left vertical bar -->
+  <rect x="16" y="18" width="2.5" height="28" rx="0.5" fill="currentColor"/>
+  <!-- B: top bump -->
+  <path d="M18.5 18 Q28 18 28 24 Q28 30 18.5 30" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- B: bottom bump (slightly wider) -->
+  <path d="M18.5 30 Q29.5 30 29.5 37 Q29.5 46 18.5 46" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- K: vertical bar -->
+  <rect x="33" y="18" width="2.5" height="28" rx="0.5" fill="currentColor"/>
+  <!-- K: top arm -->
+  <line x1="35.5" y1="32" x2="48" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- K: bottom arm -->
+  <line x1="35.5" y1="32" x2="48" y2="46" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+</svg>
