@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bSilver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="40%"  stop-color="#d8d8d8"/>
+      <stop offset="100%" stop-color="#888888"/>
+    </linearGradient>
+    <linearGradient id="kOrange" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ffbb55"/>
+      <stop offset="40%"  stop-color="#F47920"/>
+      <stop offset="100%" stop-color="#a03c00"/>
+    </linearGradient>
+    <linearGradient id="innerRing" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#F47920"/>
+      <stop offset="35%"  stop-color="#c06010"/>
+      <stop offset="70%"  stop-color="#2e2e2e"/>
+      <stop offset="100%" stop-color="#1e1e1e"/>
+    </linearGradient>
+    <clipPath id="clip">
+      <circle cx="100" cy="100" r="78"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer dark ring -->
+  <circle cx="100" cy="100" r="94" fill="none" stroke="#282828" stroke-width="3"/>
+
+  <!-- Horizontal ticks — outer ring, left (dark) and right (orange) -->
+  <line x1="2"   y1="100" x2="16"  y2="100" stroke="#282828" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="184" y1="100" x2="198" y2="100" stroke="#F47920"  stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Inner orange-accented ring -->
+  <circle cx="100" cy="100" r="80" fill="none" stroke="url(#innerRing)" stroke-width="2.2"/>
+
+  <!-- Horizontal ticks — inner ring, left (dark) and right (orange) -->
+  <line x1="16"  y1="100" x2="28"  y2="100" stroke="#1e1e1e" stroke-width="2"   stroke-linecap="round"/>
+  <line x1="172" y1="100" x2="184" y2="100" stroke="#F47920"  stroke-width="2"   stroke-linecap="round"/>
+
+  <!-- Letters clipped inside inner circle -->
+  <g clip-path="url(#clip)">
+    <!-- K first (behind) -->
+    <text x="98" y="152"
+      font-family="Georgia, 'Times New Roman', serif"
+      font-size="116" font-weight="700"
+      fill="url(#kOrange)">K</text>
+
+    <!-- B on top (in front), shifted left so they overlap naturally -->
+    <text x="22" y="152"
+      font-family="Georgia, 'Times New Roman', serif"
+      font-size="116" font-weight="700"
+      fill="url(#bSilver)">B</text>
+  </g>
+</svg>

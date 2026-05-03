@@ -17,6 +17,8 @@
     "@astrojs/vercel": "^10.0.5",
     "@fontsource/dm-serif-display": "^5.2.8",
     "@fontsource/geist-sans": "^5.2.5",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
     "@iconify-json/logos": "^1.2.10",
     "astro": "^6.0.4",
     "chart.js": "^4.5.1",

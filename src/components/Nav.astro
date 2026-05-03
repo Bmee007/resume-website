@@ -5,9 +5,10 @@
 <header id="site-nav" aria-label="Site navigation">
   <div class="nav-inner">
 
-    <!-- Logo monogram -->
+    <!-- Logo -->
     <a href="#" class="nav-brand" aria-label="Back to top">
-      <span class="nav-logo" aria-hidden="true">BK</span>
+      <img src="/images/bk-logo.svg" class="nav-logo-img" alt="BK" aria-hidden="true" />
+      <span class="nav-logo-wordmark">Borina Keo</span>
     </a>
 
     <!-- Desktop nav links -->
@@ -86,26 +87,35 @@
   .nav-brand {
     display: flex;
     align-items: center;
+    gap: 0.625rem;
     text-decoration: none;
     flex-shrink: 0;
-  }
-
-  .nav-logo {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-style: italic;
-    font-size: 1.25rem;
-    font-weight: 400;
     color: var(--amber);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    border: 1px solid var(--border);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    transition: border-color 0.2s ease;
+    transition: opacity 0.2s ease;
   }
 
-  .nav-brand:hover .nav-logo {
-    border-color: var(--amber);
+  .nav-brand:hover { opacity: 0.8; }
+
+  .nav-logo-img {
+    width: 2.25rem;
+    height: 2.25rem;
+    flex-shrink: 0;
+    display: block;
+  }
+
+  .nav-logo-wordmark {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-size: 1.0625rem;
+    font-weight: 400;
+    color: var(--cream);
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    .nav-logo-wordmark { display: none; }
   }
 
   /* ── Desktop links ────────────────────────────────────────── */
@@ -244,7 +254,7 @@
   }
 
   .mobile-link {
-    font-family: "DM Serif Display", Georgia, serif;
+    font-family: "Playfair Display", Georgia, serif;
     font-style: italic;
     font-weight: 400;
     font-size: clamp(2rem, 8vw, 2.75rem);
