@@ -37,7 +37,7 @@ const experiences = [
 ];
 ---
 
-<section id="experience" class="exp-root">
+<section id="experience" class="exp-root" data-parallax-bg>
 
   <span class="section-num" aria-hidden="true">03</span>
 
@@ -50,6 +50,11 @@ const experiences = [
     </div>
 
     <div class="timeline">
+      <!-- Animated vertical spine — visible sm+ alongside year column -->
+      <div class="timeline-spine" aria-hidden="true">
+        <div class="timeline-spine-fill"></div>
+      </div>
+
       {experiences.map((entry) => (
         <div class:list={["timeline-entry", entry.featured && "is-featured"]} data-reveal>
           <div class="entry-year" aria-hidden="true">
@@ -129,6 +134,33 @@ const experiences = [
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    position: relative;
+  }
+
+  /* ── Animated spine ───────────────────────────────────────── */
+  .timeline-spine {
+    display: none;
+    position: absolute;
+    left: calc(5rem - 0.5px);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+    z-index: 0;
+  }
+
+  @media (min-width: 640px) {
+    .timeline-spine { display: block; }
+  }
+
+  .timeline-spine-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(to bottom, var(--amber), color-mix(in oklch, var(--amber) 30%, transparent));
+    transition: none;
   }
 
   .timeline-entry {
