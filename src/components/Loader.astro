@@ -1,11 +1,19 @@
 ---
-// Loader.astro — Intro sequence: BK monogram + bar fill → fade out
+// Loader.astro — Curtain intro sequence
 ---
 
 <div id="loader" aria-hidden="true">
-  <span class="loader-bk">BK</span>
-  <div class="loader-bar-track">
-    <div class="loader-bar"></div>
+  <div class="loader-content">
+    <div class="loader-monogram">
+      <span class="loader-letter loader-b">B</span>
+      <span class="loader-letter loader-k">K</span>
+    </div>
+    <div class="loader-progress-wrap">
+      <div class="loader-progress-track">
+        <div class="loader-bar"></div>
+      </div>
+      <span class="loader-pct" id="loader-pct">0</span>
+    </div>
   </div>
 </div>
 
@@ -16,71 +24,125 @@
     z-index: 99990;
     background: var(--background);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
     pointer-events: all;
-    transition: opacity 0.4s var(--ease-expo-out);
+    transform: translateY(0);
+    transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+    will-change: transform;
   }
 
   #loader.is-done {
-    opacity: 0;
+    transform: translateY(-100%);
     pointer-events: none;
   }
 
-  .loader-bk {
-    font-family: "Playfair Display", Georgia, serif;
-    font-style: italic;
-    font-size: 3rem;
-    color: var(--cream);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    opacity: 0;
-    transform: translateY(12px);
-    animation: loader-text-in 0.5s var(--ease-expo-out) 0.1s forwards;
+  .loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
   }
 
-  .loader-bar-track {
-    width: 120px;
+  .loader-monogram {
+    display: flex;
+    align-items: baseline;
+    overflow: hidden;
+    padding-bottom: 0.08em;
+  }
+
+  .loader-letter {
+    font-family: "Playfair Display", Georgia, serif;
+    font-style: italic;
+    font-size: clamp(4.5rem, 12vw, 8rem);
+    color: var(--cream);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    display: block;
+    transform: translateY(110%);
+    opacity: 0;
+    animation: loader-rise 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .loader-b { animation-delay: 0.08s; }
+
+  .loader-k {
+    animation-delay: 0.16s;
+    color: var(--amber);
+  }
+
+  @keyframes loader-rise {
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .loader-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    animation: loader-fade-in 0.4s ease 0.45s forwards;
+  }
+
+  @keyframes loader-fade-in {
+    to { opacity: 1; }
+  }
+
+  .loader-progress-track {
+    width: 160px;
     height: 1px;
     background: var(--border);
     border-radius: 1px;
     overflow: hidden;
-    opacity: 0;
-    animation: loader-track-in 0.3s ease 0.3s forwards;
   }
 
   .loader-bar {
     height: 100%;
     width: 0%;
-    background: var(--amber);
+    background: linear-gradient(to right, var(--amber), oklch(0.78 0.18 55));
     border-radius: 1px;
-    animation: loader-fill 0.8s var(--ease-smooth) 0.4s forwards;
-  }
-
-  @keyframes loader-text-in {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes loader-track-in {
-    to { opacity: 1; }
+    animation: loader-fill 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.5s forwards;
   }
 
   @keyframes loader-fill {
     to { width: 100%; }
   }
+
+  .loader-pct {
+    font-family: "Inter", sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+    min-width: 2.5em;
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 
 <script>
   const loader = document.getElementById('loader');
+  const pctEl  = document.getElementById('loader-pct');
+
   if (loader) {
-    // Total intro: ~1.4s (0.4s start + 0.8s fill + 0.2s hold)
+    // Animate counter 0 → 100 matching the bar fill
+    const fillDuration = 850;
+    const fillDelay    = 500;
+    let startTs = null;
+
+    function tick(ts) {
+      if (!startTs) startTs = ts;
+      const elapsed  = ts - startTs;
+      const progress = Math.min(elapsed / fillDuration, 1);
+      const eased    = 1 - Math.pow(1 - progress, 3);
+      if (pctEl) pctEl.textContent = String(Math.round(eased * 100));
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    setTimeout(() => requestAnimationFrame(tick), fillDelay);
+
+    // Exit: curtain slides up
     setTimeout(() => {
       loader.classList.add('is-done');
       document.body.classList.add('loaded');
-      // Remove from DOM after fade
-      setTimeout(() => loader.remove(), 500);
-    }, 1400);
+      setTimeout(() => loader.remove(), 950);
+    }, 1500);
   }
 </script>
