@@ -15,7 +15,7 @@
 - 2,400 warehouse staff served across the AI agent deployment (all sites)
 - 16 operational processes automated end-to-end via agentic workflows
 - Pick accuracy improved to 99.7% via WMS AI integration
-- 13% forecast accuracy improvement from Manhattan DFIO WMS deployment
+- 13% forecast accuracy improvement from LLM-powered demand-forecasting agents on ERP supply-chain data
 - 15% warehouse throughput improvement from WMS AI optimization
 - 5% labor cost reduction from ML-driven warehouse operations models
 - 30% operational cost reduction from supply chain ERP transformation
@@ -80,7 +80,7 @@
 
 ## Career Timeline
 
-- 2016–2019: WMS & Operations AI Lead — deployed intelligent WMS across 9 distribution centres, AI pick optimization, ML-driven labor models
+- 2016–2019: WMS & Operations AI Lead — deployed intelligent WMS across 7 distribution centres, AI pick optimization, ML-driven labor models
 - 2019–2023: AI & ERP Integration Lead — directed end-to-end ERP modernization, AI procurement agents, led 45-person team through 18-month migration
 - 2023–Present: AI & Agent Systems Lead — agentic workflows, LLM memory research, agent security, multi-agent orchestration
 - All roles at Kohl & Frisch (healthcare/pharma distribution, Canada)

@@ -180,6 +180,7 @@ export function initAsk() {
       if (status) status.textContent = '';
       focusRow(canned.card);
       fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = canned.text; });
+      if (status) status.textContent = 'SAVED ANSWER · ILLUMI IS OFFLINE';
       if (send && input?.value.trim()) send.disabled = false;
       return;
     }

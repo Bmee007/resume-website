@@ -27,7 +27,7 @@ export function initWork() {
           onToggle: (self) => document.body.classList.toggle('work-pinned', self.isActive),
           onUpdate: (self) => {
             if (progress) progress.style.transform = `scaleX(${self.progress})`;
-            if (counter) counter.textContent = String(Math.min(total, 1 + Math.floor(self.progress * total * 0.999))).padStart(2, '0');
+            if (counter) counter.textContent = String(1 + Math.round(self.progress * (total - 1))).padStart(2, '0');
           },
         },
       });

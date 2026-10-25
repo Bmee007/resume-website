@@ -153,3 +153,15 @@ captions on all, hovered panel lifts, siblings settle); Forge's bottom-edge prog
 where the chapter rail is hidden. Portrait: "Profile pic 2" cut out with macOS Vision person segmentation
 and composited onto a steel-blue studio backdrop (`tools`-free one-off in the session scratchpad; result is
 `public/images/Profile.jpg`). Site is live at borinakeo.com from branch `claude/hero-page-ai-demo-3JR8X`.
+
+### Jury re-score (2026-10-26)
+Independent re-score after the fix pass: Design 7.5 · Usability 6.5 · Creativity 7.5 · Content 6.5 →
+**7.1 overall, clear Honorable Mention** (was 6.5, borderline). Verified fixed: nav collisions, drag cursor,
+scramble length, console honesty, codenames, percentages, "Fortune 500". Fixed in this pass from its list:
+12→13% on the Intelligence copy; nine→seven centres in the agent bank; work counter (end card excluded);
+case metrics hidden behind media at 900px tall (media height capped); rail now hides during the pin;
+Change/Manifesto/Contact models parked clear of text; telemetry wraps below 1300px; mobile menu tap
+targets 44px; phones skip the in-chapter map morph (it collided with the roster); models load at 130%
+on phones; project JPEGs resized to 1200px; saved answers now say so in the status line; 3 MB of unused
+legacy images removed. Still open from the jury: a dedicated low-weight mobile experience, the Manifesto
+exit clip, Illumi live for the jury (key is set in Vercel production).

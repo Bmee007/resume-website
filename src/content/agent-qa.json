@@ -149,8 +149,8 @@
       "category": "behavioral",
       "question": "Tell me about a time you missed a deadline — what happened and what did you do?",
       "keywords": ["missed", "deadline", "late", "delay", "behind schedule", "overdue", "slipped", "timeline"],
-      "text": "The one project I've shipped late was the demand forecasting agent — not because the AI was hard, but because we underestimated the data pipeline work to normalize feeds from nine distribution centres into a single schema. When I saw we'd miss by three weeks, I called it immediately, presented the revised timeline with a root cause analysis, and offered two options: deliver the core forecasting function first, expand data sources in wave two. We went phased. No surprises — and forecast accuracy still hit 13% improvement at launch. The lesson: transparent early beats silent on-time fiction.",
-      "highlights": ["13% forecast accuracy", "9 distribution centres", "phased delivery", "transparent early", "root cause analysis"],
+      "text": "The one project I've shipped late was the demand forecasting agent — not because the AI was hard, but because we underestimated the data pipeline work to normalize feeds from seven distribution centres into a single schema. When I saw we'd miss by three weeks, I called it immediately, presented the revised timeline with a root cause analysis, and offered two options: deliver the core forecasting function first, expand data sources in wave two. We went phased. No surprises — and forecast accuracy still hit 13% improvement at launch. The lesson: transparent early beats silent on-time fiction.",
+      "highlights": ["13% forecast accuracy", "7 distribution centres", "phased delivery", "transparent early", "root cause analysis"],
       "visual_query": "project timeline planning calendar notebook",
       "chart": {
         "type": "bar",
@@ -661,8 +661,8 @@
       "category": "domain",
       "question": "What supply chain AI systems have you built?",
       "keywords": ["supply chain", "logistics", "inventory", "procurement", "demand", "forecasting", "warehouse", "distribution", "built", "deployed"],
-      "text": "The supply chain AI work I'm most proud of isn't a single system — it's an interconnected stack of agents that each own a slice of the operational picture. The centrepiece is a coordinator agent at Kohl & Frisch orchestrating 16 end-to-end processes across demand forecasting, procurement, and warehouse operations — replacing what used to require human coordination across three separate systems. The Manhattan DFIO WMS integration drove a 13% improvement in forecast accuracy and 99.7% pick accuracy across 9 distribution centres serving 2,400 warehouse staff. That's the difference between AI as a pilot program and AI as the operational backbone.",
-      "highlights": ["16 processes", "13% forecast accuracy", "99.7% pick accuracy", "9 distribution centres", "2,400 staff"],
+      "text": "The supply chain AI work I'm most proud of isn't a single system — it's an interconnected stack of agents that each own a slice of the operational picture. The centrepiece is a coordinator agent at Kohl & Frisch orchestrating 16 end-to-end processes across demand forecasting, procurement, and warehouse operations — replacing what used to require human coordination across three separate systems. The Manhattan DFIO WMS integration drove a 13% improvement in forecast accuracy and 99.7% pick accuracy across 7 distribution centres serving 2,400 warehouse staff. That's the difference between AI as a pilot program and AI as the operational backbone.",
+      "highlights": ["16 processes", "13% forecast accuracy", "99.7% pick accuracy", "7 distribution centres", "2,400 staff"],
       "visual_query": "warehouse workers picking orders distribution centre",
       "chart": {
         "type": "bar",

@@ -37,10 +37,10 @@ export function initChapters() {
   // Model assets: the first chapter's model now, the rest when their chapter is within ~1.5 screens
   if (lattice && lattice.ensure) {
     sections.forEach((s, i) => {
-      const names = [s.dataset.lattice, s.dataset.latticeThen].filter((n) => n && n !== 'off');
+      const names = [s.dataset.lattice, window.innerWidth < 900 ? null : s.dataset.latticeThen].filter((n) => n && n !== 'off');
       if (!names.length) return;
       if (i === 0) names.forEach((n) => lattice.ensure(n));
-      else ScrollTrigger.create({ trigger: s, start: 'top 250%', once: true, onEnter: () => names.forEach((n) => lattice.ensure(n)) });
+      else ScrollTrigger.create({ trigger: s, start: window.innerWidth < 900 ? 'top 130%' : 'top 250%', once: true, onEnter: () => names.forEach((n) => lattice.ensure(n)) });
     });
   }
 
@@ -95,7 +95,7 @@ export function initChapters() {
         prev = { ...next, opacity: 0 };
       }
       // Optional second image inside the same chapter, reached as the reader scrolls on
-      if (d.latticeThen && LATTICE_INDEX[d.latticeThen] !== undefined) {
+      if (!small && d.latticeThen && LATTICE_INDEX[d.latticeThen] !== undefined) {
         const then = {
           ...next,
           morph: LATTICE_INDEX[d.latticeThen],

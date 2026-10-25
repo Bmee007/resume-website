@@ -171,7 +171,7 @@ body::after {
   color: var(--ink-3);
   white-space: normal;
 }
-@media (min-width: 900px) { .telemetry { white-space: nowrap; } }
+@media (min-width: 1300px) { .telemetry { white-space: nowrap; } }
 .telemetry::before {
   content: '';
   flex-shrink: 0;

@@ -132,7 +132,7 @@ const projects = [
     color: transparent; -webkit-text-stroke: 1px var(--line); pointer-events: none;
   }
   /* Photo strip, cooled into the palette: desaturated, storm-tinted, edge-faded */
-  .case-media { position: relative; aspect-ratio: 16 / 7; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent); mask-image: linear-gradient(to bottom, black 70%, transparent); }
+  .case-media { position: relative; height: clamp(8rem, 19vh, 12rem); overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent); mask-image: linear-gradient(to bottom, black 70%, transparent); }
   .case-media img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.7) contrast(1.05); transition: transform 1.2s var(--ease-out); }
   .case-media::after { content: ''; position: absolute; inset: 0; background: var(--deep); mix-blend-mode: color; opacity: 0.85; pointer-events: none; }
   .case-panel:hover .case-media img { transform: scale(1.04); }
@@ -144,7 +144,7 @@ const projects = [
   .work-track:hover .case-panel:not(:hover) { transform: translateY(6px); }
   .case-panel:hover { transform: translateY(-6px); }
   @media (pointer: coarse) { .case-cap { opacity: 1; transform: none; } .work-track:hover .case-panel:not(:hover), .case-panel:hover { transform: none; } }
-  .case-top { display: grid; gap: 0.35rem; }
+  .case-top { display: grid; gap: 0.35rem; position: relative; z-index: 1; }
   .case-metric {
     font-family: var(--font-display); font-weight: 200;
     font-size: clamp(3.2rem, 6vw, 5.6rem); line-height: 1; letter-spacing: -0.03em; color: var(--ink);
