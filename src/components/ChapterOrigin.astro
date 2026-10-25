@@ -11,7 +11,7 @@ const ledger = [
 <section
   id="about" class="chapter origin"
   data-scene="storm" data-tone="dark" data-chapter="01" data-label="Origin"
-  data-lattice="computer" data-lattice-cx="0.8" data-lattice-cy="0.36" data-lattice-scale="0.5" data-lattice-rx="0.22" data-lattice-ry="0.4"
+  data-lattice="computer" data-lattice-cx="0.9" data-lattice-cy="0.13" data-lattice-scale="0.3" data-lattice-rx="0.22" data-lattice-ry="0.4"
 >
   <span class="chapter-mark" aria-hidden="true">01</span>
 
@@ -22,7 +22,7 @@ const ledger = [
 
     <div class="origin-copy">
       <p class="t-body bio-lead" data-reveal>
-        A Fortune 500 distribution network running on IBM AS400. Green screens, manual processes,
+        Kohl &amp; Frisch, Canada&rsquo;s only Canadian-owned national full-line pharmaceutical distributor, running on IBM AS400. Green screens, manual processes,
         and a 45-person team who knew every workaround by heart. I was asked to lead them out:
         an 18-month migration to Microsoft Dynamics 365 that cut operational costs by 30% and
         procurement cycle time by 33% without stopping a single shipment.
@@ -32,8 +32,17 @@ const ledger = [
         Move the data, keep the trust. Then make the new platform smarter than the one it replaced: Manhattan DFIO
         on the warehouse floor, Azure OpenAI in procurement, Copilot in the hands of 2,400 staff.
       </p>
-      <p class="t-mono origin-now" data-reveal><strong>Now</strong> AI &amp; ERP Integration Lead · Kohl and Frisch</p>
+      <p class="t-mono origin-now" data-reveal><strong>Now</strong> AI &amp; Agent Systems Lead · Kohl &amp; Frisch</p>
     </div>
+
+    <figure class="portrait" data-reveal>
+      <div class="portrait-frame">
+        <img src="/images/Profile.jpg" alt="Borina Keo" width="1122" height="1402" loading="lazy" decoding="async" />
+      </div>
+      <figcaption class="t-mono portrait-cap">
+        <strong>Borina Keo</strong><span>Toronto · AI &amp; Agent Systems Lead, Kohl &amp; Frisch</span>
+      </figcaption>
+    </figure>
 
     <div class="origin-fig" data-reveal>
       <ChartDumbbell
@@ -73,6 +82,20 @@ const ledger = [
     margin-top: 1rem;
   }
   .origin-copy { grid-column: 1 / -1; display: grid; gap: 1.5rem; margin-top: 1rem; }
+
+  /* Portrait: the studio backdrop is navy, so it dissolves into the storm chapter with a soft mask
+     and a cool soft-light wash that pulls the tones toward the palette */
+  .portrait { grid-column: 1 / -1; margin: 2rem 0 0; display: grid; gap: 0.9rem; max-width: 22rem; }
+  .portrait-frame {
+    position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+    -webkit-mask-image: radial-gradient(ellipse 78% 82% at 50% 40%, black 58%, transparent 100%);
+    mask-image: radial-gradient(ellipse 78% 82% at 50% 40%, black 58%, transparent 100%);
+  }
+  .portrait-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; filter: saturate(0.82) contrast(1.04) brightness(1.02); }
+  .portrait-frame::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--deep) 0%, var(--storm) 100%); mix-blend-mode: soft-light; opacity: 0.7; pointer-events: none; }
+  .portrait-frame::before { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse 60% 50% at 50% 35%, transparent 55%, var(--storm) 100%); opacity: 0.45; pointer-events: none; }
+  .portrait-cap { display: grid; gap: 0.2rem; color: var(--ink-3); }
+  .portrait-cap strong { color: var(--ink); font-weight: 500; }
   .origin-fig { grid-column: 1 / -1; margin-top: 2.5rem; }
   .origin-now { color: var(--ink-3); margin-top: 0.5rem; }
   .origin-now strong { margin-right: 0.75rem; }
@@ -106,6 +129,7 @@ const ledger = [
     .origin-heading { grid-column: 1 / 11; }
     .origin-copy { grid-column: 1 / 7; }
     .origin-fig { grid-column: 1 / 7; }
-    .origin-ledger { grid-column: 8 / 13; margin-top: 0; grid-row: 3 / 5; }
+    .portrait { grid-column: 9 / 13; grid-row: 2 / 4; margin-top: 4rem; align-self: start; }
+    .origin-ledger { grid-column: 8 / 13; margin-top: 2rem; grid-row: 4 / 5; }
   }
 </style>

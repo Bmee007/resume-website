@@ -2,18 +2,26 @@ export const prerender = false;
 
 import type { APIRoute } from "astro";
 import OpenAI from "openai";
+import agentInstructions from "../../content/agent-instructions.md?raw";
+import agentData from "../../content/agent-data.md?raw";
 
-const SYSTEM_PROMPT = `You are an AI assistant embedded in Borina Keo's professional portfolio website. Answer questions in first person on his behalf. Be specific, confident, and metric-driven. Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON object.
+const SYSTEM_PROMPT = `${agentInstructions}
+
+---
+${agentData}
+---
+
+Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON object.
 
 Response format (always return all fields):
 {
-  "text": "2–4 sentence answer displayed in the response card. Always cite exact numbers when relevant.",
+  "text": "2–4 sentence answer displayed in the response card. Open with personality, close with an exact number from the data file.",
   "highlight_card": "metric",
   "updates": {
-    "metric": { "value": "$2.4M", "label": "Operational cost reduction via AI automation", "sub": "Across D365 + Manhattan DFIO integrations over 3 enterprise deployments" },
+    "metric": { "value": "$2.4M", "label": "Operational cost reduction via AI automation", "sub": "Across D365 + Manhattan DFIO · 3 deployments at Kohl & Frisch" },
     "alert_items": [
-      { "icon": "⚡", "text": "Demand spike detected: SKU-7842 +340%", "meta": "Azure OpenAI · just now · auto-routed to procurement" },
-      { "icon": "✓", "text": "BOL-93241 classified & matched to PO", "meta": "GPT-4o · 8s ago · 0.24s processing time" }
+      { "icon": "⚡", "text": "Demand spike detected: SKU-7842 +340%", "meta": "Azure OpenAI · illustrative · auto-routed to procurement" },
+      { "icon": "✓", "text": "BOL-93241 classified & matched to PO", "meta": "GPT-4o · illustrative · 0.24s processing" }
     ],
     "ai_prompt": "The user's question verbatim",
     "ai_response": "Same as the text field"
@@ -21,23 +29,13 @@ Response format (always return all fields):
 }
 
 Rules for highlight_card — pick exactly one:
-- "metric"     → question about cost, ROI, savings, financial impact, business value
-- "alert"      → question about real-time AI, monitoring, automation pipelines, alerts, live systems
-- "experience" → question about years of experience, career history, background, leadership
-- "skills"     → question about specific technologies, tools, platforms, certifications
-- "ai"         → question about AI projects, Copilot, leadership achievements, or anything else
+- "metric"     → cost, ROI, savings, financial impact, business value
+- "alert"      → real-time AI, monitoring, automation pipelines, agents acting on signals
+- "experience" → years of experience, career history, background, leadership
+- "skills"     → specific technologies, tools, platforms
+- "ai"         → AI/agent projects, research, or anything else
 
-Always tailor the updates object to the question. The alert_items and metric should reflect the topic of the question — not always the default values. alert_items are illustrative examples of the kind of signal the systems raise, never claims about live data.
-
-Borina Keo's verified facts (never fabricate numbers):
-• $2.4M operational cost reduction via AI automation
-• 68% reduction in manual order processing time
-• 15+ years enterprise systems leadership
-• 90% of tier-1 IT queries handled by Copilot Studio chatbot
-• 2,400 warehouse staff served by the Copilot deployment
-• 3 Fortune 500 enterprise D365 + Manhattan DFIO deployments
-• Pick accuracy improved to 99.7% via WMS AI integration
-• Technologies: Microsoft Dynamics 365, Manhattan DFIO, Azure OpenAI, IBM AS400, Power Automate, AI Builder, Python/ML, Microsoft Copilot, GPT-4o, Claude, Google Gemini`;
+Tailor the updates to the question. alert_items are illustrative examples of the kind of signal the systems raise, never claims about live data. Never say "Fortune 500"; name Kohl & Frisch. The site describes seven distribution centres (Delta, Calgary, Regina, Winnipeg, Toronto, Montreal, Moncton).`;
 
 /** Health: lets the client show LIVE / OFFLINE honestly without spending a completion. */
 export const GET: APIRoute = async () => {

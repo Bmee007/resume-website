@@ -36,7 +36,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
     <!-- Console -->
     <div class="console" data-reveal>
       <div class="console-head">
-        <span class="t-mono"><strong>Ask the system</strong></span>
+        <span class="t-mono"><strong>Ask Illumi</strong> · my agent answers for me</span>
         <span id="ask-health" class="t-mono console-status" data-state="checking"><span class="live-dot" aria-hidden="true"></span><span id="ask-health-text">Checking</span></span>
       </div>
 
@@ -47,11 +47,11 @@ import ChartHundred from "./charts/ChartHundred.astro";
             <button class="ask-chip" data-prompt="How did you use Azure OpenAI in production?">Azure OpenAI in production</button>
             <button class="ask-chip" data-prompt="What is your Microsoft Dynamics 365 expertise?">D365 expertise</button>
             <button class="ask-chip" data-prompt="Tell me about the $2.4M cost reduction you drove">The $2.4M</button>
-            <button class="ask-chip" data-prompt="What results have you driven for Fortune 500 companies?">Fortune 500 results</button>
+            <button class="ask-chip" data-prompt="What results have you driven at Kohl & Frisch?">Results at Kohl &amp; Frisch</button>
           </div>
           <div class="ask-input-row">
             <span class="prompt-caret t-mono" aria-hidden="true">&gt;</span>
-            <input id="ask-input" type="text" class="ask-input" placeholder="Ask about my work…" maxlength="500" autocomplete="off" aria-label="Ask a question about Borina Keo's work" />
+            <input id="ask-input" type="text" class="ask-input" placeholder="Ask Illumi about my work…" maxlength="500" autocomplete="off" aria-label="Ask a question about Borina Keo's work" />
             <button id="ask-send" class="ask-send" disabled aria-label="Send question">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
             </button>
@@ -66,7 +66,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
             <div class="row-main">
               <span id="metric-value" class="row-big">$2.4M</span>
               <span id="metric-label" class="row-label">Operational cost reduction via AI automation</span>
-              <span id="metric-sub" class="row-sub t-mono">Across D365 + Manhattan DFIO · 3 enterprise deployments</span>
+              <span id="metric-sub" class="row-sub t-mono">Across D365 + Manhattan DFIO · 3 deployments at Kohl &amp; Frisch</span>
             </div>
           </div>
 
@@ -74,7 +74,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
             <span class="row-tag t-mono">Response</span>
             <div class="row-main">
               <span id="ai-prompt-text" class="row-prompt t-mono">What can Borina Keo do for my business?</span>
-              <span id="ai-response-text" class="row-response">Ask a question to see the system answer in real time.</span>
+              <span id="ai-response-text" class="row-response">Ask Illumi a question to see the answer in real time.</span>
               <span id="ai-dots" class="ai-dots" aria-hidden="true" hidden><i></i><i></i><i></i></span>
             </div>
           </div>
@@ -100,7 +100,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
             <div class="row-main">
               <span class="row-big">15+</span>
               <span class="row-label">Years of enterprise systems leadership</span>
-              <span class="row-sub t-mono">Dynamics 365 · Manhattan WMS · Fortune 500 distribution</span>
+              <span class="row-sub t-mono">ERP · WMS · TMS · supply chain, healthcare, retail</span>
             </div>
           </div>
 

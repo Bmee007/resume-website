@@ -5,25 +5,25 @@ import Icon from "./Icon.astro";
 const brand = (s: string): "microsoft" | null => /Dynamics|Power Automate|Azure/.test(s) ? "microsoft" : null;
 const projects = [
   {
-    title: "D365 AI procurement automation", system: "Microsoft Dynamics 365", ai: "Azure OpenAI",
-    metric: "14%", metricLabel: "PO approval cycle time",
-    outcome: "AI-powered approval routing built directly into D365 workflows. Purchase-order approval cycle time fell 14% and 12 hours a week of manual review disappeared (the wider procurement cycle fell 33% across the program).",
-    github: "https://github.com/Bmee007",
-    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "PO cycle time", before: 100, after: 86 }, { label: "Manual review", before: 100, after: 0 }] },
+    title: "Autonomous supply-chain agent", system: "Agent harness · skills · workflows", ai: "Claude / GPT-4o",
+    metric: "16", metricLabel: "processes automated end-to-end",
+    outcome: "A multi-agent system with a custom harness, domain skills and multi-step planning: it manages demand signals, procurement triggers and ERP updates across Kohl & Frisch supply-chain operations.",
+    github: "https://github.com/Bmee007", image: "/images/supply-chain.jpg", alt: "Distribution centre at dusk with trailers at the docks",
+    chart: null,
   },
   {
-    title: "Manhattan DFIO pick optimisation", system: "Manhattan DFIO", ai: "Custom ML / Python",
-    metric: "15%", metricLabel: "throughput increase",
-    outcome: "Pick-path optimisation models deployed across seven distribution centres, lifting warehouse throughput 15%, taking pick accuracy to 99.7% and cutting labour cost per order 5%.",
-    github: "https://github.com/Bmee007",
-    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "Throughput", before: 100, after: 115 }, { label: "Labour / order", before: 100, after: 95 }] },
+    title: "LLM memory research · supply-chain context", system: "Episodic · semantic · working memory", ai: "Python · LLM APIs",
+    metric: "13%", metricLabel: "forecast accuracy improvement",
+    outcome: "Memory architectures (episodic recall, semantic knowledge graphs, working context) that ground forecasting agents in long-horizon operational history rather than a single session.",
+    github: null, image: "/images/llm-memory.jpg", alt: "Abstract network of connected nodes",
+    chart: { title: "Forecast accuracy, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "Forecast accuracy", before: 100, after: 113 }, { label: "Stockouts", before: 100, after: 86 }] },
   },
   {
-    title: "Supply-chain demand forecasting", system: "Power Automate + AI Builder", ai: "Azure OpenAI",
-    metric: "12%", metricLabel: "forecast accuracy gain",
-    outcome: "An end-to-end forecasting pipeline joining ERP sales data to AI Builder models. Forecast accuracy improved 12% and stockout events fell 14%.",
-    github: null,
-    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "Forecast accuracy", before: 100, after: 112 }, { label: "Stockouts", before: 100, after: 86 }] },
+    title: "Agent security research & implementation", system: "Prompt injection · trust boundaries", ai: "Red teaming · defence patterns",
+    metric: "100%", metricLabel: "privilege-escalation attempts blocked",
+    outcome: "Threat models unique to autonomous agents: injection via tool outputs, cross-agent trust escalation, authorisation boundaries. Defensive harness patterns that hold agent actions to least privilege.",
+    github: "https://github.com/Bmee007", image: "/images/agent-security.jpg", alt: "Server room lit in blue",
+    chart: null,
   },
 ];
 ---
@@ -44,6 +44,7 @@ const projects = [
       {projects.map((p, i) => (
         <article class="project-card case-panel">
           <span class="case-num" aria-hidden="true">0{i + 1}</span>
+          <div class="case-media"><img src={p.image} alt={p.alt} loading="lazy" decoding="async" /></div>
           <div class="case-top">
             <span class="case-metric">{p.metric}</span>
             <span class="case-metric-label t-mono">{p.metricLabel}</span>
@@ -55,7 +56,7 @@ const projects = [
               <span class="project-chip project-chip--ai t-mono">{brand(p.ai) && <Icon name="microsoft" size={11} />}{p.ai}</span>
             </div>
             <p class="project-outcome t-body">{p.outcome}</p>
-            <ChartPairedRungs title={p.chart.title} sub={p.chart.sub} groups={p.chart.groups} max={125} rungStep={5} source={`Indexed · ${p.system}`} />
+            {p.chart && <ChartPairedRungs title={p.chart.title} sub={p.chart.sub} groups={p.chart.groups} max={125} rungStep={5} source={`Indexed · ${p.system}`} />}
           </div>
           <div class="case-foot">
             {p.github && (
@@ -98,13 +99,13 @@ const projects = [
     padding: 0 var(--gutter);
   }
   @media (min-width: 900px) {
-    .work-track { flex-direction: row; width: max-content; padding-right: calc(var(--gutter) + 4.5rem); }
+    .work-track { flex-direction: row; width: max-content; padding-left: var(--gutter); padding-right: calc(var(--gutter) + 4.5rem); }
   }
 
   .case-panel {
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto auto 1fr auto;
     gap: 2rem;
     padding: 2.5rem 0 3rem;
     border-top: 1px solid var(--line-2);
@@ -127,6 +128,11 @@ const projects = [
     font-family: var(--font-mono); font-size: clamp(5rem, 10vw, 9rem); line-height: 1;
     color: transparent; -webkit-text-stroke: 1px var(--line); pointer-events: none;
   }
+  /* Photo strip, cooled into the palette: desaturated, storm-tinted, edge-faded */
+  .case-media { position: relative; aspect-ratio: 16 / 7; overflow: hidden; -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent); mask-image: linear-gradient(to bottom, black 70%, transparent); }
+  .case-media img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.7) contrast(1.05); transition: transform 1.2s var(--ease-out); }
+  .case-media::after { content: ''; position: absolute; inset: 0; background: var(--deep); mix-blend-mode: color; opacity: 0.85; pointer-events: none; }
+  .case-panel:hover .case-media img { transform: scale(1.04); }
   .case-top { display: grid; gap: 0.35rem; }
   .case-metric {
     font-family: var(--font-display); font-weight: 200;

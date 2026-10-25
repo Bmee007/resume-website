@@ -113,7 +113,7 @@ test("CHARTS-01 — Lieflat figures exist in four chapters and animate in", asyn
   await expect(page.locator("#about [data-chart='dumbbell']")).toHaveCount(1);
   await expect(page.locator("#network [data-chart='gauge']")).toHaveCount(1);
   await expect(page.locator("#ask [data-chart='hundred']")).toHaveCount(1);
-  await expect(page.locator("#projects [data-chart='rungs']")).toHaveCount(3);
+  await expect(page.locator("#projects [data-chart='rungs']")).toHaveCount(1);
   await jumpTo(page, "#ask [data-chart='hundred']");
   await page.waitForTimeout(1500);
   await expect(page.locator("#ask [data-chart='hundred']")).toHaveClass(/is-in/);

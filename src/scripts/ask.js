@@ -107,12 +107,34 @@ async function streamAnswer(prompt, abort) {
 
 // Canned answers (verified facts only) so the console never dead-ends when the model is offline.
 const CANNED = {
-  'How did you use Azure OpenAI in production?': { card: 'alert', text: 'Azure OpenAI runs inside Dynamics 365 procurement: it classifies inbound documents, matches them to purchase orders and routes approvals. Manual order-processing time fell 68% and the pilot lifted forecast accuracy 12%.' },
-  'What is your Microsoft Dynamics 365 expertise?': { card: 'experience', text: 'I led the full IBM AS400 → Dynamics 365 migration for a Fortune 500 distribution network: an 18-month program, a 45-person team, 30% lower operating cost, and no shipments stopped at cut-over.' },
+  'How did you use Azure OpenAI in production?': { card: 'alert', text: 'Azure OpenAI runs inside Dynamics 365 procurement: it classifies inbound documents, matches them to purchase orders and routes approvals. Manual order-processing time fell 68% and the forecasting agents lifted accuracy 13%.' },
+  'What is your Microsoft Dynamics 365 expertise?': { card: 'experience', text: 'I led the full IBM AS400 → Dynamics 365 migration for Kohl & Frisch, Canada\'s national pharmaceutical distributor: an 18-month program, a 45-person team, 30% lower operating cost, and no shipments stopped at cut-over.' },
   'Tell me about the $2.4M cost reduction you drove': { card: 'metric', text: '$2.4M of operational cost removed across three enterprise deployments: D365 procurement automation, DFIO pick-path optimisation, and a Copilot Studio assistant that now handles 90% of tier-1 IT queries for 2,400 staff.' },
-  'What results have you driven for Fortune 500 companies?': { card: 'metric', text: 'Seven distribution centres on one ERP and WMS, 99.7% pick accuracy, +15% throughput, −5% labour cost per order, 16 manual processes automated, and $2.4M in operational savings.' },
+  'What results have you driven at Kohl & Frisch?': { card: 'metric', text: 'Seven distribution centres on one ERP and WMS, 99.7% pick accuracy, +15% throughput, −5% labour cost per order, 16 processes automated end-to-end by agents, and $2.4M in operational savings.' },
 };
 let online = null;
+let qaPromise = null;
+/** Upstream Q&A (45 verified answers). Loaded only when needed so it stays out of the main bundle. */
+function loadQa() {
+  if (!qaPromise) qaPromise = import('../content/agent-qa.json').then((m) => (m.default || m).questions || []).catch(() => []);
+  return qaPromise;
+}
+const STOP = new Set(['the', 'a', 'an', 'you', 'your', 'me', 'my', 'what', 'how', 'did', 'do', 'does', 'is', 'are', 'about', 'tell', 'with', 'for', 'and', 'or', 'of', 'in', 'on', 'to', 'at', 'have', 'has', 'can', 'describe', 'time', 'when']);
+const tokens = (s) => s.toLowerCase().replace(/[^a-z0-9$% ]/g, ' ').split(/\s+/).filter((w) => w.length > 2 && !STOP.has(w));
+async function bestQa(prompt) {
+  const qa = await loadQa();
+  const q = new Set(tokens(prompt));
+  let best = null, bestScore = 0;
+  for (const item of qa) {
+    const kws = (item.keywords || []).map((k) => k.toLowerCase());
+    const qt = tokens(item.question || '');
+    let score = 0;
+    for (const w of q) { if (kws.includes(w)) score += 2; else if (qt.includes(w)) score += 1; }
+    if (score > bestScore) { bestScore = score; best = item; }
+  }
+  return bestScore >= 2 ? best : null;
+}
+const CARD_FOR = { behavioral: 'experience', domain: 'experience', 'agent-engineering': 'ai', 'agent-security': 'ai', 'ai-engineering': 'ai', 'how-to-ai': 'ai', research: 'ai' };
 
 async function checkHealth() {
   const el = document.getElementById('ask-health'); const txt = document.getElementById('ask-health-text');
@@ -153,11 +175,17 @@ export function initAsk() {
     if (send) send.disabled = true;
     if (status) status.textContent = 'PROCESSING…';
     if (promptEl) fadeSwap(promptEl, () => { promptEl.textContent = prompt; });
-    const canned = CANNED[prompt];
+    const canned = CANNED[prompt] || await bestQa(prompt).then((q) => (q ? { card: CARD_FOR[q.category] || 'ai', text: q.text } : null));
     if (online === false && canned) {
       if (status) status.textContent = '';
       focusRow(canned.card);
       fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = canned.text; });
+      if (send && input?.value.trim()) send.disabled = false;
+      return;
+    }
+    if (online === false && !canned) {
+      if (status) status.textContent = '';
+      fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = 'Illumi is offline right now and has no saved answer for that one. Try a prompt above, or ask about agents, ERP, WMS, forecasting, security or leadership.'; });
       if (send && input?.value.trim()) send.disabled = false;
       return;
     }
