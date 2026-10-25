@@ -140,6 +140,12 @@ export function initChapters() {
     if (sections[0]) Object.assign(lattice.state, poseOf(sections[0]));
   }
 
+  // Phone bottom progress line
+  const line = document.getElementById('progress-line');
+  if (line && !reduced()) {
+    gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
+  }
+
   // Progress rail fill
   if (railFill) {
     gsap.fromTo(railFill, { scaleY: 0, transformOrigin: 'top' }, {

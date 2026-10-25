@@ -48,6 +48,8 @@ const chapters = [
   <span id="rail-label" class="rail-label" aria-hidden="true">Intro</span>
 </aside>
 
+<span id="progress-line" aria-hidden="true"></span>
+
 <!-- Mobile overlay -->
 <div id="mobile-menu" class="mobile-overlay" role="navigation" aria-label="Mobile navigation" inert>
   <div class="mobile-inner">
@@ -189,6 +191,10 @@ const chapters = [
   .rail-dot { width: 14px; height: 14px; display: grid; place-items: center; }
   .rail-dot::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--ink-3); transition: transform 0.4s var(--ease-out), background 0.3s; }
   .rail-dot:hover::before, .rail-dot.active::before { transform: scale(1.8); background: var(--ink); }
+
+  /* Phone progress line: the rail is desktop-only, so phones get Forge's bottom-edge line */
+  #progress-line { position: fixed; left: 0; bottom: 0; height: 2px; width: 100%; z-index: 57; background: var(--ink); transform: scaleX(0); transform-origin: left; pointer-events: none; opacity: 0.9; }
+  @media (min-width: 900px) { #progress-line { display: none; } }
 
   /* Mobile overlay */
   .mobile-overlay {

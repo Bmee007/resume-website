@@ -44,7 +44,10 @@ const projects = [
       {projects.map((p, i) => (
         <article class="project-card case-panel">
           <span class="case-num" aria-hidden="true">0{i + 1}</span>
-          <div class="case-media"><img src={p.image} alt={p.alt} loading="lazy" decoding="async" /></div>
+          <div class="case-media">
+            <img src={p.image} alt={p.alt} loading="lazy" decoding="async" />
+            <span class="case-cap t-mono" aria-hidden="true"><span>Case 0{i + 1}</span><span>{p.system}</span></span>
+          </div>
           <div class="case-top">
             <span class="case-metric">{p.metric}</span>
             <span class="case-metric-label t-mono">{p.metricLabel}</span>
@@ -133,6 +136,14 @@ const projects = [
   .case-media img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.7) contrast(1.05); transition: transform 1.2s var(--ease-out); }
   .case-media::after { content: ''; position: absolute; inset: 0; background: var(--deep); mix-blend-mode: color; opacity: 0.85; pointer-events: none; }
   .case-panel:hover .case-media img { transform: scale(1.04); }
+  /* Hovering any panel reveals the captions on every panel in the row (Yasin) */
+  .case-cap { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; padding: 0.75rem 0.9rem; color: var(--ink); opacity: 0; transform: translateY(-6px); transition: opacity 0.5s var(--ease-out), transform 0.6s var(--ease-out); z-index: 2; }
+  .case-cap span { background: color-mix(in oklch, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 0.3rem 0.55rem; border-radius: 999px; }
+  .work-track:hover .case-cap { opacity: 1; transform: none; }
+  .case-panel { transition: transform 0.7s var(--ease-out); }
+  .work-track:hover .case-panel:not(:hover) { transform: translateY(6px); }
+  .case-panel:hover { transform: translateY(-6px); }
+  @media (pointer: coarse) { .case-cap { opacity: 1; transform: none; } .work-track:hover .case-panel:not(:hover), .case-panel:hover { transform: none; } }
   .case-top { display: grid; gap: 0.35rem; }
   .case-metric {
     font-family: var(--font-display); font-weight: 200;

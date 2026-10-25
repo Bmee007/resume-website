@@ -145,3 +145,11 @@ GET health check, serves saved answers for the four prompts when offline, labels
 chapters (15% / −5% / +12%; 14% = PO approval cycle); chart captions no longer carry template codenames;
 Record scope stated; hero video removed; phone DPR capped at 1.5; gate ~1.6 s; scrambles ≤0.4 s.
 Verified after the pass: 96/96 Playwright, axe 0 violations, build + check clean.
+
+### Awwwards pass 3 (2026-10-26, afternoon)
+Reviewed Forge Automotive (SOTD Oct 25), Brandon Yasin (Oct 24) past their entry screens; Cartier blocked
+by its CDN. Adopted: Yasin's row-wide hover captions on the Work panels (hovering one panel reveals mono
+captions on all, hovered panel lifts, siblings settle); Forge's bottom-edge progress line, used on phones
+where the chapter rail is hidden. Portrait: "Profile pic 2" cut out with macOS Vision person segmentation
+and composited onto a steel-blue studio backdrop (`tools`-free one-off in the session scratchpad; result is
+`public/images/Profile.jpg`). Site is live at borinakeo.com from branch `claude/hero-page-ai-demo-3JR8X`.
