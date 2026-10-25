@@ -1,0 +1,142 @@
+---
+// Contact.astro — CH.07. Back out into the mist. Form posts to Formspree.
+import Icon from "./Icon.astro";
+---
+<section
+  id="contact" class="chapter contact"
+  data-scene="mist" data-tone="light" data-chapter="07" data-label="Contact"
+  data-lattice="brain" data-lattice-cx="0.33" data-lattice-cy="0.9" data-lattice-scale="0.28" data-lattice-opacity="0.5" data-lattice-rx="0.3"
+>
+  <span class="chapter-mark" aria-hidden="true">07</span>
+
+  <div class="wrap grid-12">
+    <div class="contact-left">
+      <p class="telemetry" data-scramble><span class="ch">CH.07</span> Contact</p>
+      <h2 class="t-display contact-heading" data-split>Let's clear the fog.</h2>
+      <p class="t-body" data-reveal>
+        Open to consulting engagements, AI integration programs, and full-time leadership roles
+        where ERP, WMS and AI have to work as one system.
+      </p>
+      <div class="contact-social" data-reveal>
+        <a href="https://www.linkedin.com/in/borinakeo" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile" class="link-arrow" data-cursor="open">
+          <Icon name="linkedin" size={14} /> LinkedIn
+          <span class="disc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>
+        </a>
+        <a href="https://github.com/Bmee007" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile" class="link-arrow" data-cursor="open">
+          <Icon name="github" size={14} /> GitHub
+          <span class="disc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="contact-right" data-reveal>
+      <form id="contact-form" novalidate data-formspree-id="xdawllej">
+        <div class="field">
+          <label for="cf-name">Name</label>
+          <input id="cf-name" name="name" type="text" placeholder="Your name" autocomplete="name" required />
+          <span id="error-name" class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required />
+          <span id="error-email" class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="field">
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" name="message" placeholder="What are you trying to make intelligent?" rows="4" required></textarea>
+          <span id="error-message" class="field-error" aria-live="polite"></span>
+        </div>
+        <button type="submit" class="btn contact-submit" data-magnetic="0.2">
+          <span>Send message</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
+        </button>
+      </form>
+      <div id="contact-success" class="contact-success" hidden aria-live="polite">
+        <p class="t-statement">Received. I'll be in touch soon.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer wrap t-mono">
+    <span>&copy; 2026 Borina Keo · he/him</span>
+    <span>ERP · WMS · AI integration</span>
+    <a href="#" class="to-top">Back to top ↑</a>
+  </footer>
+</section>
+
+<style>
+  .contact { padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
+  .contact-left { grid-column: 1 / -1; display: grid; gap: 1.5rem; align-content: start; }
+  .contact-heading { font-size: clamp(2.6rem, 7vw, 7rem); max-width: 10ch; }
+  .contact-social { display: flex; gap: 2.5rem; flex-wrap: wrap; margin-top: 1rem; }
+  .contact-right { grid-column: 1 / -1; }
+  @media (min-width: 900px) { .contact-left { grid-column: 1 / 7; } .contact-right { grid-column: 8 / 13; padding-top: 3.5rem; } }
+  .contact-submit { margin-top: 0.5rem; }
+  .contact-success { padding: 2rem 0; }
+  .contact-success .t-statement { font-size: 1.5rem; }
+
+  .site-footer {
+    margin-top: clamp(5rem, 10vw, 8rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem;
+    color: var(--ink-3);
+  }
+  .to-top { text-decoration: none; color: var(--ink-2); display: inline-block; padding: 0.5rem 0; }
+</style>
+
+<script>
+  const FORMSPREE_ID = "xdawllej";
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  const submitBtn = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  const success = document.getElementById("contact-success");
+  const fields = {
+    name: document.getElementById("cf-name") as HTMLInputElement | null,
+    email: document.getElementById("cf-email") as HTMLInputElement | null,
+    message: document.getElementById("cf-message") as HTMLTextAreaElement | null,
+  };
+  const errors = {
+    name: document.getElementById("error-name"),
+    email: document.getElementById("error-email"),
+    message: document.getElementById("error-message"),
+  };
+
+  const setError = (key: keyof typeof fields, msg: string) => {
+    fields[key]?.classList.toggle("is-invalid", !!msg);
+    if (errors[key]) errors[key]!.textContent = msg;
+  };
+  const clearErrors = () => (Object.keys(fields) as (keyof typeof fields)[]).forEach((k) => setError(k, ""));
+
+  const validate = () => {
+    let ok = true;
+    if (!fields.name?.value.trim()) { setError("name", "Name is required"); ok = false; }
+    const email = fields.email?.value.trim() ?? "";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("email", "Please enter a valid email"); ok = false; }
+    if (!fields.message?.value.trim()) { setError("message", "Message is required"); ok = false; }
+    return ok;
+  };
+
+  const setSending = (sending: boolean) => {
+    if (!submitBtn) return;
+    submitBtn.disabled = sending;
+    const span = submitBtn.querySelector("span");
+    if (span) span.textContent = sending ? "Sending…" : "Send message";
+  };
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearErrors();
+    if (!validate()) return;
+    setSending(true);
+    try {
+      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, { method: "POST", headers: { Accept: "application/json" }, body: new FormData(form) });
+      if (!res.ok) throw new Error(`Formspree ${res.status}`);
+      form.hidden = true;
+      if (success) success.hidden = false;
+    } catch (err) {
+      console.error("[contact] submit failed", err);
+      setSending(false);
+      setError("message", "Something went wrong. Please try again or email me on LinkedIn.");
+    }
+  });
+</script>

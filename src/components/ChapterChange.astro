@@ -1,0 +1,87 @@
+---
+// ChapterChange.astro — CH.04. Change management: teaching people to work with D365 and AI assistants.
+import Icon from "./Icon.astro";
+const modules = [
+  {
+    num: "01", title: "Dynamics 365", tools: "D365 · Power Platform", icons: ["microsoft"],
+    lead: "The operation, in the new system.",
+    items: ["Role-based training for finance, procurement and the warehouse floor", "Floor-walking through the first close, the first cycle count, the first peak", "Super-user network so every shift had someone who knew the answer"],
+  },
+  {
+    num: "02", title: "Copilot", tools: "Microsoft 365 · D365 · Copilot Studio", icons: ["microsoft"],
+    lead: "The assistant inside the tools people already open.",
+    items: ["Copilot in D365 and Microsoft 365 for drafting, summarising and querying", "Tier-1 IT questions answered by the Copilot Studio assistant for 2,400 staff", "Prompt patterns for purchase orders, exceptions and daily reporting"],
+  },
+  {
+    num: "03", title: "Claude & Gemini", tools: "Anthropic · Google Workspace", icons: ["claude", "gemini"],
+    lead: "Thinking partners for the work around the system.",
+    items: ["Claude for analysis, drafting and turning messy process notes into clear SOPs", "Gemini in Workspace for meetings, mail and spreadsheets", "Guardrails: what to share, what to verify, what stays human"],
+  },
+];
+---
+<section
+  id="change" class="chapter change"
+  data-scene="clearing" data-tone="light" data-chapter="04" data-label="Change"
+  data-lattice="brain" data-lattice-cx="0.84" data-lattice-cy="0.78" data-lattice-scale="0.42" data-lattice-opacity="0.35" data-lattice-rx="0.3" data-lattice-ry="0.5"
+>
+  <span class="chapter-mark" aria-hidden="true">04</span>
+
+  <div class="wrap">
+    <p class="telemetry" data-scramble><span class="ch">CH.04</span> Change · Dynamics 365 · Copilot · Claude · Gemini</p>
+
+    <div class="change-head grid-12">
+      <h2 class="t-display change-heading" data-split>Systems don't transform. People do.</h2>
+      <p class="t-body change-copy" data-reveal>
+        Every platform I've deployed came with a change program. I taught users across the business to work in
+        Dynamics 365, then to work alongside AI: Copilot inside the Microsoft tools they already use, and Claude
+        and Gemini for the thinking around them. Not a slide deck. Hands on the keyboard, on their own workflows,
+        until the new way was the normal way.
+      </p>
+    </div>
+
+    <ol class="syllabus">
+      {modules.map((m) => (
+        <li class="module" data-reveal>
+          <span class="module-rule" data-rule></span>
+          <div class="module-head">
+            <span class="module-num t-mono">Module {m.num}</span>
+            <span class="module-tools t-mono">{m.icons.map((n) => <Icon name={n as any} size={14} />)}{m.tools}</span>
+          </div>
+          <h3 class="module-title">{m.title}</h3>
+          <p class="module-lead">{m.lead}</p>
+          <ul class="module-items">
+            {m.items.map((it) => <li>{it}</li>)}
+          </ul>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .change { padding-block: clamp(8rem, 16vw, 14rem); }
+  .change-head { margin-top: 1rem; }
+  .change-heading { grid-column: 1 / -1; font-size: clamp(2.2rem, 5.4vw, 5.4rem); max-width: 12ch; }
+  .change-copy { grid-column: 1 / -1; align-self: end; }
+  @media (min-width: 900px) { .change-heading { grid-column: 1 / 8; } .change-copy { grid-column: 8 / 13; } }
+
+  /* Syllabus: three modules on one hairline grid, no cards */
+  .syllabus {
+    list-style: none;
+    margin: clamp(3rem, 6vw, 5rem) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 900px) { .syllabus { grid-template-columns: repeat(3, 1fr); column-gap: 2.5rem; } }
+  .module { position: relative; padding: 1.75rem 0 2.25rem; display: grid; gap: 0.9rem; align-content: start; }
+  .module-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .module-head { display: flex; justify-content: space-between; align-items: center; }
+  .module-num { color: var(--accent); }
+  .module-tools { color: var(--ink-3); text-align: right; display: inline-flex; align-items: center; gap: 0.5rem; }
+  .module-tools :global(.icon) { color: var(--ink-2); }
+  .module-title { margin: 0; font-weight: 300; font-size: clamp(1.6rem, 2.4vw, 2.2rem); letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); }
+  .module-lead { margin: 0; color: var(--ink); font-size: 1rem; }
+  .module-items { margin: 0.25rem 0 0; padding-left: 1.1rem; display: grid; gap: 0.5rem; }
+  .module-items li { color: var(--ink-2); font-size: 0.95rem; line-height: 1.6; }
+</style>

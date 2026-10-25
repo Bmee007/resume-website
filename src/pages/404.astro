@@ -1,49 +1,24 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
-
 <BaseLayout
   title="Page Not Found — Borina Keo"
   description="This page doesn't exist, but your next integration opportunity does."
+  showLoader={false}
 >
-  <main class="error-page">
-    <h1>Even ERP migrations hit a wrong path.</h1>
-    <p>This page doesn't exist — but your next integration opportunity does.</p>
-    <a href="/" class="btn-hero rounded-full">Back to Home</a>
-  </main>
+  <section id="not-found" class="chapter nf" data-scene="storm" data-tone="dark" data-chapter="404" data-label="Lost" data-lattice="computer" data-lattice-cx="0.72" data-lattice-rx="0.22" data-lattice-ry="0.4">
+    <div class="wrap nf-inner">
+      <p class="telemetry"><span class="ch">ERR.404</span> Route not found</p>
+      <h1 class="t-display nf-heading">Even migrations hit a wrong path.</h1>
+      <p class="t-body">This page doesn't exist. Your next integration program does.</p>
+      <a href="/" class="btn">Back to the start</a>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-  .error-page {
-    min-height: calc(100svh - 5rem);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 1.5rem;
-    padding: 4rem 1.5rem;
-  }
-
-  .error-page h1 {
-    font-size: clamp(1.75rem, 5vw, 3rem);
-    font-weight: 600;
-    color: hsl(var(--foreground));
-    margin: 0;
-    line-height: 1.15;
-  }
-
-  .error-page p {
-    font-size: 1.125rem;
-    color: hsl(var(--foreground) / 0.7);
-    margin: 0;
-    max-width: 32rem;
-    line-height: 1.6;
-  }
-
-  .error-page .btn-hero {
-    padding: 0.75rem 1.75rem;
-    font-size: 1rem;
-    text-decoration: none;
-  }
+  .nf { min-height: 100svh; display: grid; align-items: center; }
+  .nf-inner { display: grid; gap: 1.5rem; max-width: 40rem; }
+  .nf-inner .btn { justify-self: start; }
+  .nf-heading { font-size: clamp(2.2rem, 6vw, 5.5rem); }
 </style>

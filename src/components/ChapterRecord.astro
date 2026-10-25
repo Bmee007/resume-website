@@ -1,0 +1,147 @@
+---
+// ChapterRecord.astro — CH.04. The record: roles, then the spec sheet of capabilities.
+const roles = [
+  {
+    year: "2023", range: "2023 — Present", title: "AI & ERP Integration Lead", company: "Kohl and Frisch", featured: false,
+    bullets: [
+      "Architected Power Automate + AI Builder workflows, automating <em>16 manual processes</em> across finance and operations",
+      "Led the Azure OpenAI pilot for supply-chain demand forecasting: <em>12% forecast accuracy improvement</em>",
+      "Shipped a Copilot Studio assistant handling <em>90% of tier-1 IT queries</em> for 2,400 warehouse staff",
+    ],
+  },
+  {
+    year: "2019", range: "2019 — 2023", title: "ERP Implementation Lead · D365 Migration", company: "Kohl and Frisch", featured: true,
+    bullets: [
+      "Directed the full Microsoft Dynamics 365 migration from IBM AS400, cutting operational costs by <em>30%</em>",
+      "Integrated Azure OpenAI into D365 procurement workflows, reducing cycle time by <em>33%</em>",
+      "Led a <em>45-person</em> cross-functional team through an 18-month modernisation program",
+    ],
+  },
+  {
+    year: "2016", range: "2016 — 2019", title: "WMS Implementation Lead · Manhattan DFIO", company: "Kohl and Frisch", featured: true,
+    bullets: [
+      "Deployed Manhattan DFIO alongside Dynamics 365 across <em>7 distribution centres</em>, increasing throughput by <em>15%</em>",
+      "Integrated AI-driven pick optimisation into DFIO, reducing labour costs by <em>5%</em> at <em>99.7%</em> pick accuracy",
+      "Partnered with C-suite stakeholders to align the WMS roadmap with a five-year supply-chain strategy",
+    ],
+  },
+];
+const spec = [
+  { title: "ERP systems", skills: ["Microsoft Dynamics 365", "IBM AS400", "Legacy migration"] },
+  { title: "WMS systems", skills: ["Manhattan DFIO", "Warehouse operations", "Pick-path optimisation"] },
+  { title: "AI / ML", skills: ["Azure OpenAI / Microsoft Copilot", "Power Automate + AI Builder", "Custom ML / Python models", "Supply-chain AI"] },
+  { title: "Leadership", skills: ["Team leadership", "Stakeholder management", "Change management", "ERP rollout strategy"] },
+];
+---
+<section
+  id="experience" class="chapter record"
+  data-scene="clearing" data-tone="light" data-chapter="05" data-label="Record"
+  data-lattice="brain" data-lattice-cx="0.86" data-lattice-cy="0.18" data-lattice-scale="0.4" data-lattice-opacity="0.35" data-lattice-rx="0.3"
+>
+  <span class="chapter-mark" aria-hidden="true">05</span>
+
+  <div class="wrap">
+    <p class="telemetry" data-scramble><span class="ch">CH.05</span> Record · Kohl and Frisch, 2016 — present · earlier roles on request</p>
+    <h2 class="t-display record-heading" data-split>The record.</h2>
+
+    <ol class="timeline">
+      {roles.map((r) => (
+        <li class:list={["timeline-entry", r.featured && "is-featured"]} data-reveal>
+          <span class="entry-rule" data-rule></span>
+          <span class="entry-year">{r.year}</span>
+          <div class="entry-body">
+            <div class="entry-head">
+              <h3 class="entry-title">{r.title}</h3>
+              <span class="entry-meta t-mono"><strong>{r.company}</strong> · {r.range}</span>
+            </div>
+            <ul class="entry-bullets">
+              {r.bullets.map((b) => <li set:html={b}></li>)}
+            </ul>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <section id="skills" class="spec" aria-label="Skills and expertise">
+      <div class="spec-head">
+        <p class="telemetry" data-scramble><span class="ch">05.1</span> Spec sheet</p>
+        <h3 class="t-display spec-heading" data-split>Skills &amp; expertise</h3>
+      </div>
+      <div class="spec-grid">
+        {spec.map((col, i) => (
+          <div class="spec-col" data-reveal>
+            <span class="spec-num t-mono">0{i + 1}</span>
+            <span class="spec-title">{col.title}</span>
+            <div class="spec-chips">
+              {col.skills.map((s) => <span class="skill-chip">{s}</span>)}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+</section>
+
+<style>
+  .record { padding-block: clamp(8rem, 16vw, 14rem) clamp(4rem, 7vw, 6rem); }
+  .record-heading { font-size: clamp(2.6rem, 7vw, 7rem); margin-top: 1rem; }
+
+  .timeline { list-style: none; margin: 3rem 0 0; padding: 0; display: grid; }
+  .timeline-entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 2.25rem 0;
+  }
+  .entry-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .timeline-entry:last-child::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .entry-year {
+    font-family: var(--font-display); font-weight: 200;
+    font-size: clamp(2.6rem, 6vw, 5.5rem); line-height: 0.9; letter-spacing: -0.03em;
+    color: var(--ink-3); transition: color 0.5s var(--ease-out);
+  }
+  .is-featured .entry-year { color: var(--ink); }
+  .timeline-entry:hover .entry-year { color: var(--accent); }
+  .entry-body { display: grid; gap: 1.25rem; }
+  .entry-head { display: grid; gap: 0.4rem; }
+  .entry-title { margin: 0; font-weight: 400; font-size: clamp(1.15rem, 1.6vw, 1.45rem); color: var(--ink); letter-spacing: 0.01em; }
+  .entry-meta { color: var(--ink-3); }
+  .entry-bullets { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.5rem; max-width: 46rem; }
+  .entry-bullets li { color: var(--ink-2); line-height: 1.65; font-size: 0.95rem; }
+  .entry-bullets li :global(em) { font-style: normal; color: var(--ink); font-weight: 500; }
+
+  @media (min-width: 900px) {
+    .timeline-entry { grid-template-columns: 3fr 9fr; gap: 2rem; }
+  }
+
+  /* Spec sheet */
+  .spec { margin-top: clamp(5rem, 10vw, 9rem); }
+  .spec-head { display: grid; gap: 1rem; }
+  .spec-heading { font-size: clamp(1.8rem, 3.4vw, 3rem); }
+  .spec-grid {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    border-top: 1px solid var(--line-2);
+  }
+  @media (min-width: 700px) { .spec-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (min-width: 1100px) { .spec-grid { grid-template-columns: repeat(4, 1fr); } }
+  .spec-col {
+    display: grid; align-content: start; gap: 0.75rem;
+    padding: 1.75rem 1.5rem 2rem 0;
+    border-bottom: 1px solid var(--line-2);
+  }
+  @media (min-width: 1100px) { .spec-col + .spec-col { padding-left: 1.5rem; border-left: 1px solid var(--line); } }
+  .spec-num { color: var(--accent); }
+  .spec-title { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
+  .spec-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+  .skill-chip {
+    display: inline-block;
+    font-size: 0.875rem; color: var(--ink-2);
+    border: 1px solid var(--line-2); border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    transition: color 0.3s, border-color 0.3s, transform 0.4s var(--ease-out);
+  }
+  .skill-chip:hover { color: var(--ink); border-color: var(--ink); transform: translateY(-2px); }
+</style>

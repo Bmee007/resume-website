@@ -1,0 +1,43 @@
+---
+// ChartDumbbell.astro — Lieflat F12 "Dumbbell Queue": before → after per row, beads = real units.
+// Hairline track with countable ticks; hollow dot = before, solid dot = after, beads fill the gap.
+interface Row { label: string; before: number; after: number; unit?: string }
+interface Props { rows: Row[]; min?: number; max?: number; beadStep?: number; tickStep?: number; title: string; sub: string; source: string; compact?: boolean }
+const { rows, min = 0, max = 100, beadStep = 1, tickStep = 5, title, sub, source, compact = false } = Astro.props;
+const W = 640, LW = compact ? 118 : 150, RW = 44, rowH = compact ? 40 : 48, top = 14;
+const H = top + rows.length * rowH + 10;
+const x = (v: number) => LW + ((v - min) / (max - min)) * (W - LW - RW);
+const ticks = Array.from({ length: Math.floor((max - min) / tickStep) + 1 }, (_, i) => min + i * tickStep);
+const fmt = (v: number, u?: string) => `${Number.isInteger(v) ? v : v.toFixed(1)}${u ?? ""}`;
+---
+<figure class="fig" data-chart="dumbbell">
+  <figcaption class="fig-head">
+    <span class="fig-title">{title}</span>
+    <span class="fig-sub t-mono">{sub}</span>
+  </figcaption>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}. ${rows.map((r) => `${r.label}: ${fmt(r.before, r.unit)} to ${fmt(r.after, r.unit)}`).join("; ")}`}>
+    {rows.map((r, i) => {
+      const y = top + i * rowH + rowH / 2;
+      const lo = Math.min(r.before, r.after), hi = Math.max(r.before, r.after);
+      const beads: number[] = [];
+      for (let v = lo + beadStep; v < hi; v += beadStep) beads.push(v);
+      return (
+        <g class="row">
+          <text class="c-label c-label--inline" x="0" y={y + 4}>{r.label}</text>
+          <text class="c-label c-label--above" x={x(min)} y={y - 12}>{r.label}</text>
+          <line class="c-track c-draw" x1={x(min)} y1={y} x2={x(max)} y2={y} />
+          {ticks.map((t) => <line class="c-tick" x1={x(t)} y1={y - 3} x2={x(t)} y2={y + 3} />)}
+          <line class="c-span c-draw" x1={x(r.before)} y1={y} x2={x(r.after)} y2={y} />
+          {beads.map((v) => <circle class="c-bead c-pop" cx={x(v)} cy={y} r="2.1" />)}
+          <circle class="c-before c-pop" cx={x(r.before)} cy={y} r="4.2" />
+          <circle class="c-after c-pop" cx={x(r.after)} cy={y} r="4.6" />
+          <text class="c-val c-val--before" x={x(r.before)} y={y - 10} text-anchor="middle">{fmt(r.before, r.unit)}</text>
+          <text class="c-val c-val--after" x={x(r.after)} y={y - 10} text-anchor="middle">{fmt(r.after, r.unit)}</text>
+        </g>
+      );
+    })}
+    <text class="c-axis" x={x(min)} y={H - 1}>{min}</text>
+    <text class="c-axis" x={x(max)} y={H - 1} text-anchor="end">{max}</text>
+  </svg>
+  <span class="fig-src t-mono">{source}</span>
+</figure>

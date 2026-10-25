@@ -1,0 +1,159 @@
+---
+// Hero.astro — the opening frame. Lattice sits centre-right in the fog; the statement anchors bottom-left.
+import Icon from "./Icon.astro";
+---
+<section
+  id="hero" class="hero"
+  data-scene="mist" data-tone="light" data-chapter="00" data-label="Intro"
+  data-lattice="brain" data-lattice-cx="0.7" data-lattice-cy="0.46" data-lattice-scale="0.78" data-lattice-rx="0.3" data-lattice-ry="0.5"
+  data-lattice-cx-sm="0.5" data-lattice-cy-sm="0.31" data-lattice-scale-sm="0.58"
+>
+  <div class="wrap hero-frame">
+
+    <span class="drag-hint" aria-hidden="true">Drag to rotate</span>
+    <p id="hero-label" class="hero-label t-mono" data-text="Borina Keo — ERP · WMS · AI Integration Leader">
+      Borina Keo — ERP · WMS · AI Integration Leader
+    </p>
+
+    <aside class="hero-mission t-mono hero-meta">
+      <span class="mission-tag">////// Mission</span>
+      <span>Make the systems that run Fortune 500 distribution intelligent.</span>
+    </aside>
+
+    <h1 class="hero-statement t-display">
+      <span class="l">I make</span>
+      <span class="l l--heavy">legacy systems</span>
+      <span class="l">think.</span>
+    </h1>
+
+    <p id="hero-title" class="hero-desc hero-meta t-body">
+      Fifteen years inside enterprise operations: migrating <strong>Microsoft Dynamics 365</strong> off IBM AS400,
+      deploying <strong>Manhattan DFIO</strong> across seven distribution centres, and building the
+      <strong>Azure OpenAI</strong> layer that now connects them.
+    </p>
+
+    <div class="hero-links hero-meta t-mono">
+      <a href="https://www.linkedin.com/in/borinakeo" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn profile" data-cursor-hover data-cursor="open"><Icon name="linkedin" size={13} /> LinkedIn</a>
+      <span aria-hidden="true">/</span>
+      <a href="https://github.com/Bmee007" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile" data-cursor-hover data-cursor="open"><Icon name="github" size={13} /> GitHub</a>
+      <span aria-hidden="true">/</span>
+      <a href="#contact" data-cursor-hover>Contact</a>
+    </div>
+
+    <div class="hero-hint t-mono">
+      <span class="hint-line"></span>
+      <span>Scroll down to discover</span>
+    </div>
+
+    <div class="hero-readout hero-meta t-mono">
+      <span><strong>15+</strong> yrs in enterprise systems</span>
+      <span><strong>07</strong> DCs</span>
+      <span><strong>$2.4M</strong> saved</span>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    align-items: stretch;
+  }
+  .hero-frame {
+    position: relative;
+    flex: 1;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    padding-top: 6.5rem;
+    padding-bottom: 5.5rem;
+    min-height: 100svh;
+  }
+
+  .hero-label { grid-row: 1; margin: 0; color: var(--ink-2); max-width: 70%; }
+
+  .hero-mission {
+    position: absolute;
+    top: 6.5rem;
+    right: var(--gutter);
+    width: 14rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: right;
+    color: var(--ink-2);
+    text-transform: none;
+    letter-spacing: 0.04em;
+    font-size: 0.72rem;
+    line-height: 1.6;
+  }
+  .mission-tag { text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-3); }
+  @media (min-width: 900px) { .hero-mission { display: flex; } }
+
+  .hero-statement {
+    grid-row: 3;
+    align-self: end;
+    font-size: clamp(2.8rem, min(11.5vw, 15.5vh), 11.5rem);
+    letter-spacing: 0.015em;
+    line-height: 0.92;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    max-width: 10ch; /* always four lines: never runs under the lattice */
+  }
+  .hero-statement .l { display: block; }
+  .hero-statement .l--heavy { font-weight: 500; letter-spacing: 0.005em; }
+  .hero-statement .l:nth-child(2) { padding-left: 0.08em; }
+  .hero-statement .l:nth-child(3) { padding-left: 0.3em; color: var(--ink-2); }
+
+  .hero-desc {
+    grid-row: 4;
+    max-width: 34rem;
+    font-size: clamp(0.9rem, 1.05vw, 1rem);
+  }
+  .hero-desc strong { font-weight: 500; color: var(--ink); }
+
+  .hero-links {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 2.25rem;
+    display: flex;
+    gap: 0.75rem;
+    color: var(--ink-3);
+  }
+  .hero-links a { text-decoration: none; color: var(--ink-2); transition: color 0.3s; display: inline-flex; align-items: center; gap: 0.4rem; min-height: 32px; padding: 0 0.25rem; }
+  .hero-links a:hover { color: var(--ink); }
+
+  .hero-hint {
+    position: absolute;
+    left: var(--gutter);
+    bottom: 2.25rem;
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    color: var(--ink-3);
+  }
+  @media (min-width: 900px) { .hero-hint { display: flex; } }
+  .hint-line {
+    width: 3.5rem; height: 1px; background: var(--ink-3);
+    transform-origin: left; animation: hint 2.6s var(--ease-in-out) infinite;
+  }
+  @keyframes hint { 0%, 100% { transform: scaleX(0.3); opacity: 0.4; } 50% { transform: scaleX(1); opacity: 1; } }
+
+  .hero-readout {
+    position: absolute;
+    right: var(--gutter);
+    top: 13.5rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: right;
+    color: var(--ink-3);
+  }
+  @media (min-width: 1100px) { .hero-readout { display: flex; } }
+
+  @media (max-width: 899px) {
+    .hero-frame { padding-top: 5.5rem; padding-bottom: 2rem; grid-template-rows: auto 1fr auto auto auto; }
+    .hero-desc { padding-bottom: 2.5rem; }
+    .hero-links { position: static; grid-row: 5; justify-self: start; }
+    .hero-label { max-width: 100%; }
+  }
+</style>

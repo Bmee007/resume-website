@@ -1,0 +1,182 @@
+// src/scripts/scene3d.js
+// The story object as real 3D: five solid models that shatter into fragments and
+// reassemble as the chapter changes. Keeps the same state contract as the old
+// wireframe (morph, cx, cy, scale, opacity, rotX, rotY, tilt, ink, glow) so the
+// scene director in motion/chapters.js is unchanged.
+
+import * as THREE from 'three';
+import { MODELS, loadModel } from './models.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+
+const STATES = ['truck', 'computer', 'warehouse', 'canada', 'brain'];
+
+// Shatter displacement + fade, injected into Three's physical material so lighting stays PBR.
+const SHATTER_PARS_V = /* glsl */`
+attribute vec3 aCenter; attribute vec3 aDir; attribute float aPhase;
+uniform float uProgress;
+varying float vT;`;
+const SHATTER_V = /* glsl */`
+float t = smoothstep(aPhase * 0.65, aPhase * 0.65 + 0.35, uProgress);
+transformed = mix(transformed, aCenter, t * 0.92) + aDir * t * 1.6;
+vT = t;`;
+const SHATTER_PARS_F = /* glsl */`
+varying float vT; uniform float uGlow;`;
+const SHATTER_F = /* glsl */`
+if (vT > 0.96) discard;
+gl_FragColor.a *= 1.0 - smoothstep(0.6, 0.96, vT);
+gl_FragColor.rgb += uGlow * 0.25;`;
+
+function makeMaterial(shadeAttr) {
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.58, metalness: 0.0,
+    clearcoat: 0.18, clearcoatRoughness: 0.4, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
+    transparent: true, side: THREE.DoubleSide, vertexColors: !!shadeAttr,
+  });
+  mat.userData.uniforms = { uProgress: { value: 1 }, uGlow: { value: 0 } };
+  mat.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, mat.userData.uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\n' + SHATTER_PARS_V)
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\n' + SHATTER_V);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + SHATTER_PARS_F)
+      .replace('#include <dithering_fragment>', SHATTER_F + '\n#include <dithering_fragment>');
+  };
+  return mat;
+}
+
+export function createScene(canvas, labelLayer) {
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' });
+  } catch { return null; }
+  renderer.setClearColor(0x000000, 0);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.92;
+  const scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(2.5, 4, 3); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xcfe2f3, 0.5); rim.position.set(-3, 1, -2); scene.add(rim);
+  scene.add(new THREE.HemisphereLight(0xe3eaf2, 0x55606e, 0.5));
+  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
+  camera.position.set(0, 0, 6.4);
+  const group = new THREE.Group();
+  scene.add(group);
+
+  const meshes = {};
+  const labels = {};
+  const attach = (name, geo) => {
+    const mat = makeMaterial(geo.attributes.color);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.visible = false;
+    mesh.frustumCulled = false;
+    if (meshes[name]) { group.remove(meshes[name]); meshes[name].geometry.dispose(); }
+    group.add(mesh);
+    meshes[name] = mesh;
+    labels[name] = geo.userData.labels || [];
+  };
+  // Procedural stand-ins first (instant). Lifelike GLBs load on demand (see ensure) so the
+  // first paint doesn't pay for models whose chapters are a long scroll away.
+  for (const name of STATES) attach(name, MODELS[name]());
+  const loaded = new Set();
+  function ensure(name) {
+    if (!STATES.includes(name) || loaded.has(name)) return;
+    loaded.add(name);
+    loadModel(name).then((geo) => { if (geo) attach(name, geo); }).catch((e) => { loaded.delete(name); console.warn('[scene3d] model', name, e); });
+  }
+
+  // DOM labels (city names on the map)
+  const labelEls = {};
+  if (labelLayer) {
+    for (const name of STATES) {
+      labelEls[name] = labels[name].map((lb) => {
+        const el = document.createElement('span');
+        el.className = 'lat-label';
+        el.textContent = lb.text;
+        labelLayer.appendChild(el);
+        return el;
+      });
+    }
+  }
+
+  const state = {
+    morph: 4, rotY: 0.6, rotX: 0.35, tiltX: 0, tiltY: 0,
+    scale: 1, opacity: 1, cx: 0.5, cy: 0.5,
+    ink: [36, 46, 62], glow: 0,
+    intro: 1, // loader multiplier on scale, so the intro never fights a chapter's own scale
+    userY: 0, userX: 0, spinY: 0, spinX: 0, // drag rotation + inertia
+  };
+  const smooth = { tiltX: 0, tiltY: 0 };
+  let w = 1, h = 1;
+
+  function resize() {
+    w = canvas.clientWidth || 1; h = canvas.clientHeight || 1;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 900 ? 1.5 : 2));
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  // visible world size at z = 0 for mapping cx/cy
+  const visible = () => { const vh = 2 * Math.tan((camera.fov * Math.PI) / 360) * camera.position.z; return [vh * camera.aspect, vh]; };
+  const tmp = new THREE.Vector3();
+
+  function render(t) {
+    if (state.opacity <= 0.001) { renderer.clear(); Object.values(labelEls).flat().forEach((el) => { el.style.opacity = '0'; }); return; }
+    const m = Math.max(0, Math.min(STATES.length - 1, state.morph));
+    const si = Math.floor(m), sj = Math.min(STATES.length - 1, si + 1);
+    const f = m - si, ease = f * f * (3 - 2 * f);
+    const isDark = state.ink[0] > 128;
+
+    smooth.tiltX += (state.tiltX - smooth.tiltX) * 0.06;
+    smooth.tiltY += (state.tiltY - smooth.tiltY) * 0.06;
+    const [vw, vh] = visible();
+    group.position.set((state.cx - 0.5) * vw, -(state.cy - 0.5) * vh + Math.sin(t * 0.7) * 0.02, 0);
+    // drag inertia: spin decays, settles back toward the chapter's pose
+    state.userY += state.spinY; state.userX += state.spinX;
+    state.spinY *= 0.95; state.spinX *= 0.95;
+    state.userY *= 0.985; state.userX *= 0.97;
+    group.rotation.set(state.rotX + smooth.tiltY * 0.18 + state.userX, state.rotY + Math.sin(t * 0.14) * 0.2 + smooth.tiltX * 0.3 + state.userY, 0);
+    const base = Math.min(vw, vh) * 0.3 * state.scale * state.intro;
+    group.scale.setScalar(base);
+
+    for (const name of STATES) {
+      const mesh = meshes[name];
+      const u = mesh.material.userData.uniforms;
+      let prog = 1; // 1 = fully dissolved (hidden)
+      if (name === STATES[si]) prog = ease;
+      else if (name === STATES[sj] && sj !== si) prog = 1 - ease;
+      mesh.visible = prog < 0.999;
+      u.uProgress.value = prog;
+      u.uGlow.value = state.glow;
+      mesh.material.opacity = state.opacity;
+      mesh.material.color.setRGB(...(isDark ? [0.6, 0.68, 0.79] : [0.64, 0.7, 0.77]));
+    }
+    renderer.render(scene, camera);
+
+    // labels follow their pins; fade with the model
+    group.updateMatrixWorld();
+    for (const name of STATES) {
+      const els = labelEls[name]; if (!els || !els.length) continue;
+      const prog = meshes[name].visible ? meshes[name].material.userData.uniforms.uProgress.value : 1;
+      const alpha = (1 - prog) * state.opacity;
+      els.forEach((el, i) => {
+        if (alpha < 0.02) { el.style.opacity = '0'; return; }
+        tmp.set(...labels[name][i].pos).applyMatrix4(group.matrixWorld).project(camera);
+        el.style.opacity = String(alpha);
+        el.style.transform = `translate(${((tmp.x + 1) / 2) * w + 8}px, ${((1 - tmp.y) / 2) * h - 6}px)`;
+      });
+    }
+  }
+
+  /** Screen-space circle (px) around the visible model, for pointer hit-testing. */
+  function screenBounds() {
+    if (state.opacity < 0.05) return null;
+    const [vw, vh] = visible();
+    const cx = state.cx * w, cy = state.cy * h;
+    const r = Math.min(vw, vh) * 0.3 * state.scale * state.intro * 1.15; // world radius ≈ 1.15 units
+    return { x: cx, y: cy, r: (r / vh) * h };
+  }
+  return { render, state, STATES, screenBounds, ensure };
+}

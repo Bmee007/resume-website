@@ -9,3 +9,5 @@ playwright-report/
 .DS_Store
 .superpowers/
 .env*.local
+.gitnexus
+.env.txt

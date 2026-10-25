@@ -1,0 +1,129 @@
+---
+// ChapterNetwork.astro — CH.02. Dynamics 365 + Manhattan DFIO across seven distribution centres, coast to coast.
+import { DCS } from "../scripts/shapes.js";
+import ChartGauge from "./charts/ChartGauge.astro";
+const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v).toFixed(2)}°${v >= 0 ? pos : neg}`;
+const stats = [
+  { value: 7,    suffix: "",  decimals: 0, label: "distribution centres on one ERP and WMS" },
+  { value: 15,   prefix: "+", suffix: "%", decimals: 0, label: "warehouse throughput" },
+  { value: 99.7, suffix: "%", decimals: 1, label: "pick accuracy" },
+  { value: 5,    prefix: "−", suffix: "%", decimals: 0, label: "labour cost per order" },
+];
+---
+<section
+  id="network" class="chapter network"
+  data-scene="steel" data-tone="light" data-chapter="02" data-label="Network"
+  data-lattice="warehouse" data-lattice-cx="0.23" data-lattice-cy="0.5" data-lattice-scale="0.58" data-lattice-rx="0.42" data-lattice-ry="0.55"
+  data-lattice-then="canada" data-lattice-then-cx="0.21" data-lattice-then-cy="0.46" data-lattice-then-scale="0.64" data-lattice-then-rx="0.95" data-lattice-then-ry="0.12"
+>
+  <span class="chapter-mark" aria-hidden="true">02</span>
+
+  <div class="wrap grid-12">
+    <p class="telemetry net-tel" data-scramble><span class="ch">CH.02</span> Network · Dynamics 365 + Manhattan DFIO × 7 distribution centres · coast to coast</p>
+
+    <h2 class="t-display net-heading" data-split>Seven warehouses. One nervous system.</h2>
+
+    <p class="t-body net-copy" data-reveal>
+      Seven distribution centres, from Delta on the Pacific to Moncton on the Atlantic, brought onto one
+      system of record. Microsoft Dynamics 365 was the larger integration: finance, procurement and inventory
+      for every site, replacing the AS400 processes each warehouse had grown around. Manhattan DFIO ran the
+      floor underneath it, and the two were wired together so a pick, a receipt or a transfer in one became
+      truth in the other. With AI-driven pick-path optimisation on top, throughput rose 15%, pick accuracy
+      reached 99.7%, and labour cost per order fell 5%.
+    </p>
+
+    <ol class="dc-roster" aria-label="Distribution centres, west to east">
+      {DCS.map((d, i) => (
+        <li class="dc" data-reveal style={`--i:${i}`}>
+          <span class="dc-idx t-mono">{String(i + 1).padStart(2, "0")}</span>
+          <span class="dc-city">{d.city}<span class="dc-region t-mono">{d.region}</span></span>
+          <span class="dc-coords t-mono" data-scramble>{fmt(d.lat, "N", "S")} {fmt(d.lon, "E", "W")}</span>
+          <span class="dc-state t-mono"><span class="sys sys--erp">D365</span><span class="sys sys--wms">DFIO</span></span>
+        </li>
+      ))}
+    </ol>
+
+    <div class="net-fig" data-reveal>
+      <ChartGauge
+        value={99.7}
+        title="Pick accuracy after DFIO and AI pick-path optimisation"
+        sub="one tick = one per cent of picks · 99.7 of every 100 picks correct · across all seven sites"
+        source="Manhattan DFIO on Dynamics 365, seven distribution centres"
+      />
+    </div>
+
+    <dl class="net-stats">
+      {stats.map((s) => (
+        <div class="net-stat" data-reveal>
+          <dt><span data-count={s.value} data-prefix={s.prefix ?? ""} data-suffix={s.suffix} data-decimals={s.decimals}>{s.prefix ?? ""}{s.value}{s.suffix}</span></dt>
+          <dd>{s.label}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<style>
+  .network { padding-block: clamp(8rem, 16vw, 14rem); }
+  .net-tel { grid-column: 1 / -1; }
+  .net-heading { grid-column: 1 / -1; font-size: clamp(2.2rem, 5.4vw, 5.4rem); max-width: none; margin-top: 1rem; }
+  .net-copy { grid-column: 1 / -1; margin-top: 1rem; }
+
+  /* Roster: a ledger of cities, west → east, matching the pins on the map */
+  .dc-roster {
+    grid-column: 1 / -1;
+    list-style: none;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line-2);
+  }
+  .dc {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    grid-template-areas: "idx city state" "idx coords state";
+    align-items: center;
+    column-gap: 1rem;
+    row-gap: 0.2rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--line-2);
+    transition: background 0.4s var(--ease-out);
+  }
+  .dc:hover { background: var(--surface); }
+  .dc-idx { grid-area: idx; color: var(--accent); }
+  .dc-city { grid-area: city; font-size: 1.05rem; color: var(--ink); display: inline-flex; align-items: baseline; gap: 0.6rem; }
+  .dc-region { color: var(--ink-3); }
+  .dc-coords { grid-area: coords; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .dc-state { grid-area: state; display: inline-flex; gap: 1rem; color: var(--ink-3); }
+  .sys { position: relative; padding-left: 0.9rem; }
+  .sys::before {
+    content: ''; position: absolute; left: 0; top: 50%; width: 5px; height: 5px; margin-top: -2.5px;
+    border-radius: 50%; background: var(--accent);
+    animation: pulse 2.4s var(--ease-in-out) infinite; animation-delay: calc(var(--i, 0) * 160ms);
+  }
+  .sys--erp { color: var(--ink); }
+  .sys--wms::before { background: var(--ink-3); animation-delay: calc(var(--i, 0) * 160ms + 1.2s); }
+  @keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+  @media (min-width: 700px) {
+    .dc { grid-template-columns: 2.5rem 1fr 1fr auto; grid-template-areas: "idx city coords state"; }
+  }
+
+  .net-fig { grid-column: 1 / -1; margin-top: 2.5rem; }
+  .net-stats {
+    grid-column: 1 / -1;
+    margin: 2.5rem 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1.5rem;
+  }
+  .net-stat dt {
+    font-family: var(--font-display); font-weight: 200;
+    font-size: clamp(2.2rem, 4.2vw, 3.8rem); line-height: 1; letter-spacing: -0.02em; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .net-stat dd { margin: 0.5rem 0 0; color: var(--ink-2); font-size: 0.95rem; }
+
+  @media (min-width: 900px) {
+    .net-tel, .net-heading, .net-copy, .dc-roster, .net-fig { grid-column: 6 / 13; }
+    .net-stats { grid-column: 6 / 13; grid-template-columns: repeat(4, 1fr); }
+  }
+</style>

@@ -1,0 +1,111 @@
+---
+// ChapterOrigin.astro — CH.01. The storm: IBM AS400 → Microsoft Dynamics 365.
+import ChartDumbbell from "./charts/ChartDumbbell.astro";
+const ledger = [
+  { value: 30, suffix: "%", label: "operational cost reduction", note: "AS400 → D365 migration" },
+  { value: 33, suffix: "%", label: "faster procurement cycle", note: "Azure OpenAI inside D365 workflows" },
+  { value: 45, suffix: "",  label: "people led through the change", note: "cross-functional, 18-month program" },
+  { value: 0,  suffix: "",  label: "shipments stopped", note: "cut-over without interrupting operations" },
+];
+---
+<section
+  id="about" class="chapter origin"
+  data-scene="storm" data-tone="dark" data-chapter="01" data-label="Origin"
+  data-lattice="computer" data-lattice-cx="0.8" data-lattice-cy="0.36" data-lattice-scale="0.5" data-lattice-rx="0.22" data-lattice-ry="0.4"
+>
+  <span class="chapter-mark" aria-hidden="true">01</span>
+
+  <div class="wrap grid-12">
+    <p class="telemetry origin-tel" data-scramble><span class="ch">CH.01</span> Origin · IBM AS400 → Microsoft Dynamics 365</p>
+
+    <h2 class="t-display origin-heading" data-split>Every transformation starts in the dark.</h2>
+
+    <div class="origin-copy">
+      <p class="t-body bio-lead" data-reveal>
+        A Fortune 500 distribution network running on IBM AS400. Green screens, manual processes,
+        and a 45-person team who knew every workaround by heart. I was asked to lead them out:
+        an 18-month migration to Microsoft Dynamics 365 that cut operational costs by 30% and
+        procurement cycle time by 33% without stopping a single shipment.
+      </p>
+      <p class="t-body" data-reveal>
+        That program set the pattern for everything since. Understand the operation before touching the system.
+        Move the data, keep the trust. Then make the new platform smarter than the one it replaced: Manhattan DFIO
+        on the warehouse floor, Azure OpenAI in procurement, Copilot in the hands of 2,400 staff.
+      </p>
+      <p class="t-mono origin-now" data-reveal><strong>Now</strong> AI &amp; ERP Integration Lead · Kohl and Frisch</p>
+    </div>
+
+    <div class="origin-fig" data-reveal>
+      <ChartDumbbell
+        title="What the migration took out"
+        sub="indexed · AS400 baseline = 100 · hollow dot = before · solid dot = after · one bead = one index point"
+        source="Kohl and Frisch D365 program, 2019–2023"
+        rows={[
+          { label: "Operational cost", before: 100, after: 70 },
+          { label: "Procurement cycle time", before: 100, after: 67 },
+        ]}
+        min={0} max={100} beadStep={1} tickStep={10}
+      />
+    </div>
+
+    <ol class="ledger origin-ledger" aria-label="Program outcomes">
+      {ledger.map((row) => (
+        <li class="ledger-row" data-reveal>
+          <span class="ledger-rule" data-rule aria-hidden="true"></span>
+          <span class="ledger-value"><span data-count={row.value} data-suffix={row.suffix}>{row.value}{row.suffix}</span></span>
+          <span class="ledger-meta">
+            <span class="ledger-label">{row.label}</span>
+            <span class="ledger-note t-mono">{row.note}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .origin { padding-block: clamp(8rem, 16vw, 14rem); }
+  .origin-tel { grid-column: 1 / -1; }
+  .origin-heading {
+    grid-column: 1 / -1;
+    font-size: clamp(1.9rem, 5.2vw, 5.2rem);
+    max-width: none;
+    margin-top: 1rem;
+  }
+  .origin-copy { grid-column: 1 / -1; display: grid; gap: 1.5rem; margin-top: 1rem; }
+  .origin-fig { grid-column: 1 / -1; margin-top: 2.5rem; }
+  .origin-now { color: var(--ink-3); margin-top: 0.5rem; }
+  .origin-now strong { margin-right: 0.75rem; }
+
+  .ledger { grid-column: 1 / -1; margin: 2rem 0 0; padding: 0; list-style: none; display: grid; }
+  .ledger-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(7rem, auto) 1fr;
+    align-items: baseline;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+  .ledger-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .ledger-row:last-child::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .ledger-value {
+    font-family: var(--font-display);
+    font-weight: 200;
+    font-size: clamp(2.6rem, 5vw, 4.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .ledger-meta { margin: 0; display: grid; gap: 0.3rem; }
+  .ledger-label { font-size: 1rem; color: var(--ink-2); }
+  .ledger-note { color: var(--ink-3); }
+
+  @media (min-width: 900px) {
+    .origin-heading { grid-column: 1 / 11; }
+    .origin-copy { grid-column: 1 / 7; }
+    .origin-fig { grid-column: 1 / 7; }
+    .origin-ledger { grid-column: 8 / 13; margin-top: 0; grid-row: 3 / 5; }
+  }
+</style>

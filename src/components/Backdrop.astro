@@ -1,0 +1,34 @@
+---
+// Backdrop.astro — fixed WebGL fog + the lattice story object. Content scrolls over it.
+---
+<div id="backdrop" aria-hidden="true">
+  <canvas id="fog-canvas"></canvas>
+  <canvas id="lattice-canvas"></canvas>
+  <div id="lattice-labels"></div>
+</div>
+
+<style>
+  #backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    touch-action: pan-y;
+    overflow: hidden;
+  }
+  #fog-canvas,
+  #lattice-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  #lattice-canvas { mix-blend-mode: normal; }
+  #lattice-labels { position: absolute; inset: 0; }
+  #lattice-labels :global(.lat-label) {
+    position: absolute; left: 0; top: 0;
+    font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink); opacity: 0; white-space: nowrap; will-change: transform, opacity;
+  }
+</style>

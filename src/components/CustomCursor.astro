@@ -1,135 +1,72 @@
 ---
-// CustomCursor.astro — lerp-based trailing cursor for mouse devices
+// CustomCursor.astro — survey crosshair. Dot snaps, ring trails, difference blend keeps it visible on any fog.
 ---
-
-<div id="custom-cursor" aria-hidden="true"></div>
+<div id="custom-cursor" aria-hidden="true">
+  <span class="c-tick c-tick--n"></span><span class="c-tick c-tick--s"></span>
+  <span class="c-tick c-tick--e"></span><span class="c-tick c-tick--w"></span>
+  <span class="c-glyph" aria-hidden="true">↗</span>
+  <span class="c-label" aria-hidden="true">Drag</span>
+</div>
 <div id="custom-cursor-dot" aria-hidden="true"></div>
 
 <style>
+  #custom-cursor, #custom-cursor-dot {
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    mix-blend-mode: difference;
+    opacity: 0;
+    will-change: transform;
+  }
   #custom-cursor {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 40px;
-    height: 40px;
+    width: 36px; height: 36px;
+    border: 1px solid white;
     border-radius: 50%;
-    border: 1.5px solid var(--amber);
-    pointer-events: none;
-    z-index: 99998;
-    opacity: 0;
-    transition:
-      width    0.3s var(--ease-expo-out),
-      height   0.3s var(--ease-expo-out),
-      background 0.3s ease,
-      border-color 0.3s ease,
-      opacity  0.4s ease;
-    mix-blend-mode: exclusion;
-    will-change: transform;
+    z-index: 9998;
+    transition: width 0.4s var(--ease-out), height 0.4s var(--ease-out), opacity 0.4s, background 0.4s;
   }
-
-  #custom-cursor-dot {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--amber);
-    pointer-events: none;
-    z-index: 99999;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    will-change: transform;
-  }
-
-  /* Visible on mouse-capable devices only */
-  @media (pointer: fine) {
-    #custom-cursor     { opacity: 1; }
-    #custom-cursor-dot { opacity: 1; }
-  }
-
-  /* Hover state — expand ring, fill slightly */
-  #custom-cursor.is-hovering {
-    width: 56px;
-    height: 56px;
-    border-color: transparent;
-    background: color-mix(in oklch, var(--amber) 14%, transparent);
-  }
-
-  /* Link state — show text cursor indicator */
-  #custom-cursor.is-link {
-    width: 64px;
-    height: 64px;
-    border-color: transparent;
-    background: color-mix(in oklch, var(--amber) 10%, transparent);
-  }
+  #custom-cursor-dot { width: 4px; height: 4px; background: white; z-index: 9999; transition: opacity 0.4s; }
+  .c-tick { position: absolute; background: white; }
+  .c-tick--n, .c-tick--s { width: 1px; height: 6px; left: 50%; }
+  .c-tick--e, .c-tick--w { height: 1px; width: 6px; top: 50%; }
+  .c-tick--n { top: -8px; } .c-tick--s { bottom: -8px; } .c-tick--e { right: -8px; } .c-tick--w { left: -8px; }
+  #custom-cursor.is-hovering { width: 64px; height: 64px; background: rgba(255,255,255,0.12); }
+  #custom-cursor.is-hovering .c-tick { opacity: 0; }
+  .c-glyph { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-mono); font-size: 14px; color: white; opacity: 0; transition: opacity 0.25s; }
+  #custom-cursor.is-open .c-glyph { opacity: 1; }
+  #custom-cursor.is-open { width: 56px; height: 56px; background: rgba(255,255,255,0.1); }
+  .c-label { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: white; opacity: 0; transition: opacity 0.25s; }
+  body.can-drag #custom-cursor { width: 72px; height: 72px; background: rgba(255,255,255,0.08); }
+  body.can-drag #custom-cursor .c-tick { opacity: 0; }
+  body.can-drag #custom-cursor .c-label { opacity: 1; }
+  body.is-dragging #custom-cursor { width: 44px; height: 44px; background: rgba(255,255,255,0.18); }
+  body.is-dragging #custom-cursor .c-label { opacity: 0; }
+  body.is-dragging { user-select: none; }
+  body.cursor-ready #custom-cursor, body.cursor-ready #custom-cursor-dot { opacity: 1; }
 </style>
 
 <script>
-  // Only run on fine-pointer (mouse) devices
-  if (!window.matchMedia('(pointer: fine)').matches) {
-    // Remove elements entirely on touch devices
-    document.getElementById('custom-cursor')?.remove();
-    document.getElementById('custom-cursor-dot')?.remove();
-  } else {
-    const ring = document.getElementById('custom-cursor');
-    const dot  = document.getElementById('custom-cursor-dot');
-
-    let mouseX = window.innerWidth  / 2;
-    let mouseY = window.innerHeight / 2;
-    let ringX  = mouseX;
-    let ringY  = mouseY;
-
-    // Update mouse position immediately
+  const fine = window.matchMedia('(pointer: fine)').matches;
+  const ring = document.getElementById('custom-cursor');
+  const dot = document.getElementById('custom-cursor-dot');
+  if (!fine) { ring?.remove(); dot?.remove(); }
+  else if (ring && dot) {
+    let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my, armed = false;
     document.addEventListener('mousemove', (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      // Dot follows instantly
-      if (dot) {
-        dot.style.transform = `translate(${mouseX - 3}px, ${mouseY - 3}px)`;
-      }
-    });
-
-    // Ring follows with lerp (smooth lag)
-    function animateCursor() {
-      ringX += (mouseX - ringX) * 0.10;
-      ringY += (mouseY - ringY) * 0.10;
-      if (ring) {
-        ring.style.transform = `translate(${ringX - 20}px, ${ringY - 20}px)`;
-      }
-      requestAnimationFrame(animateCursor);
-    }
-    animateCursor();
-
-    // Hover state on interactive elements
-    const selectors = 'a, button, [data-cursor-hover], input, textarea, label';
-    document.querySelectorAll(selectors).forEach((el) => {
-      el.addEventListener('mouseenter', () => ring?.classList.add('is-hovering'));
-      el.addEventListener('mouseleave', () => ring?.classList.remove('is-hovering'));
-    });
-
-    // Handle dynamically added elements via delegation
-    document.addEventListener('mouseover', (e) => {
-      const target = e.target as Element;
-      if (target.closest('a, button, [data-cursor-hover]')) {
-        ring?.classList.add('is-hovering');
-      }
-    });
-    document.addEventListener('mouseout', (e) => {
-      const target = e.target as Element;
-      if (target.closest('a, button, [data-cursor-hover]')) {
-        ring?.classList.remove('is-hovering');
-      }
-    });
-
-    // Hide when leaving window
-    document.addEventListener('mouseleave', () => {
-      if (ring) ring.style.opacity = '0';
-      if (dot)  dot.style.opacity  = '0';
-    });
-    document.addEventListener('mouseenter', () => {
-      if (ring) ring.style.opacity = '';
-      if (dot)  dot.style.opacity  = '';
-    });
+      mx = e.clientX; my = e.clientY;
+      dot.style.transform = `translate(${mx - 2}px, ${my - 2}px)`;
+      if (!armed) { armed = true; document.body.classList.add('cursor-ready'); }
+    }, { passive: true });
+    const loop = () => {
+      rx += (mx - rx) * 0.16; ry += (my - ry) * 0.16;
+      const s = ring.offsetWidth / 2;
+      ring.style.transform = `translate(${rx - s}px, ${ry - s}px)`;
+      requestAnimationFrame(loop);
+    };
+    loop();
+    const sel = 'a, button, [data-cursor-hover], input, textarea, label';
+    document.addEventListener('mouseover', (e) => { const t = (e.target as Element).closest(sel); if (t) { ring.classList.add('is-hovering'); if ((t as HTMLElement).dataset.cursor === 'open' || (t as HTMLAnchorElement).target === '_blank') ring.classList.add('is-open'); } });
+    document.addEventListener('mouseout',  (e) => { if ((e.target as Element).closest(sel)) ring.classList.remove('is-hovering', 'is-open'); });
+    document.addEventListener('mouseleave', () => { ring.style.opacity = '0'; dot.style.opacity = '0'; });
+    document.addEventListener('mouseenter', () => { ring.style.opacity = ''; dot.style.opacity = ''; });
   }
 </script>

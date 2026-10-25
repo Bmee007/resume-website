@@ -1,0 +1,34 @@
+---
+// ChartPairedRungs.astro — Lieflat F6 "Paired Rungs": before and after as two ladders of countable rungs.
+interface Group { label: string; before: number; after: number; unit?: string }
+interface Props { groups: Group[]; max?: number; rungStep?: number; title: string; sub: string; source: string }
+const { groups, max = 120, rungStep = 5, title, sub, source } = Astro.props;
+const W = 320, H = 150, base = 118, top = 18, barW = 26, gapIn = 8;
+const groupW = W / groups.length;
+const yOf = (v: number) => base - (v / max) * (base - top);
+const rungs = (v: number) => Array.from({ length: Math.floor(v / rungStep) }, (_, i) => (i + 1) * rungStep);
+const fmt = (v: number, u?: string) => `${v}${u ?? ""}`;
+---
+<figure class="fig fig--compact" data-chart="rungs">
+  <figcaption class="fig-head">
+    <span class="fig-title">{title}</span>
+    <span class="fig-sub t-mono">{sub}</span>
+  </figcaption>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}. ${groups.map((g) => `${g.label}: ${fmt(g.before, g.unit)} before, ${fmt(g.after, g.unit)} after`).join("; ")}`}>
+    <line class="c-track" x1="0" y1={base} x2={W} y2={base} />
+    {groups.map((g, i) => {
+      const cx = i * groupW + groupW / 2;
+      const xb = cx - gapIn / 2 - barW, xa = cx + gapIn / 2;
+      return (
+        <g>
+          {rungs(g.before).map((v) => <line class="c-rung c-rung--before c-grow" x1={xb} y1={yOf(v)} x2={xb + barW} y2={yOf(v)} />)}
+          {rungs(g.after).map((v) => <line class="c-rung c-rung--after c-grow" x1={xa} y1={yOf(v)} x2={xa + barW} y2={yOf(v)} />)}
+          <text class="c-val c-val--before" x={xb + barW / 2} y={yOf(g.before) - 6} text-anchor="middle">{fmt(g.before, g.unit)}</text>
+          <text class="c-val c-val--after" x={xa + barW / 2} y={yOf(g.after) - 6} text-anchor="middle">{fmt(g.after, g.unit)}</text>
+          <text class="c-label" x={cx} y={H - 2} text-anchor="middle">{g.label}</text>
+        </g>
+      );
+    })}
+  </svg>
+  <span class="fig-src t-mono">{source}</span>
+</figure>

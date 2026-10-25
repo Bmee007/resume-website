@@ -1,0 +1,40 @@
+<!doctype html>
+<!-- Model lab: renders a GLB the way the site does (PBR, soft studio light). Opened by tools/render-model.cjs. -->
+<html><head><meta charset="utf-8"><style>html,body{margin:0;background:#e3e8ee}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const q = new URLSearchParams(location.search);
+const url = q.get('model'); const yaw = parseFloat(q.get('yaw') || '0.6'); const pitch = parseFloat(q.get('pitch') || '0.3');
+const W = 900, H = 700;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setSize(W, H); renderer.setPixelRatio(1); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color('#e3e8ee');
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+const cam = new THREE.PerspectiveCamera(32, W / H, 0.1, 100); cam.position.set(0, 0, 6.4);
+const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(2, 4, 3); scene.add(key);
+scene.add(new THREE.HemisphereLight(0xdfe7f0, 0x6b7785, 0.6));
+const loader = new GLTFLoader();
+const draco = new DRACOLoader(); draco.setDecoderPath('/node_modules/three/examples/jsm/libs/draco/'); loader.setDRACOLoader(draco);
+loader.setMeshoptDecoder(MeshoptDecoder);
+const stats = { tris: 0, meshes: 0, bytes: 0 };
+try {
+  const res = await fetch(url); const buf = await res.arrayBuffer(); stats.bytes = buf.byteLength;
+  const gltf = await loader.parseAsync(buf, '');
+  const root = gltf.scene;
+  root.traverse((o) => { if (o.isMesh) { stats.meshes++; const g = o.geometry; stats.tris += (g.index ? g.index.count : g.attributes.position.count) / 3; o.material = new THREE.MeshStandardMaterial({ color: '#c9d2dc', roughness: 0.55, metalness: 0.0 }); } });
+  // normalise: longest axis = 2.8, centred
+  const box = new THREE.Box3().setFromObject(root); const size = new THREE.Vector3(); box.getSize(size); const c = new THREE.Vector3(); box.getCenter(c);
+  const s = 2.8 / Math.max(size.x, size.y, size.z);
+  const group = new THREE.Group(); group.add(root); root.position.sub(c); group.scale.setScalar(s);
+  group.rotation.set(pitch, yaw, 0); scene.add(group);
+  renderer.render(scene, cam);
+  window.__stats = { ...stats, size: [size.x, size.y, size.z].map((v) => +(v * s).toFixed(2)), ok: true };
+} catch (e) { window.__stats = { ok: false, error: String(e) }; }
+</script></body></html>

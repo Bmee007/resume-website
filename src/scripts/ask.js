@@ -1,0 +1,176 @@
+// src/scripts/ask.js — "Ask the system" live console (streams from /api/chat)
+import { gsap, Flip, reduced } from './motion/core.js';
+
+let initialized = false;
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+const ROWS = { metric: 'card-metric-big', alert: 'card-alert', experience: 'card-yrs', skills: 'card-skills', ai: 'card-ai' };
+
+function focusRow(key) {
+  const rows = document.querySelectorAll('#ask-bento .readout-row');
+  if (!rows.length || !ROWS[key]) return;
+  const apply = () => {
+    rows.forEach((r) => r.classList.remove('is-focus'));
+    document.getElementById(ROWS[key])?.classList.add('is-focus');
+  };
+  if (reduced()) { apply(); return; }
+  const state = Flip.getState(rows);
+  apply();
+  Flip.from(state, { duration: 0.7, ease: 'expo.out', nested: true });
+}
+
+function fadeSwap(el, apply) {
+  if (!el) return;
+  gsap.to(el, { opacity: 0, duration: 0.18, onComplete: () => { apply(); gsap.to(el, { opacity: 1, duration: 0.4 }); } });
+}
+
+function updateReadout(u) {
+  if (!u) return;
+  if (u.metric) {
+    const { value, label, sub } = u.metric;
+    if (value) fadeSwap(document.getElementById('metric-value'), () => { document.getElementById('metric-value').textContent = value; });
+    if (label) fadeSwap(document.getElementById('metric-label'), () => { document.getElementById('metric-label').textContent = label; });
+    if (sub) fadeSwap(document.getElementById('metric-sub'), () => { document.getElementById('metric-sub').textContent = sub; });
+  }
+  if (Array.isArray(u.alert_items)) {
+    const list = document.getElementById('alert-list');
+    fadeSwap(list, () => {
+      list.innerHTML = u.alert_items.map((it, i) => `
+        <div class="alert-item${i > 0 ? ' alert-item--ok' : ''}">
+          <span class="alert-icon" aria-hidden="true">${escapeHtml(it.icon)}</span>
+          <span class="alert-text">${escapeHtml(it.text)}</span>
+          <span class="alert-meta">${escapeHtml(it.meta)}</span>
+        </div>`).join('');
+    });
+  }
+  if (u.ai_response) {
+    fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = u.ai_response; });
+  }
+}
+
+async function streamAnswer(prompt, abort) {
+  const out = document.getElementById('ai-response-text');
+  const dots = document.getElementById('ai-dots');
+  const status = document.getElementById('ask-status');
+  let shown = '';
+  if (dots) dots.hidden = false;
+  if (out) out.textContent = '';
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }), signal: abort.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let full = '', buf = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n'); buf = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (raw === '[DONE]') {
+          if (dots) dots.hidden = true;
+          try {
+            const parsed = JSON.parse(full);
+            if (parsed.highlight_card) focusRow(parsed.highlight_card);
+            if (parsed.updates) updateReadout(parsed.updates);
+            if (status) status.textContent = '';
+            return { ok: true };
+          } catch { return { ok: shown.length > 0 }; }
+        }
+        try {
+          const { delta, error } = JSON.parse(raw);
+          if (error) throw new Error(error);
+          if (delta) {
+            full += delta;
+            const m = full.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+            if (m) {
+              const txt = m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+              if (txt !== shown && out) { shown = txt; out.textContent = txt; }
+            }
+          }
+        } catch (e) { if (!(e instanceof SyntaxError)) throw e; }
+      }
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return { ok: false, aborted: true };
+    if (dots) dots.hidden = true;
+    if (status) status.textContent = 'SIGNAL LOST — TRY AGAIN';
+    return { ok: false, error: err };
+  }
+  return { ok: shown.length > 0 };
+}
+
+// Canned answers (verified facts only) so the console never dead-ends when the model is offline.
+const CANNED = {
+  'How did you use Azure OpenAI in production?': { card: 'alert', text: 'Azure OpenAI runs inside Dynamics 365 procurement: it classifies inbound documents, matches them to purchase orders and routes approvals. Manual order-processing time fell 68% and the pilot lifted forecast accuracy 12%.' },
+  'What is your Microsoft Dynamics 365 expertise?': { card: 'experience', text: 'I led the full IBM AS400 → Dynamics 365 migration for a Fortune 500 distribution network: an 18-month program, a 45-person team, 30% lower operating cost, and no shipments stopped at cut-over.' },
+  'Tell me about the $2.4M cost reduction you drove': { card: 'metric', text: '$2.4M of operational cost removed across three enterprise deployments: D365 procurement automation, DFIO pick-path optimisation, and a Copilot Studio assistant that now handles 90% of tier-1 IT queries for 2,400 staff.' },
+  'What results have you driven for Fortune 500 companies?': { card: 'metric', text: 'Seven distribution centres on one ERP and WMS, 99.7% pick accuracy, +15% throughput, −5% labour cost per order, 16 manual processes automated, and $2.4M in operational savings.' },
+};
+let online = null;
+
+async function checkHealth() {
+  const el = document.getElementById('ask-health'); const txt = document.getElementById('ask-health-text');
+  try {
+    const r = await fetch('/api/chat', { method: 'GET', cache: 'no-store' });
+    const j = r.ok ? await r.json() : { ok: false };
+    online = !!j.ok;
+  } catch { online = false; }
+  if (el) el.dataset.state = online ? 'live' : 'offline';
+  if (txt) txt.textContent = online ? 'Live · GPT-4o' : 'Offline · saved answers';
+}
+
+export function initAsk() {
+  const root = document.getElementById('ask-bento');
+  if (!root || initialized) return;
+  initialized = true;
+  checkHealth();
+
+  const input = document.getElementById('ask-input');
+  const send = document.getElementById('ask-send');
+  const status = document.getElementById('ask-status');
+  const promptEl = document.getElementById('ai-prompt-text');
+  const dots = document.getElementById('ai-dots');
+  let current = null;
+
+  input?.addEventListener('input', () => { if (send) send.disabled = !input.value.trim(); });
+  document.querySelectorAll('.ask-chip').forEach((chip) => chip.addEventListener('click', () => {
+    const p = chip.dataset.prompt; if (!p) return;
+    if (input) input.value = p; if (send) send.disabled = false; ask(p);
+  }));
+  send?.addEventListener('click', () => { const p = input?.value.trim(); if (p) ask(p); });
+  input?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { const p = input.value.trim(); if (p) { e.preventDefault(); ask(p); } }
+  });
+
+  async function ask(prompt) {
+    if (current) { current.abort(); current = null; }
+    if (send) send.disabled = true;
+    if (status) status.textContent = 'PROCESSING…';
+    if (promptEl) fadeSwap(promptEl, () => { promptEl.textContent = prompt; });
+    const canned = CANNED[prompt];
+    if (online === false && canned) {
+      if (status) status.textContent = '';
+      focusRow(canned.card);
+      fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = canned.text; });
+      if (send && input?.value.trim()) send.disabled = false;
+      return;
+    }
+    current = new AbortController();
+    const r = await streamAnswer(prompt, current);
+    current = null;
+    if (!r?.ok && !r?.aborted) {
+      const out = document.getElementById('ai-response-text');
+      if (canned) { focusRow(canned.card); if (out) out.textContent = canned.text; if (status) status.textContent = 'LIVE MODEL UNAVAILABLE — SHOWING A SAVED ANSWER'; }
+      else if (out) out.textContent = 'The live model is unreachable right now. Try one of the prompts above for a saved answer.';
+    }
+    if (send && input?.value.trim()) send.disabled = false;
+    if (dots) dots.hidden = true;
+    if (status && status.textContent === 'PROCESSING…') status.textContent = r?.ok ? '' : 'SIGNAL LOST — TRY AGAIN';
+  }
+}

@@ -10,6 +10,7 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   integrations: [sitemap()],
+  devToolbar: { enabled: false },
   vite: {
     plugins: [tailwindcss()],
   },

@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import OpenAI from "openai";
 
-const SYSTEM_PROMPT = `You are an AI assistant embedded in Borina Keo's professional portfolio website. Answer questions in first person on her behalf. Be specific, confident, and metric-driven. Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON object.
+const SYSTEM_PROMPT = `You are an AI assistant embedded in Borina Keo's professional portfolio website. Answer questions in first person on his behalf. Be specific, confident, and metric-driven. Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON object.
 
 Response format (always return all fields):
 {
@@ -14,11 +14,6 @@ Response format (always return all fields):
     "alert_items": [
       { "icon": "⚡", "text": "Demand spike detected: SKU-7842 +340%", "meta": "Azure OpenAI · just now · auto-routed to procurement" },
       { "icon": "✓", "text": "BOL-93241 classified & matched to PO", "meta": "GPT-4o · 8s ago · 0.24s processing time" }
-    ],
-    "skills": [
-      { "name": "Microsoft Dynamics 365", "pct": 98, "color": "amber" },
-      { "name": "Azure OpenAI / AI Builder", "pct": 91, "color": "blue" },
-      { "name": "Manhattan DFIO / WMS", "pct": 95, "color": "green" }
     ],
     "ai_prompt": "The user's question verbatim",
     "ai_response": "Same as the text field"
@@ -32,7 +27,7 @@ Rules for highlight_card — pick exactly one:
 - "skills"     → question about specific technologies, tools, platforms, certifications
 - "ai"         → question about AI projects, Copilot, leadership achievements, or anything else
 
-Always tailor the updates object to the question. The alert_items, metric, and skills should reflect the topic of the question — not always the default values.
+Always tailor the updates object to the question. The alert_items and metric should reflect the topic of the question — not always the default values. alert_items are illustrative examples of the kind of signal the systems raise, never claims about live data.
 
 Borina Keo's verified facts (never fabricate numbers):
 • $2.4M operational cost reduction via AI automation
@@ -43,6 +38,12 @@ Borina Keo's verified facts (never fabricate numbers):
 • 3 Fortune 500 enterprise D365 + Manhattan DFIO deployments
 • Pick accuracy improved to 99.7% via WMS AI integration
 • Technologies: Microsoft Dynamics 365, Manhattan DFIO, Azure OpenAI, IBM AS400, Power Automate, AI Builder, Python/ML, Microsoft Copilot, GPT-4o, Claude, Google Gemini`;
+
+/** Health: lets the client show LIVE / OFFLINE honestly without spending a completion. */
+export const GET: APIRoute = async () => {
+  const configured = !!(import.meta.env.OPENAI_API_KEY ?? import.meta.env.OPENCODE_API_KEY);
+  return new Response(JSON.stringify({ ok: configured }), { status: 200, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
+};
 
 export const POST: APIRoute = async ({ request }) => {
   let prompt: string;

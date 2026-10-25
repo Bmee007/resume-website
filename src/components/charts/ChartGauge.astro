@@ -1,0 +1,26 @@
+---
+// ChartGauge.astro — Lieflat F11 "Tick Gauge", laid flat: one tick = one per cent; filled to the value.
+interface Props { value: number; max?: number; title: string; sub: string; source: string }
+const { value, max = 100, title, sub, source } = Astro.props;
+const W = 640, H = 64, pad = 2, n = 100;
+const gap = (W - pad * 2) / n;
+const full = Math.floor((value / max) * n);
+const frac = (value / max) * n - full;
+const ticks = Array.from({ length: n }, (_, i) => {
+  const filled = i < full, partial = i === full && frac > 0;
+  return { x: pad + i * gap + gap / 2, h: filled ? 26 : partial ? 26 * frac : 10, on: filled || partial };
+});
+---
+<figure class="fig" data-chart="gauge">
+  <figcaption class="fig-head">
+    <span class="fig-title">{title}</span>
+    <span class="fig-sub t-mono">{sub}</span>
+  </figcaption>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}: ${value} of ${max}`}>
+    <line class="c-track" x1={pad} y1={H - 14} x2={W - pad} y2={H - 14} />
+    {ticks.map((t) => <line class:list={["c-tick c-rise", t.on && "is-on"]} x1={t.x} y1={H - 14} x2={t.x} y2={H - 14 - t.h} />)}
+    {[0, 25, 50, 75, 100].map((t) => <text class="c-axis" x={pad + (t / 100) * (W - pad * 2)} y={H - 1} text-anchor={t === 0 ? "start" : t === 100 ? "end" : "middle"}>{t}</text>)}
+    <text class="c-val c-val--after" x={pad + (value / max) * (W - pad * 2)} y="10" text-anchor="end">{value}</text>
+  </svg>
+  <span class="fig-src t-mono">{source}</span>
+</figure>

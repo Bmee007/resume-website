@@ -1,86 +1,66 @@
 ---
-// Loader.astro — Intro sequence: BK monogram + bar fill → fade out
+// Loader.astro — entry gate. A line-art monogram draws itself while the counter calibrates,
+// then the visitor chooses to enter with or without sound (the gesture that unlocks audio).
 ---
-
-<div id="loader" aria-hidden="true">
-  <span class="loader-bk">BK</span>
-  <div class="loader-bar-track">
-    <div class="loader-bar"></div>
+<div id="loader" role="dialog" aria-label="Welcome">
+  <div class="loader-corner loader-corner--tl t-mono">
+    <strong>BK</strong><span>Borina Keo</span>
   </div>
+  <div class="loader-corner loader-corner--tr t-mono">
+    <span>ERP · WMS · AI</span><span>Portfolio / 2026</span>
+  </div>
+
+  <div class="loader-centre">
+    <svg class="loader-mark" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+      <circle class="mk" cx="100" cy="100" r="88" />
+      <circle class="mk" cx="100" cy="100" r="62" stroke-dasharray="2 6" />
+      <path class="mk" d="M62 58v84M62 58h26a20 20 0 0 1 0 40H62M62 98h30a22 22 0 0 1 0 44H62" />
+      <path class="mk" d="M112 58v84M138 58l-26 42 28 42" />
+      <path class="mk" d="M100 12v10M100 178v10M12 100h10M178 100h10" />
+    </svg>
+    <div class="loader-num">000</div>
+    <div class="loader-label t-mono">Calibrating</div>
+    <div class="loader-enter" hidden>
+      <button id="enter-sound" class="btn" type="button">
+        <span class="audio-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Enter with sound</span>
+      </button>
+      <button id="enter-silent" class="enter-silent t-mono" type="button">Enter without sound</button>
+    </div>
+  </div>
+
+  <div class="loader-corner loader-corner--bl t-mono"><span>Loading systems</span></div>
+  <div class="loader-corner loader-corner--br t-mono"><span>// 01 — 07</span></div>
 </div>
 
 <style>
   #loader {
-    position: fixed;
-    inset: 0;
-    z-index: 99990;
-    background: var(--background);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    pointer-events: all;
-    transition: opacity 0.4s var(--ease-expo-out);
+    position: fixed; inset: 0; z-index: 9500;
+    background: var(--fog-0); color: var(--ink);
+    display: grid; place-items: center;
+    clip-path: inset(0 0 0 0);
   }
+  .loader-corner { position: absolute; display: flex; flex-direction: column; gap: 0.2rem; color: var(--ink-3); }
+  .loader-corner strong { color: var(--ink); font-weight: 500; }
+  .loader-corner--tl { top: 1.5rem; left: var(--gutter); }
+  .loader-corner--tr { top: 1.5rem; right: var(--gutter); text-align: right; }
+  .loader-corner--bl { bottom: 1.5rem; left: var(--gutter); }
+  .loader-corner--br { bottom: 1.5rem; right: var(--gutter); }
 
-  #loader.is-done {
-    opacity: 0;
-    pointer-events: none;
+  .loader-centre { display: grid; justify-items: center; gap: 1rem; position: relative; }
+  .loader-mark { width: clamp(160px, 26vw, 260px); height: auto; color: var(--ink-2); opacity: 0.9; }
+  .loader-num {
+    font-family: var(--font-mono); font-size: clamp(2.2rem, 5vw, 3.4rem); letter-spacing: -0.02em; line-height: 1;
+    font-variant-numeric: tabular-nums; color: var(--ink);
   }
+  .loader-label { color: var(--ink-3); min-width: 14ch; text-align: center; }
+  .loader-enter { display: grid; justify-items: center; gap: 1.25rem; margin-top: 1rem; }
+  .loader-enter[hidden] { display: none; }
+  .enter-silent { background: none; border: 0; padding: 0.4rem 0; color: var(--ink-3); border-bottom: 1px solid var(--line-2); cursor: pointer; transition: color 0.3s, border-color 0.3s; }
+  .enter-silent:hover { color: var(--ink); border-color: var(--ink); }
+  .audio-bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+  .audio-bars i { width: 1.5px; height: 3px; background: currentColor; transform-origin: bottom; animation: eq 0.9s var(--ease-in-out) infinite alternate; }
+  .audio-bars i:nth-child(2) { animation-delay: -0.3s; } .audio-bars i:nth-child(3) { animation-delay: -0.6s; } .audio-bars i:nth-child(4) { animation-delay: -0.15s; }
+  @keyframes eq { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
 
-  .loader-bk {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-style: italic;
-    font-size: 3rem;
-    color: var(--cream);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    opacity: 0;
-    transform: translateY(12px);
-    animation: loader-text-in 0.5s var(--ease-expo-out) 0.1s forwards;
-  }
-
-  .loader-bar-track {
-    width: 120px;
-    height: 1px;
-    background: var(--border);
-    border-radius: 1px;
-    overflow: hidden;
-    opacity: 0;
-    animation: loader-track-in 0.3s ease 0.3s forwards;
-  }
-
-  .loader-bar {
-    height: 100%;
-    width: 0%;
-    background: var(--amber);
-    border-radius: 1px;
-    animation: loader-fill 0.8s var(--ease-smooth) 0.4s forwards;
-  }
-
-  @keyframes loader-text-in {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes loader-track-in {
-    to { opacity: 1; }
-  }
-
-  @keyframes loader-fill {
-    to { width: 100%; }
-  }
+  @media (prefers-reduced-motion: reduce) { #loader { display: none; } }
 </style>
-
-<script>
-  const loader = document.getElementById('loader');
-  if (loader) {
-    // Total intro: ~1.4s (0.4s start + 0.8s fill + 0.2s hold)
-    setTimeout(() => {
-      loader.classList.add('is-done');
-      document.body.classList.add('loaded');
-      // Remove from DOM after fade
-      setTimeout(() => loader.remove(), 500);
-    }, 1400);
-  }
-</script>

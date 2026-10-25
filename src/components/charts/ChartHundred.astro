@@ -1,0 +1,21 @@
+---
+// ChartHundred.astro — Lieflat L14 "Hundred Field": one dot = one in a hundred. Honest unit decomposition.
+interface Props { value: number; title: string; sub: string; source: string; onLabel: string; offLabel: string }
+const { value, title, sub, source, onLabel, offLabel } = Astro.props;
+const cols = 20, rows = 5, cell = 22, r = 4.2, W = cols * cell, H = rows * cell;
+const dots = Array.from({ length: 100 }, (_, i) => ({ x: (i % cols) * cell + cell / 2, y: Math.floor(i / cols) * cell + cell / 2, on: i < Math.round(value) }));
+---
+<figure class="fig" data-chart="hundred">
+  <figcaption class="fig-head">
+    <span class="fig-title">{title}</span>
+    <span class="fig-sub t-mono">{sub}</span>
+  </figcaption>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${title}: ${value} of 100`}>
+    {dots.map((d) => <circle class:list={["c-pop", d.on ? "c-after" : "c-before"]} cx={d.x} cy={d.y} r={r} />)}
+  </svg>
+  <div class="fig-legend t-mono">
+    <span><i class="sw sw--on"></i>{onLabel}</span>
+    <span><i class="sw sw--off"></i>{offLabel}</span>
+  </div>
+  <span class="fig-src t-mono">{source}</span>
+</figure>

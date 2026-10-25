@@ -1,0 +1,231 @@
+---
+// ChapterIntelligence.astro — CH.03. The AI layer, plus a live console that answers from /api/chat.
+import Icon from "./Icon.astro";
+import ChartHundred from "./charts/ChartHundred.astro";
+---
+<section
+  id="ask" class="chapter intel"
+  data-scene="summit" data-tone="light" data-chapter="03" data-label="Intelligence"
+  data-lattice="brain" data-lattice-cx="0.93" data-lattice-cy="0.09" data-lattice-scale="0.22" data-lattice-opacity="0.45" data-lattice-rx="0.3" data-lattice-ry="0.5"
+>
+  <span class="chapter-mark" aria-hidden="true">03</span>
+
+  <div class="wrap grid-12">
+    <p class="telemetry intel-tel" data-scramble><span class="ch">CH.03</span> Intelligence · Azure OpenAI · Copilot Studio · AI Builder</p>
+
+    <h2 class="t-display intel-heading" data-split>Then I taught the systems to think.</h2>
+
+    <p class="t-body intel-copy" data-reveal>
+      Sixteen manual processes automated with Power Automate and AI Builder. A Copilot Studio assistant that
+      now answers 90% of tier-1 IT queries for 2,400 warehouse staff. Azure OpenAI inside D365 procurement,
+      cutting manual order processing time by 68% and lifting forecast accuracy 12%. Together: $2.4M of
+      operational cost removed across three enterprise deployments.
+    </p>
+
+    <div class="intel-fig" data-reveal>
+      <ChartHundred
+        value={90}
+        title="Nine in ten tier-1 IT questions never reach a person"
+        sub="one dot = one in a hundred tier-1 IT queries · 2,400 warehouse staff served"
+        onLabel="Answered by the Copilot Studio assistant"
+        offLabel="Escalated to IT"
+        source="Copilot Studio deployment, Kohl and Frisch"
+      />
+    </div>
+
+    <!-- Console -->
+    <div class="console" data-reveal>
+      <div class="console-head">
+        <span class="t-mono"><strong>Ask the system</strong></span>
+        <span id="ask-health" class="t-mono console-status" data-state="checking"><span class="live-dot" aria-hidden="true"></span><span id="ask-health-text">Checking</span></span>
+      </div>
+
+      <div class="console-body">
+        <div class="console-left">
+          <p class="t-mono console-hint">Type a question or pick a prompt. The readout updates in real time.</p>
+          <div class="ask-chips" id="ask-chips">
+            <button class="ask-chip" data-prompt="How did you use Azure OpenAI in production?">Azure OpenAI in production</button>
+            <button class="ask-chip" data-prompt="What is your Microsoft Dynamics 365 expertise?">D365 expertise</button>
+            <button class="ask-chip" data-prompt="Tell me about the $2.4M cost reduction you drove">The $2.4M</button>
+            <button class="ask-chip" data-prompt="What results have you driven for Fortune 500 companies?">Fortune 500 results</button>
+          </div>
+          <div class="ask-input-row">
+            <span class="prompt-caret t-mono" aria-hidden="true">&gt;</span>
+            <input id="ask-input" type="text" class="ask-input" placeholder="Ask about my work…" maxlength="500" autocomplete="off" aria-label="Ask a question about Borina Keo's work" />
+            <button id="ask-send" class="ask-send" disabled aria-label="Send question">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg>
+            </button>
+          </div>
+          <div id="ask-status" class="t-mono ask-status" aria-live="polite" aria-atomic="true"></div>
+        </div>
+
+        <!-- Readout: one ledger, rows re-order/expand via FLIP -->
+        <div id="ask-bento" class="readout">
+          <div id="card-metric-big" class="readout-row is-focus" data-card="metric">
+            <span class="row-tag t-mono">Documented impact</span>
+            <div class="row-main">
+              <span id="metric-value" class="row-big">$2.4M</span>
+              <span id="metric-label" class="row-label">Operational cost reduction via AI automation</span>
+              <span id="metric-sub" class="row-sub t-mono">Across D365 + Manhattan DFIO · 3 enterprise deployments</span>
+            </div>
+          </div>
+
+          <div id="card-ai" class="readout-row" data-card="ai" aria-live="polite">
+            <span class="row-tag t-mono">Response</span>
+            <div class="row-main">
+              <span id="ai-prompt-text" class="row-prompt t-mono">What can Borina Keo do for my business?</span>
+              <span id="ai-response-text" class="row-response">Ask a question to see the system answer in real time.</span>
+              <span id="ai-dots" class="ai-dots" aria-hidden="true" hidden><i></i><i></i><i></i></span>
+            </div>
+          </div>
+
+          <div id="card-alert" class="readout-row" data-card="alert">
+            <span class="row-tag t-mono">D365 AI monitor<br /><em class="row-note">illustrative</em></span>
+            <div id="alert-list" class="row-main alert-list">
+              <div class="alert-item">
+                <span class="alert-icon" aria-hidden="true">⚡</span>
+                <span class="alert-text">Demand spike detected: SKU-7842 +340%</span>
+                <span class="alert-meta">Azure OpenAI · just now · auto-routed to procurement</span>
+              </div>
+              <div class="alert-item alert-item--ok">
+                <span class="alert-icon" aria-hidden="true">✓</span>
+                <span class="alert-text">BOL-93241 classified &amp; matched to PO</span>
+                <span class="alert-meta">GPT-4o · 8s ago · 0.24s processing</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="card-yrs" class="readout-row" data-card="experience">
+            <span class="row-tag t-mono">Experience</span>
+            <div class="row-main">
+              <span class="row-big">15+</span>
+              <span class="row-label">Years of enterprise systems leadership</span>
+              <span class="row-sub t-mono">Dynamics 365 · Manhattan WMS · Fortune 500 distribution</span>
+            </div>
+          </div>
+
+          <div id="card-skills" class="readout-row" data-card="skills">
+            <span class="row-tag t-mono">Platforms<br /><em class="row-note">years hands-on</em></span>
+            <div id="skill-list" class="row-main skill-list">
+              <div class="skill-row"><span class="skill-name">Manhattan DFIO</span><span class="skill-bar"><span class="skill-fill" style="transform:scaleX(0.67)"></span></span><span class="skill-pct">since 2016</span></div>
+              <div class="skill-row"><span class="skill-name">Microsoft Dynamics 365</span><span class="skill-bar"><span class="skill-fill" style="transform:scaleX(0.47)"></span></span><span class="skill-pct">since 2019</span></div>
+              <div class="skill-row"><span class="skill-name">Azure OpenAI · Copilot</span><span class="skill-bar"><span class="skill-fill" style="transform:scaleX(0.2)"></span></span><span class="skill-pct">since 2023</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .intel { padding-block: clamp(8rem, 16vw, 14rem); }
+  .intel-tel { grid-column: 1 / -1; }
+  .intel-heading { grid-column: 1 / -1; font-size: clamp(2.4rem, 6.2vw, 6.2rem); max-width: 12ch; margin-top: 1rem; }
+  .intel-copy { grid-column: 1 / -1; margin-top: 1rem; }
+  .intel-fig { grid-column: 1 / -1; margin-top: 2.5rem; }
+  @media (min-width: 900px) { .intel-heading { grid-column: 1 / 9; } .intel-copy { grid-column: 1 / 7; } .intel-fig { grid-column: 7 / 13; margin-top: 0; align-self: end; } }
+
+  /* Console */
+  .console {
+    grid-column: 1 / -1;
+    margin-top: 3rem;
+    border-top: 1px solid var(--line-2);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .console-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .console-status { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: live 1.8s var(--ease-in-out) infinite; }
+  #ask-health[data-state="offline"] .live-dot { background: var(--ink-3); animation: none; }
+  #ask-health[data-state="checking"] .live-dot { background: var(--ink-3); }
+  .row-note { display: block; font-style: normal; color: var(--ink-3); opacity: 0.8; text-transform: none; letter-spacing: 0.04em; }
+  @keyframes live { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+  .console-body { display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .console-body { grid-template-columns: 5fr 7fr; } .console-left { border-right: 1px solid var(--line); padding-right: 2.5rem; } .readout { padding-left: 2.5rem; } }
+
+  .console-left { display: grid; gap: 1.5rem; padding-block: 2rem; align-content: start; }
+  .console-hint { max-width: 30ch; }
+
+  .ask-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .ask-chip {
+    font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--ink-2); background: transparent; border: 1px solid var(--line-2); border-radius: 999px;
+    padding: 0.55rem 0.95rem; transition: color 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .ask-chip:hover { color: var(--accent-fg); background: var(--ink); border-color: var(--ink); }
+
+  .ask-input-row { display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--line-2); padding: 0.5rem 0; }
+  .prompt-caret { color: var(--accent); }
+  .ask-input {
+    flex: 1; background: transparent; border: 0; outline: none;
+    font-family: var(--font-display); font-weight: 300; font-size: 1.125rem; color: var(--ink);
+  }
+  .ask-input::placeholder { color: var(--ink-3); }
+  .ask-send {
+    width: 2.25rem; height: 2.25rem; border-radius: 50%; border: 1px solid var(--ink);
+    background: var(--ink); color: var(--accent-fg); display: grid; place-items: center;
+    transition: opacity 0.3s, transform 0.4s var(--ease-out);
+  }
+  .ask-send:disabled { opacity: 0.25; }
+  .ask-send:not(:disabled):hover { transform: translateX(3px); }
+  .ask-status { min-height: 1rem; color: var(--ink-3); }
+
+  /* Readout ledger */
+  .readout { display: grid; align-content: start; padding-block: 1rem; }
+  .readout-row {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: padding 0.5s var(--ease-out);
+  }
+  .readout-row:last-child { border-bottom: 0; }
+  .readout-row::before {
+    content: ''; position: absolute; left: -2.5rem; top: 0; bottom: 0; width: 2px;
+    background: var(--accent); transform: scaleY(0); transform-origin: top; transition: transform 0.6s var(--ease-out);
+  }
+  .readout-row.is-focus::before { transform: scaleY(1); }
+  .readout-row.is-focus { padding: 2rem 0; }
+  .row-tag { align-self: start; padding-top: 0.2rem; }
+  .row-main { display: grid; gap: 0.35rem; }
+  .row-big {
+    font-family: var(--font-display); font-weight: 200; letter-spacing: -0.02em; line-height: 1;
+    font-size: clamp(2rem, 3.4vw, 3rem); color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .is-focus .row-big { font-size: clamp(2.6rem, 5vw, 4.4rem); }
+  .row-label { color: var(--ink-2); font-size: 0.95rem; }
+  .row-sub { color: var(--ink-3); }
+  .row-prompt { color: var(--ink-3); text-transform: none; letter-spacing: 0.02em; }
+  .row-response { font-weight: 300; font-size: 1.05rem; line-height: 1.6; color: var(--ink); }
+  .ai-dots { display: inline-flex; gap: 4px; }
+  .ai-dots i { width: 4px; height: 4px; background: var(--ink-2); border-radius: 50%; animation: dot 1.1s infinite; }
+  .ai-dots i:nth-child(2) { animation-delay: 0.15s; } .ai-dots i:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dot { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+  .alert-list { gap: 0.9rem; }
+  .alert-item { display: grid; grid-template-columns: 1.25rem 1fr; column-gap: 0.5rem; }
+  .alert-icon { font-size: 0.75rem; color: var(--accent); }
+  .alert-item--ok .alert-icon { color: var(--ink-2); }
+  .alert-text { color: var(--ink); font-size: 0.95rem; }
+  .alert-meta { grid-column: 2; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.06em; color: var(--ink-3); }
+
+  .skill-list { gap: 0.7rem; }
+  .skill-row { display: grid; grid-template-columns: minmax(7rem, 1fr) 2fr auto; align-items: center; gap: 1rem; }
+  @media (max-width: 899px) { .skill-row { grid-template-columns: 1fr auto; } .skill-row .skill-bar { grid-column: 1 / -1; } }
+  .skill-name { font-size: 0.9rem; color: var(--ink-2); }
+  .skill-bar { height: 1px; background: var(--line-2); position: relative; }
+  .skill-fill { position: absolute; inset: 0; background: var(--ink); transform-origin: left; }
+  .skill-pct { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--ink-3); }
+
+  @media (max-width: 899px) {
+    .readout-row { grid-template-columns: 1fr; gap: 0.5rem; }
+    .readout-row::before { left: -1rem; }
+  }
+</style>

@@ -1,0 +1,148 @@
+---
+// ChapterWork.astro — CH.06. Case studies as a pinned horizontal track on desktop, stacked on mobile.
+import ChartPairedRungs from "./charts/ChartPairedRungs.astro";
+import Icon from "./Icon.astro";
+const brand = (s: string): "microsoft" | null => /Dynamics|Power Automate|Azure/.test(s) ? "microsoft" : null;
+const projects = [
+  {
+    title: "D365 AI procurement automation", system: "Microsoft Dynamics 365", ai: "Azure OpenAI",
+    metric: "14%", metricLabel: "PO approval cycle time",
+    outcome: "AI-powered approval routing built directly into D365 workflows. Purchase-order approval cycle time fell 14% and 12 hours a week of manual review disappeared (the wider procurement cycle fell 33% across the program).",
+    github: "https://github.com/Bmee007",
+    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "PO cycle time", before: 100, after: 86 }, { label: "Manual review", before: 100, after: 0 }] },
+  },
+  {
+    title: "Manhattan DFIO pick optimisation", system: "Manhattan DFIO", ai: "Custom ML / Python",
+    metric: "15%", metricLabel: "throughput increase",
+    outcome: "Pick-path optimisation models deployed across seven distribution centres, lifting warehouse throughput 15%, taking pick accuracy to 99.7% and cutting labour cost per order 5%.",
+    github: "https://github.com/Bmee007",
+    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "Throughput", before: 100, after: 115 }, { label: "Labour / order", before: 100, after: 95 }] },
+  },
+  {
+    title: "Supply-chain demand forecasting", system: "Power Automate + AI Builder", ai: "Azure OpenAI",
+    metric: "12%", metricLabel: "forecast accuracy gain",
+    outcome: "An end-to-end forecasting pipeline joining ERP sales data to AI Builder models. Forecast accuracy improved 12% and stockout events fell 14%.",
+    github: null,
+    chart: { title: "Before and after, indexed", sub: "left ladder = before (100) · right = after · one rung = 5 points", groups: [{ label: "Forecast accuracy", before: 100, after: 112 }, { label: "Stockouts", before: 100, after: 86 }] },
+  },
+];
+---
+<section
+  id="projects" class="work"
+  data-scene="deep" data-tone="dark" data-chapter="06" data-label="Work"
+  data-lattice="off"
+>
+  <div class="work-head wrap">
+    <p class="telemetry" data-scramble><span class="ch">CH.06</span> Work · case studies</p>
+    <h2 class="t-display projects-heading" data-split>AI Integrations in production.</h2>
+    <span class="work-meta t-mono" aria-hidden="true"><span id="projects-counter">01</span> / 0{projects.length} · scroll</span>
+    <span id="projects-progress" class="work-progress" aria-hidden="true"></span>
+  </div>
+
+  <div class="work-viewport">
+    <div id="projects-track" class="work-track">
+      {projects.map((p, i) => (
+        <article class="project-card case-panel">
+          <span class="case-num" aria-hidden="true">0{i + 1}</span>
+          <div class="case-top">
+            <span class="case-metric">{p.metric}</span>
+            <span class="case-metric-label t-mono">{p.metricLabel}</span>
+          </div>
+          <div class="case-mid">
+            <h3 class="case-title">{p.title}</h3>
+            <div class="case-chips">
+              <span class="project-chip t-mono">{brand(p.system) && <Icon name="microsoft" size={11} />}{p.system}</span>
+              <span class="project-chip project-chip--ai t-mono">{brand(p.ai) && <Icon name="microsoft" size={11} />}{p.ai}</span>
+            </div>
+            <p class="project-outcome t-body">{p.outcome}</p>
+            <ChartPairedRungs title={p.chart.title} sub={p.chart.sub} groups={p.chart.groups} max={125} rungStep={5} source={`Indexed · ${p.system}`} />
+          </div>
+          <div class="case-foot">
+            {p.github && (
+              <a href={p.github} class="link-arrow" target="_blank" rel="noopener noreferrer" data-cursor="open">
+                <Icon name="github" size={13} /> View on GitHub
+                <span class="disc"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4"/></svg></span>
+              </a>
+            )}
+          </div>
+        </article>
+      ))}
+      <article class="project-card project-card--end case-panel">
+        <span class="t-display end-label">More in<br/>the field.</span>
+        <a href="#contact" class="btn">Start a conversation</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .work { position: relative; padding-top: clamp(6rem, 12vw, 10rem); padding-bottom: clamp(4rem, 8vw, 7rem); }
+  @media (min-width: 900px) {
+    .work { height: 100svh; padding-top: 5.5rem; padding-bottom: 0; display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+    .work-viewport { min-height: 0; }
+    .work-track { height: 100%; }
+  }
+  .work-head { position: relative; display: grid; gap: 1rem; padding-bottom: 2.5rem; }
+  .projects-heading { font-size: clamp(2rem, 4vw, 4rem); max-width: 16ch; }
+  .work-meta { display: none; position: absolute; right: var(--gutter); bottom: 3.4rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  @media (min-width: 900px) { .work-meta { display: block; } }
+  .work-progress {
+    display: none; position: absolute; right: var(--gutter); bottom: 2.5rem;
+    width: 10rem; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left;
+  }
+  @media (min-width: 900px) { .work-progress { display: block; } }
+
+  .work-viewport { overflow: hidden; }
+  .work-track {
+    display: flex; flex-direction: column; gap: 0;
+    padding: 0 var(--gutter);
+  }
+  @media (min-width: 900px) {
+    .work-track { flex-direction: row; width: max-content; padding-right: calc(var(--gutter) + 4.5rem); }
+  }
+
+  .case-panel {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 2rem;
+    padding: 2.5rem 0 3rem;
+    border-top: 1px solid var(--line-2);
+    min-height: 24rem;
+    overflow: hidden;
+  }
+  @media (min-width: 900px) {
+    .case-panel {
+      width: clamp(28rem, 36vw, 40rem);
+      min-height: 0;
+      height: 100%;
+      padding: 2rem 2.5rem 2.5rem 0;
+      border-top: 0; border-left: 1px solid var(--line-2);
+      padding-left: 2.5rem;
+    }
+    .case-panel:first-child { padding-left: 0; border-left: 0; }
+  }
+  .case-num {
+    position: absolute; right: 0; top: -0.5rem;
+    font-family: var(--font-mono); font-size: clamp(5rem, 10vw, 9rem); line-height: 1;
+    color: transparent; -webkit-text-stroke: 1px var(--line); pointer-events: none;
+  }
+  .case-top { display: grid; gap: 0.35rem; }
+  .case-metric {
+    font-family: var(--font-display); font-weight: 200;
+    font-size: clamp(3.2rem, 6vw, 5.6rem); line-height: 1; letter-spacing: -0.03em; color: var(--ink);
+  }
+  .case-metric-label { color: var(--ink-3); }
+  .case-mid { display: grid; gap: 1rem; align-content: start; }
+  .case-mid :global(.fig) { max-width: 22rem; margin-top: 0.5rem; }
+  .case-title { margin: 0; font-weight: 400; font-size: clamp(1.2rem, 1.7vw, 1.5rem); color: var(--ink); }
+  .case-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .project-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 0.35rem 0.7rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 0.4rem; }
+  .project-chip--ai { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 45%, transparent); }
+  .project-outcome { max-width: 30rem; }
+  .case-foot { align-self: end; }
+
+  .project-card--end { align-content: space-between; gap: 2rem; }
+  .project-card--end .btn { justify-self: start; align-self: end; }
+  .end-label { font-size: clamp(2rem, 3.6vw, 3.4rem); color: var(--ink-3); }
+</style>
