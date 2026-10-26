@@ -57,103 +57,56 @@ export function initChapters() {
   if (sections[0]) applyChapter(sections[0], false);
 
   // Lattice choreography: explicit from/to per section so fast scrolling can't desync
-  if (lattice && !reduced() && window.innerWidth < 900) {
-    // Phones: each chapter owns the object while it is on screen. Pose and opacity are computed from the
-    // section's position every update, so fast scrolls and jumps can never leave a stale state behind.
+  if (lattice && !reduced()) {
+    // Every chapter owns the object while it is on screen. Pose, blend and opacity are computed from the
+    // section's position on each update, so fast scrolls and jumps can never leave a stale state behind,
+    // and a blend goes straight from the previous model to the next (never through the ones between).
+    const small = window.innerWidth < 900;
     const smooth = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
     const lerp = (a, b, t) => a + (b - a) * t;
-    let prev = { morph: 4, cx: 0.5, cy: 0.3, scale: 0.86, rotX: 0.35, rotY: 0.6 };
+    const num = (v, f) => (v !== undefined ? parseFloat(v) : f);
+    let prev = { morph: 4, cx: small ? 0.5 : 0.62, cy: small ? 0.3 : 0.46, scale: small ? 0.86 : 0.78, rotX: 0.3, rotY: 0.5, opacity: 1 };
+    let prevOff = false;
     sections.forEach((s) => {
       const d = s.dataset; if (!d.lattice) return;
       const off = d.lattice === 'off';
-      const next = {
-        morph: off ? prev.morph : LATTICE_INDEX[d.lattice] ?? prev.morph,
-        cx: parseFloat(d.latticeCxSm ?? '0.5'), cy: parseFloat(d.latticeCySm ?? '0.3'), scale: parseFloat(d.latticeScaleSm ?? '0.82'),
-        rotX: d.latticeRx !== undefined ? parseFloat(d.latticeRx) : prev.rotX, rotY: d.latticeRy !== undefined ? parseFloat(d.latticeRy) : prev.rotY,
-      };
-      const from = prev, peak = off ? 0 : 0.92;
+      const pose = (name, cx, cy, sc, rx, ry, op) => ({ morph: LATTICE_INDEX[name] ?? prev.morph, cx, cy, scale: sc, rotX: rx, rotY: ry, opacity: op });
+      const next = off
+        ? { ...prev, opacity: 0 }
+        : small
+          ? pose(d.lattice, num(d.latticeCxSm, 0.5), num(d.latticeCySm, 0.3), num(d.latticeScaleSm, 0.82), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), 0.92)
+          : pose(d.lattice, num(d.latticeCx, prev.cx), num(d.latticeCy, prev.cy), num(d.latticeScale, prev.scale), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), num(d.latticeOpacity, 1));
+      // optional second model inside the chapter (desktop only)
+      const then = !small && !off && d.latticeThen && LATTICE_INDEX[d.latticeThen] !== undefined
+        ? pose(d.latticeThen, num(d.latticeThenCx, next.cx), num(d.latticeThenCy, next.cy), num(d.latticeThenScale, next.scale), num(d.latticeThenRx, next.rotX), num(d.latticeThenRy, next.rotY), next.opacity)
+        : null;
+      const from = prev, afterOff = prevOff;
       ScrollTrigger.create({
-        trigger: s, start: 'top 95%', end: 'bottom top',
+        trigger: s, start: 'top 100%', end: 'bottom bottom', // exactly one owner at any scroll position
         onUpdate: () => {
-          const vh = window.innerHeight, top = s.getBoundingClientRect().top;
-          const tIn = smooth((0.95 * vh - top) / (0.65 * vh));          // enters while the top travels 95vh → 30vh
-          const tOut = smooth((-top - 0.1 * vh) / (0.45 * vh));         // leaves while the top travels −10vh → −55vh
-          lattice.state.morph = lerp(from.morph, next.morph, tIn);
-          lattice.state.cx = lerp(from.cx, next.cx, tIn); lattice.state.cy = lerp(from.cy, next.cy, tIn);
-          lattice.state.scale = lerp(from.scale, next.scale, tIn);
-          lattice.state.rotX = next.rotX; lattice.state.rotY = next.rotY;
-          lattice.state.opacity = peak * tIn * (1 - tOut);
+          const vh = window.innerHeight, top = s.getBoundingClientRect().top / vh; // in viewport heights
+          // enter window: phones wait for the object band to arrive; after an 'off' chapter (the pinned work
+          // track) wait until the previous content has left so nothing is drawn over it
+          const [e0, e1] = small ? [0.45, 0.08] : afterOff ? [0.35, 0.05] : [0.95, 0.3];
+          const tIn = smooth((e0 - top) / (e0 - e1));
+          const tThen = then ? smooth((0 - top) / 0.6) : 0;          // top → −60vh
+          const tOut = small ? smooth((-top - 0.1) / 0.3) : 0;        // phones: leave while top travels −10vh → −40vh
+          const target = then && tThen > 0 ? then : next;
+          const base = then && tThen > 0 ? next : from;
+          const t = then && tThen > 0 ? tThen : tIn;
+          const st = lattice.state;
+          st.blend = { a: base.morph, b: target.morph, t };
+          st.cx = lerp(base.cx, target.cx, t); st.cy = lerp(base.cy, target.cy, t); st.scale = lerp(base.scale, target.scale, t);
+          st.rotX = lerp(base.rotX, target.rotX, t); st.rotY = lerp(base.rotY, target.rotY, t);
+          st.opacity = lerp(base.opacity, target.opacity, t) * (1 - tOut);
         },
       });
-      prev = next;
+      prev = then || next; prevOff = off;
     });
-    // Phone bottom progress line
-    const line = document.getElementById('progress-line');
-    if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
-  } else   if (lattice && !reduced()) {
-    const small = window.innerWidth < 900;
-    // On phones the lattice becomes a crest behind the chapter mark unless a -sm value is given
-    const pick = (d, key, fallback) => {
-      const sm = d[`${key}Sm`];
-      if (small && sm !== undefined) return parseFloat(sm);
-      // Phones: the object owns the upper half of the screen; chapter text starts below it (see .chapter padding)
-      if (small && key === 'latticeCy') return 0.3;
-      if (small && key === 'latticeCx') return 0.5;
-      if (small && key === 'latticeScale') return 0.82;
-      return d[key] !== undefined ? parseFloat(d[key]) : fallback;
-    };
-    let prev = { morph: 4, cx: 0.5, cy: 0.5, scale: 1, opacity: 1, rotX: 0.35, rotY: 0.6 };
-    sections.forEach((s) => {
-      if (!s.dataset.lattice) return;
-      const d = s.dataset;
-      const next = {
-        morph: d.lattice === 'off' ? prev.morph : LATTICE_INDEX[d.lattice] ?? prev.morph,
-        cx: pick(d, 'latticeCx', prev.cx),
-        cy: pick(d, 'latticeCy', prev.cy),
-        scale: pick(d, 'latticeScale', prev.scale),
-        opacity: d.lattice === 'off' ? 0 : small ? Math.max(0.92, parseFloat(d.latticeOpacity ?? '1')) : parseFloat(d.latticeOpacity ?? '1'),
-        rotX: d.latticeRx !== undefined ? parseFloat(d.latticeRx) : prev.rotX,
-        rotY: d.latticeRy !== undefined ? parseFloat(d.latticeRy) : prev.rotY,
-      };
-      gsap.fromTo(lattice.state, { ...prev }, {
-        ...next, ease: 'none', immediateRender: false,
-        scrollTrigger: { trigger: s, start: 'top 95%', end: 'top 30%', scrub: 0.9 },
-      });
-      prev = next;
-      if (small && !d.latticeThen && next.opacity > 0) {
-        // Phones: the object sits in a band above the text; fade it once the heading has scrolled past
-        gsap.fromTo(lattice.state, { opacity: next.opacity }, {
-          opacity: 0, ease: 'none', immediateRender: false,
-          scrollTrigger: { trigger: s, start: 'top -10%', end: () => `+=${window.innerHeight * 0.5}`, scrub: 0.6 },
-        });
-        prev = { ...next, opacity: 0 };
-      }
-      // Optional second image inside the same chapter, reached as the reader scrolls on
-      if (!small && d.latticeThen && LATTICE_INDEX[d.latticeThen] !== undefined) {
-        const then = {
-          ...next,
-          morph: LATTICE_INDEX[d.latticeThen],
-          cx: d.latticeThenCx !== undefined && !small ? parseFloat(d.latticeThenCx) : next.cx,
-          cy: small ? 0.13 : d.latticeThenCy !== undefined ? parseFloat(d.latticeThenCy) : next.cy,
-          scale: small ? 0.34 : d.latticeThenScale !== undefined ? parseFloat(d.latticeThenScale) : next.scale,
-          opacity: small ? Math.min(next.opacity, 0.45) : next.opacity,
-          rotX: d.latticeThenRx !== undefined ? parseFloat(d.latticeThenRx) : next.rotX,
-          rotY: d.latticeThenRy !== undefined ? parseFloat(d.latticeThenRy) : next.rotY,
-        };
-        gsap.fromTo(lattice.state, { ...next }, {
-          ...then, ease: 'none', immediateRender: false,
-          scrollTrigger: { trigger: s, start: 'top top', end: () => `+=${window.innerHeight * 0.6}`, scrub: 0.9 },
-        });
-        prev = then;
-        if (small) {
-          gsap.fromTo(lattice.state, { opacity: then.opacity }, {
-            opacity: 0, ease: 'none', immediateRender: false,
-            scrollTrigger: { trigger: s, start: () => `top+=${window.innerHeight * 0.7} top`, end: () => `+=${window.innerHeight * 0.4}`, scrub: 0.6 },
-          });
-          prev = { ...then, opacity: 0 };
-        }
-      }
-    });
+    if (small) {
+      const line = document.getElementById('progress-line');
+      if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
+    }
   } else if (lattice && reduced()) {
     // Reduced motion: no scrubbing, but each chapter still gets its own pose (set instantly on entry)
     const small = window.innerWidth < 900;

@@ -173,3 +173,13 @@ chapter change; same state contract as `scene3d.js`, so the chapter director is 
 the GLBs are now a desktop-only dynamic import (scene3d chunk 185 KB gz, split from the 79 KB main
 bundle). Phone full-scroll payload 4.3 MB → 2.0 MB; no WebGL model canvas on phones. The object owns the
 upper half of each chapter (cy 0.3, scale 0.82, full opacity) and chapter text starts at 58vh.
+
+### Jury pass 4 → unified choreography (2026-10-26)
+Jury #4 (production): 8.0 / 7.6 / 8.0 / 7.3 → **7.8, firm Honorable Mention**; blocker moved from mobile to
+the desktop 3D layer (models on the chapter numerals, flat look, intermittent wrong model, particles over
+the Work cards). Response: one choreography for all viewports — each chapter owns the object from
+`top 100%` to `bottom bottom` and computes pose/blend/opacity from its own position (no sandwiched
+tweens, blends go directly previous→next model via `state.blend`); chapter numerals retired (rail +
+telemetry number the chapters); fresnel rim + stronger key/rim/env on the clay material; post-Work
+entry delayed to 35vh so nothing draws over the cards; tap targets ≥44px via id-scoped rules; Illumi
+answers 3–5 grounded sentences with no opening simile and streams text as it arrives.

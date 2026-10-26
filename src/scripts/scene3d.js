@@ -20,19 +20,23 @@ float t = smoothstep(aPhase * 0.65, aPhase * 0.65 + 0.35, uProgress);
 transformed = mix(transformed, aCenter, t * 0.92) + aDir * t * 1.6;
 vT = t;`;
 const SHATTER_PARS_F = /* glsl */`
-varying float vT; uniform float uGlow;`;
+varying float vT; uniform float uGlow; uniform vec3 uRim;`;
 const SHATTER_F = /* glsl */`
 if (vT > 0.96) discard;
 gl_FragColor.a *= 1.0 - smoothstep(0.6, 0.96, vT);
+// cool fresnel rim: separates the object from the fog and gives the clay a lit edge
+float fres = pow(1.0 - max(dot(normalize(normal), normalize(vViewPosition)), 0.0), 3.2);
+gl_FragColor.rgb += uRim * fres;
 gl_FragColor.rgb += uGlow * 0.25;`;
 
 function makeMaterial(shadeAttr) {
   const mat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.58, metalness: 0.0,
-    clearcoat: 0.18, clearcoatRoughness: 0.4, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
+    color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.5, metalness: 0.02,
+    clearcoat: 0.3, clearcoatRoughness: 0.3, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
     transparent: true, side: THREE.DoubleSide, vertexColors: !!shadeAttr,
   });
-  mat.userData.uniforms = { uProgress: { value: 1 }, uGlow: { value: 0 } };
+  mat.userData.uniforms = { uProgress: { value: 1 }, uGlow: { value: 0 }, uRim: { value: new THREE.Vector3(0.22, 0.28, 0.36) } };
+  mat.envMapIntensity = 1.35;
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, mat.userData.uniforms);
     shader.vertexShader = shader.vertexShader
@@ -55,8 +59,8 @@ export function createScene(canvas, labelLayer) {
   renderer.toneMappingExposure = 0.92;
   const scene = new THREE.Scene();
   scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
-  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(2.5, 4, 3); scene.add(key);
-  const rim = new THREE.DirectionalLight(0xcfe2f3, 0.5); rim.position.set(-3, 1, -2); scene.add(rim);
+  const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(2.5, 4, 3); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xcfe2f3, 0.9); rim.position.set(-3, 1.5, -2.5); scene.add(rim);
   scene.add(new THREE.HemisphereLight(0xe3eaf2, 0x55606e, 0.5));
   const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
   camera.position.set(0, 0, 6.4);
@@ -124,9 +128,10 @@ export function createScene(canvas, labelLayer) {
 
   function render(t) {
     if (state.opacity <= 0.001) { renderer.clear(); Object.values(labelEls).flat().forEach((el) => { el.style.opacity = '0'; }); return; }
-    const m = Math.max(0, Math.min(STATES.length - 1, state.morph));
-    const si = Math.floor(m), sj = Math.min(STATES.length - 1, si + 1);
-    const f = m - si, ease = f * f * (3 - 2 * f);
+    let si, sj, f;
+    if (state.blend) { si = state.blend.a; sj = state.blend.b; f = Math.max(0, Math.min(1, state.blend.t)); if (si === sj) f = 0; }
+    else { const m = Math.max(0, Math.min(STATES.length - 1, state.morph)); si = Math.floor(m); sj = Math.min(STATES.length - 1, si + 1); f = m - si; }
+    const ease = f * f * (3 - 2 * f);
     const isDark = state.ink[0] > 128;
 
     smooth.tiltX += (state.tiltX - smooth.tiltX) * 0.06;
@@ -150,6 +155,7 @@ export function createScene(canvas, labelLayer) {
       mesh.visible = prog < 0.999;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
+      u.uRim.value.set(...(isDark ? [0.34, 0.42, 0.52] : [0.16, 0.2, 0.26]));
       mesh.material.opacity = state.opacity;
       mesh.material.color.setRGB(...(isDark ? [0.6, 0.68, 0.79] : [0.64, 0.7, 0.77]));
     }

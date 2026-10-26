@@ -189,6 +189,7 @@ body::after {
 
 /* Big ghost chapter number (hairline stroke, like a survey marker) */
 .chapter-mark {
+  display: none; /* retired: the rail + CH.0x telemetry number the chapters; the numeral fought the 3D object */
   position: absolute;
   top: clamp(2rem, 6vw, 5rem);
   right: var(--gutter);
@@ -463,7 +464,9 @@ body.has-dragged .drag-hint, body.is-stills .drag-hint { opacity: 0; }
 
 /* ── Phone tap targets (44px floor) ─────────────────────────── */
 @media (pointer: coarse) {
-  .nav-brand, .nav-cta, .nav-audio, .to-top, .hero-links a, .link-arrow { min-height: 44px; }
-  .ask-input { min-height: 44px; }
-  .ask-send { width: 44px; height: 44px; }
+  #site-nav .nav-brand, #site-nav .nav-cta, #site-nav .nav-audio, #site-nav .hamburger, #contact .to-top, #hero .hero-links a, main .link-arrow { min-height: 44px; }
+  #ask .ask-input { min-height: 44px; }
+  #ask .ask-send { width: 44px; height: 44px; }
+  #ask .ask-chip { min-height: 44px; }
+  #rail .rail-dot { width: 24px; height: 24px; }
 }

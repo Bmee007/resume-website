@@ -150,6 +150,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
   @media (min-width: 900px) { .console-body { grid-template-columns: 5fr 7fr; } .console-left { border-right: 1px solid var(--line); padding-right: 2.5rem; } .readout { padding-left: 2.5rem; } }
 
   .console-left { display: grid; gap: 1.5rem; padding-block: 2rem; align-content: start; }
+  @media (max-width: 899px) { .console-left { padding-bottom: 0.5rem; } .readout { padding-block: 0.5rem 1rem; } }
   .console-hint { max-width: 30ch; }
 
   .ask-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }

@@ -87,7 +87,7 @@ async function streamAnswer(prompt, abort) {
           if (error) throw new Error(error);
           if (delta) {
             full += delta;
-            const m = full.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+            const m = full.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)/); // partial match: stream as it arrives
             if (m) {
               const txt = m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
               if (txt !== shown && out) { shown = txt; out.textContent = txt; }

@@ -21,9 +21,11 @@ export function createStills(layer) {
   function ensure(name) { const img = imgs[name]; if (!img || loaded.has(name)) return; loaded.add(name); img.src = img.dataset.src; }
 
   function render(t) {
-    const m = Math.max(0, Math.min(STATES.length - 1, state.morph));
-    const si = Math.floor(m), sj = Math.min(STATES.length - 1, si + 1), f = m - si;
-    const ease = f * f * (3 - 2 * f), burst = Math.sin(ease * Math.PI);
+    let si, sj, f;
+    if (state.blend) { si = state.blend.a; sj = state.blend.b; f = Math.max(0, Math.min(1, state.blend.t)); if (si === sj) f = 0; }
+    else { const m = Math.max(0, Math.min(STATES.length - 1, state.morph)); si = Math.floor(m); sj = Math.min(STATES.length - 1, si + 1); f = m - si; }
+    const ease = f * f * (3 - 2 * f);
+    const burst = Math.sin(ease * Math.PI);
     // Box the trimmed still so wide objects fill the width and tall ones the height
     const box = Math.min(w, h) * 0.92 * state.scale * state.intro;
     const x = state.cx * w, y = state.cy * h + Math.sin(t * 0.7) * 3;
