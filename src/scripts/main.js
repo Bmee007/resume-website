@@ -36,6 +36,8 @@ export async function boot() {
   initAsk();
 
   // Layout settled after fonts + splits
+  // Pins are created after the chapter triggers; sorting makes refresh account for the pin spacer
+  ScrollTrigger.sort();
   requestAnimationFrame(() => ScrollTrigger.refresh());
   if (reduced()) document.body.classList.add('reduced-motion');
 }

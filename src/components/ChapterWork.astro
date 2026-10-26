@@ -138,12 +138,12 @@ const projects = [
   .case-panel:hover .case-media img { transform: scale(1.04); }
   /* Hovering any panel reveals the captions on every panel in the row (Yasin) */
   .case-cap { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; padding: 0.75rem 0.9rem; color: var(--ink); opacity: 0; transform: translateY(-6px); transition: opacity 0.5s var(--ease-out), transform 0.6s var(--ease-out); z-index: 2; }
-  .case-cap span { background: color-mix(in oklch, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 0.3rem 0.55rem; border-radius: 999px; }
+  .case-cap span { white-space: nowrap; background: color-mix(in oklch, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 0.3rem 0.55rem; border-radius: 999px; }
   .work-track:hover .case-cap { opacity: 1; transform: none; }
   .case-panel { transition: transform 0.7s var(--ease-out); }
   .work-track:hover .case-panel:not(:hover) { transform: translateY(6px); }
   .case-panel:hover { transform: translateY(-6px); }
-  @media (pointer: coarse) { .case-cap { opacity: 1; transform: none; } .work-track:hover .case-panel:not(:hover), .case-panel:hover { transform: none; } }
+  @media (pointer: coarse) { .case-cap { opacity: 1; transform: none; } .case-cap span + span { display: none; } .work-track:hover .case-panel:not(:hover), .case-panel:hover { transform: none; } }
   .case-top { display: grid; gap: 0.35rem; position: relative; z-index: 1; }
   .case-metric {
     font-family: var(--font-display); font-weight: 200;
@@ -154,7 +154,7 @@ const projects = [
   .case-mid :global(.fig) { max-width: 22rem; margin-top: 0.5rem; }
   .case-title { margin: 0; font-weight: 400; font-size: clamp(1.2rem, 1.7vw, 1.5rem); color: var(--ink); }
   .case-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .project-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 0.35rem 0.7rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 0.4rem; }
+  .project-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 0.35rem 0.7rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; max-width: 100%; }
   .project-chip--ai { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 45%, transparent); }
   .project-outcome { max-width: 30rem; }
   .case-foot { align-self: end; }

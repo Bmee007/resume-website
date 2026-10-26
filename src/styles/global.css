@@ -460,3 +460,10 @@ main.is-glitching .telemetry { animation: rgb-split 0.42s steps(6) both; }
 .drag-hint::before, .drag-hint::after { content: ''; width: 1.25rem; height: 1px; background: var(--line-2); }
 @media (max-width: 899px) and (pointer: coarse) { .drag-hint { display: inline-flex; } }
 body.has-dragged .drag-hint, body.is-stills .drag-hint { opacity: 0; }
+
+/* ── Phone tap targets (44px floor) ─────────────────────────── */
+@media (pointer: coarse) {
+  .nav-brand, .nav-cta, .nav-audio, .to-top, .hero-links a, .link-arrow { min-height: 44px; }
+  .ask-input { min-height: 44px; }
+  .ask-send { width: 44px; height: 44px; }
+}

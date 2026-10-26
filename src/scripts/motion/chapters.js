@@ -57,7 +57,40 @@ export function initChapters() {
   if (sections[0]) applyChapter(sections[0], false);
 
   // Lattice choreography: explicit from/to per section so fast scrolling can't desync
-  if (lattice && !reduced()) {
+  if (lattice && !reduced() && window.innerWidth < 900) {
+    // Phones: each chapter owns the object while it is on screen. Pose and opacity are computed from the
+    // section's position every update, so fast scrolls and jumps can never leave a stale state behind.
+    const smooth = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+    const lerp = (a, b, t) => a + (b - a) * t;
+    let prev = { morph: 4, cx: 0.5, cy: 0.3, scale: 0.86, rotX: 0.35, rotY: 0.6 };
+    sections.forEach((s) => {
+      const d = s.dataset; if (!d.lattice) return;
+      const off = d.lattice === 'off';
+      const next = {
+        morph: off ? prev.morph : LATTICE_INDEX[d.lattice] ?? prev.morph,
+        cx: parseFloat(d.latticeCxSm ?? '0.5'), cy: parseFloat(d.latticeCySm ?? '0.3'), scale: parseFloat(d.latticeScaleSm ?? '0.82'),
+        rotX: d.latticeRx !== undefined ? parseFloat(d.latticeRx) : prev.rotX, rotY: d.latticeRy !== undefined ? parseFloat(d.latticeRy) : prev.rotY,
+      };
+      const from = prev, peak = off ? 0 : 0.92;
+      ScrollTrigger.create({
+        trigger: s, start: 'top 95%', end: 'bottom top',
+        onUpdate: () => {
+          const vh = window.innerHeight, top = s.getBoundingClientRect().top;
+          const tIn = smooth((0.95 * vh - top) / (0.65 * vh));          // enters while the top travels 95vh → 30vh
+          const tOut = smooth((-top - 0.1 * vh) / (0.45 * vh));         // leaves while the top travels −10vh → −55vh
+          lattice.state.morph = lerp(from.morph, next.morph, tIn);
+          lattice.state.cx = lerp(from.cx, next.cx, tIn); lattice.state.cy = lerp(from.cy, next.cy, tIn);
+          lattice.state.scale = lerp(from.scale, next.scale, tIn);
+          lattice.state.rotX = next.rotX; lattice.state.rotY = next.rotY;
+          lattice.state.opacity = peak * tIn * (1 - tOut);
+        },
+      });
+      prev = next;
+    });
+    // Phone bottom progress line
+    const line = document.getElementById('progress-line');
+    if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
+  } else   if (lattice && !reduced()) {
     const small = window.innerWidth < 900;
     // On phones the lattice becomes a crest behind the chapter mark unless a -sm value is given
     const pick = (d, key, fallback) => {
@@ -141,9 +174,9 @@ export function initChapters() {
     if (sections[0]) Object.assign(lattice.state, poseOf(sections[0]));
   }
 
-  // Phone bottom progress line
-  const line = document.getElementById('progress-line');
-  if (line && !reduced()) {
+  // Desktop keeps the rail; the phone branch above owns the bottom line
+  const line = window.innerWidth >= 900 ? null : document.getElementById('progress-line');
+  if (line && reduced()) {
     gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
   }
 

@@ -56,7 +56,6 @@
 
 - Canada's only Canadian-owned national full-line pharmaceutical distributor, founded 1916
 - 7 distribution centres across Canada on one ERP/WMS/TMS stack: Delta (BC), Calgary, Regina, Winnipeg, Toronto, Montreal, Moncton
-- 700,000+ sq ft of active warehousing
 - Serves chain pharmacies, independent pharmacies, clinics, and hospitals nationwide
 - Core tech stack: Manhattan DFIO WMS (IBM AS/400), Microsoft Azure, Microsoft 365, Microsoft BI
 

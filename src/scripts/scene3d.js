@@ -160,7 +160,9 @@ export function createScene(canvas, labelLayer) {
     for (const name of STATES) {
       const els = labelEls[name]; if (!els || !els.length) continue;
       const prog = meshes[name].visible ? meshes[name].material.userData.uniforms.uProgress.value : 1;
-      const alpha = (1 - prog) * state.opacity;
+      // City labels only when the map is the subject, not a ghost in a corner
+      const legible = state.scale * state.intro >= 0.55 && state.opacity >= 0.5 ? 1 : 0;
+      const alpha = (1 - prog) * state.opacity * legible;
       els.forEach((el, i) => {
         if (alpha < 0.02) { el.style.opacity = '0'; return; }
         tmp.set(...labels[name][i].pos).applyMatrix4(group.matrixWorld).project(camera);
