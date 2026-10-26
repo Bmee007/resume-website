@@ -63,9 +63,10 @@ export function initChapters() {
     const pick = (d, key, fallback) => {
       const sm = d[`${key}Sm`];
       if (small && sm !== undefined) return parseFloat(sm);
-      if (small && key === 'latticeCy') return 0.15;
+      // Phones: the object owns the upper half of the screen; chapter text starts below it (see .chapter padding)
+      if (small && key === 'latticeCy') return 0.3;
       if (small && key === 'latticeCx') return 0.5;
-      if (small && key === 'latticeScale') return 0.36;
+      if (small && key === 'latticeScale') return 0.82;
       return d[key] !== undefined ? parseFloat(d[key]) : fallback;
     };
     let prev = { morph: 4, cx: 0.5, cy: 0.5, scale: 1, opacity: 1, rotX: 0.35, rotY: 0.6 };
@@ -77,7 +78,7 @@ export function initChapters() {
         cx: pick(d, 'latticeCx', prev.cx),
         cy: pick(d, 'latticeCy', prev.cy),
         scale: pick(d, 'latticeScale', prev.scale),
-        opacity: d.lattice === 'off' ? 0 : parseFloat(d.latticeOpacity ?? '1'),
+        opacity: d.lattice === 'off' ? 0 : small ? Math.max(0.92, parseFloat(d.latticeOpacity ?? '1')) : parseFloat(d.latticeOpacity ?? '1'),
         rotX: d.latticeRx !== undefined ? parseFloat(d.latticeRx) : prev.rotX,
         rotY: d.latticeRy !== undefined ? parseFloat(d.latticeRy) : prev.rotY,
       };
@@ -90,7 +91,7 @@ export function initChapters() {
         // Phones: the object sits in a band above the text; fade it once the heading has scrolled past
         gsap.fromTo(lattice.state, { opacity: next.opacity }, {
           opacity: 0, ease: 'none', immediateRender: false,
-          scrollTrigger: { trigger: s, start: 'top 10%', end: () => `+=${window.innerHeight * 0.45}`, scrub: 0.6 },
+          scrollTrigger: { trigger: s, start: 'top -10%', end: () => `+=${window.innerHeight * 0.5}`, scrub: 0.6 },
         });
         prev = { ...next, opacity: 0 };
       }
@@ -128,9 +129,9 @@ export function initChapters() {
       return {
         morph: key === 'off' ? lattice.state.morph : LATTICE_INDEX[key] ?? lattice.state.morph,
         cx: small ? 0.5 : parseFloat(d.latticeThenCx ?? d.latticeCx ?? 0.5),
-        cy: small ? 0.15 : parseFloat(d.latticeThenCy ?? d.latticeCy ?? 0.5),
-        scale: small ? 0.36 : parseFloat(d.latticeThenScale ?? d.latticeScale ?? 1),
-        opacity: key === 'off' ? 0 : Math.min(0.5, parseFloat(d.latticeOpacity ?? '1')),
+        cy: small ? 0.3 : parseFloat(d.latticeThenCy ?? d.latticeCy ?? 0.5),
+        scale: small ? 0.82 : parseFloat(d.latticeThenScale ?? d.latticeScale ?? 1),
+        opacity: key === 'off' ? 0 : small ? 0.9 : Math.min(0.5, parseFloat(d.latticeOpacity ?? '1')),
         rotX: parseFloat(d.latticeThenRx ?? d.latticeRx ?? 0.35), rotY: parseFloat(d.latticeThenRy ?? d.latticeRy ?? 0.6),
       };
     };

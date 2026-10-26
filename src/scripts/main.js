@@ -13,12 +13,13 @@ import { initAsk } from './ask.js';
 
 export async function boot() {
   document.documentElement.classList.add('js');
-  initBackdrop();
+  const backdropReady = initBackdrop();
   initLenis();
   initAnchorLinks();
 
   try { await document.fonts.ready; } catch { /* fonts API unsupported: proceed */ }
 
+  await backdropReady;
   initAmbient();
   await runLoader();
   initHero();

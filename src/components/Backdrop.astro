@@ -26,6 +26,7 @@
   }
   #lattice-canvas { mix-blend-mode: normal; }
   #lattice-labels { position: absolute; inset: 0; }
+  #lattice-labels :global(.still) { position: absolute; left: 0; top: 0; height: auto; opacity: 0; will-change: transform, opacity; transform-origin: center; filter: none; }
   #lattice-labels :global(.lat-label) {
     position: absolute; left: 0; top: 0;
     font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.12em; text-transform: uppercase;

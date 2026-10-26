@@ -165,3 +165,11 @@ targets 44px; phones skip the in-chapter map morph (it collided with the roster)
 on phones; project JPEGs resized to 1200px; saved answers now say so in the status line; 3 MB of unused
 legacy images removed. Still open from the jury: a dedicated low-weight mobile experience, the Manifesto
 exit clip, Illumi live for the jury (key is set in Vercel production).
+
+### Phone experience (2026-10-26, evening)
+Below 900px the story object is `src/scripts/stills.js`: five pre-rendered WebP stills of the models at
+their chapter poses (`tools/render-stills.cjs`, trimmed, 4–19 KB each), crossfaded with a blur burst on
+chapter change; same state contract as `scene3d.js`, so the chapter director is unchanged. Three.js and
+the GLBs are now a desktop-only dynamic import (scene3d chunk 185 KB gz, split from the 79 KB main
+bundle). Phone full-scroll payload 4.3 MB → 2.0 MB; no WebGL model canvas on phones. The object owns the
+upper half of each chapter (cy 0.3, scale 0.82, full opacity) and chapter text starts at 58vh.

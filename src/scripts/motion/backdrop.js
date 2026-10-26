@@ -1,16 +1,26 @@
 // src/scripts/motion/backdrop.js — fog shader + lattice, one shared RAF
 import { gsap, finePointer } from './core.js';
 import { createFog } from '../fog.js';
-import { createScene } from '../scene3d.js';
 
 let fog = null;
 let lattice = null;
 
-export function initBackdrop() {
+export async function initBackdrop() {
   const fogCanvas = document.getElementById('fog-canvas');
   const latCanvas = document.getElementById('lattice-canvas');
   if (fogCanvas) fog = createFog(fogCanvas);
-  if (latCanvas) { try { lattice = createScene(latCanvas, document.getElementById('lattice-labels')); } catch (e) { console.error('[scene3d]', e); lattice = null; } }
+  // Phones: pre-rendered stills, no Three.js and no GLBs (≈3 MB saved). Desktop: the live 3D scene.
+  const small = window.innerWidth < 900;
+  try {
+    if (small) {
+      const { createStills } = await import('../stills.js');
+      lattice = createStills(document.getElementById('lattice-labels'));
+      document.body.classList.add('is-stills');
+    } else if (latCanvas) {
+      const { createScene } = await import('../scene3d.js');
+      lattice = createScene(latCanvas, document.getElementById('lattice-labels'));
+    }
+  } catch (e) { console.error('[backdrop] story object', e); lattice = null; }
   if (fog) document.body.classList.add('has-webgl');
   window.__lattice = lattice; // review hook (harmless in production)
 
