@@ -20,7 +20,7 @@ test("HERO-02 — hero statement lines are revealed after the intro", async ({ p
 test("HERO-03 — social links and contact CTA are present", async ({ page }) => {
   await openHome(page);
   const hero = page.locator("#hero");
-  await expect(hero.locator('a[aria-label="LinkedIn profile"]')).toHaveAttribute("href", /linkedin\.com\/in\/borinakeo/);
+  await expect(hero.locator('a[aria-label="LinkedIn profile"]')).toHaveAttribute("href", /linkedin\.com\/in\/borina-keo-3534ab80/);
   await expect(hero.locator('a[aria-label="GitHub profile"]')).toHaveAttribute("href", /github\.com\/Bmee007/);
   await page.click('#hero a[href="#contact"]');
   await page.waitForTimeout(2600);
@@ -75,6 +75,13 @@ test("RECORD-01 — three roles with bullet accomplishments; two are featured", 
   await expect(page.locator("#experience .timeline-entry").first().locator(".entry-bullets li").first()).toBeVisible();
 });
 
+test("RECORD-03 — education lists the three schools from LinkedIn", async ({ page }) => {
+  await openHome(page);
+  await jumpTo(page, "#education");
+  await expect(page.locator("#education .edu-row")).toHaveCount(3);
+  for (const s of ["University of Toronto", "Sheridan College", "Centennial College"]) await expect(page.locator("#education")).toContainText(s);
+});
+
 test("RECORD-02 — spec sheet lists four columns of skill chips, not a plain list", async ({ page }) => {
   await openHome(page);
   await jumpTo(page, "#skills");
@@ -104,7 +111,7 @@ test("CONTACT-01 — form has three fields, validates, and targets Formspree", a
   await expect(form.locator("input, textarea")).toHaveCount(3);
   await form.locator('button[type="submit"]').click();
   await expect(page.locator("#contact .is-invalid").first()).toBeAttached();
-  await expect(page.locator("#contact a[href*='linkedin.com/in/borinakeo']")).toBeAttached();
+  await expect(page.locator("#contact a[href*='linkedin.com/in/borina-keo-3534ab80']")).toBeAttached();
   await expect(page.locator("#contact a[href*='github.com/Bmee007']")).toBeAttached();
 });
 

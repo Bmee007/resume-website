@@ -26,6 +26,11 @@ const roles = [
     ],
   },
 ];
+const education = [
+  { school: "University of Toronto", field: "Business Analysis" },
+  { school: "Sheridan College", field: "Data Science · Data Modeling, Warehousing & Database Administration" },
+  { school: "Centennial College School of Business", field: "Operations Management & Supervision" },
+];
 const spec = [
   { title: "ERP · WMS · TMS", skills: ["Microsoft Dynamics 365", "Manhattan DFIO", "TMS integration", "IBM AS400 · legacy migration"] },
   { title: "Agent engineering", skills: ["Agent harnesses & skills", "Multi-step workflows", "LLM memory (episodic · semantic · working)", "Agent security · prompt injection"] },
@@ -36,7 +41,7 @@ const spec = [
 <section
   id="experience" class="chapter record"
   data-scene="clearing" data-tone="light" data-chapter="05" data-label="Record"
-  data-lattice="brain" data-lattice-cx="0.86" data-lattice-cy="0.18" data-lattice-scale="0.4" data-lattice-opacity="0.35" data-lattice-rx="0.3"
+  data-lattice="brain" data-lattice-cx="0.9" data-lattice-cy="0.1" data-lattice-scale="0.28" data-lattice-opacity="0.3" data-lattice-rx="0.3"
 >
   <span class="chapter-mark" aria-hidden="true">05</span>
 
@@ -62,9 +67,25 @@ const spec = [
       ))}
     </ol>
 
+    <section id="education" class="edu" aria-label="Education">
+      <div class="spec-head">
+        <p class="telemetry" data-scramble><span class="ch">05.1</span> Education</p>
+        <h3 class="t-display spec-heading" data-split>Where the foundation was laid</h3>
+      </div>
+      <ol class="edu-list" data-reveal>
+        {education.map((e) => (
+          <li class="edu-row">
+            <span class="edu-rule" data-rule aria-hidden="true"></span>
+            <span class="edu-school">{e.school}</span>
+            <span class="edu-field t-mono">{e.field}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
     <section id="skills" class="spec" aria-label="Skills and expertise">
       <div class="spec-head">
-        <p class="telemetry" data-scramble><span class="ch">05.1</span> Spec sheet</p>
+        <p class="telemetry" data-scramble><span class="ch">05.2</span> Spec sheet</p>
         <h3 class="t-display spec-heading" data-split>Skills &amp; expertise</h3>
       </div>
       <div class="spec-grid">
@@ -114,6 +135,16 @@ const spec = [
   @media (min-width: 900px) {
     .timeline-entry { grid-template-columns: 3fr 9fr; gap: 2rem; }
   }
+
+  /* Education */
+  .edu { margin-top: clamp(5rem, 10vw, 9rem); }
+  .edu-list { list-style: none; margin: 2.5rem 0 0; padding: 0; display: grid; }
+  .edu-row { position: relative; display: grid; grid-template-columns: 1fr; gap: 0.35rem; padding: 1.4rem 0; }
+  .edu-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .edu-row:last-child::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--line-2); }
+  .edu-school { font-size: clamp(1.1rem, 1.6vw, 1.4rem); color: var(--ink); font-weight: 400; }
+  .edu-field { color: var(--ink-3); text-transform: none; letter-spacing: 0.04em; }
+  @media (min-width: 900px) { .edu-row { grid-template-columns: 5fr 7fr; gap: 2rem; align-items: baseline; } }
 
   /* Spec sheet */
   .spec { margin-top: clamp(5rem, 10vw, 9rem); }
