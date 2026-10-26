@@ -194,3 +194,12 @@ hero-size objects leave with the chapter's last content and ghosts leave once th
 full-page scrolls now land on the right model every time (3/3). Material: roughness .42, clearcoat .45,
 env 1.8. Contact brain sits below the form in frame; Contact's desktop top padding reduced; hamburger 44px;
 Illumi: similes banned outright, no unrelated stats.
+
+### Pass 12 — jury #6 list (2026-10-26)
+- Contact brain moved to the left column under the social links (cx .30, cy .80, scale .26); probe confirms it never crosses a form field during the handoff or at rest.
+- Top-edge ghosts lifted off the nav band: Origin/Intelligence/Change cy .24, Record cy .26 (was .12–.16); none clipped at 1440×900.
+- Hero brain nudged left (cx .64, scale .74) so the readout stats no longer set across it.
+- Tone/fog/rail now follow the chapter covering the viewport midline (ticker-driven, direction-free) instead of per-section enter/leave triggers; dark Work tone holds on scroll-back until its bottom passes 50vh.
+- Work track end padding +1.5rem so the rail no longer overprints the last panel's caption.
+- Gate "Enter without sound" button is 44px tall.
+- Illumi: instructions lock first-person singular, forbid invented incidents ("not documented" fallback), append a KPI only for results questions; the metric label rule names 99.7% a pick-accuracy level. Saved Q&A rewritten against agent-data.md only.

@@ -44,17 +44,19 @@ export function initChapters() {
     });
   }
 
-  sections.forEach((s, i) => {
-    ScrollTrigger.create({
-      trigger: s,
-      start: 'top 55%',
-      end: 'bottom 55%',
-      onEnter: () => applyChapter(s, i > 0),
-      onEnterBack: () => applyChapter(s, true),
-    });
-  });
-  // Initial state without a pulse
-  if (sections[0]) applyChapter(sections[0], false);
+  // Tone / fog / rail follow whichever chapter covers the viewport's midline, in both scroll directions.
+  // (Per-section enter/leave triggers flipped the tone light on the way back while the dark Work
+  // track still filled most of the screen; a midline rule has no direction.)
+  let current = null;
+  const syncTone = () => {
+    const mid = window.innerHeight * 0.5;
+    let s = sections[0];
+    for (const c of sections) { const r = c.getBoundingClientRect(); if (r.top <= mid) s = c; }
+    if (s !== current) { const first = current === null; current = s; applyChapter(s, !first); }
+  };
+  syncTone();
+  gsap.ticker.add(syncTone);
+  ScrollTrigger.addEventListener('refresh', syncTone);
 
   // Lattice choreography: explicit from/to per section so fast scrolling can't desync
   if (lattice && !reduced()) {

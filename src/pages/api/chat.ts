@@ -15,7 +15,7 @@ Respond ONLY with valid JSON — no prose, no markdown, no text outside the JSON
 
 Response format (always return all fields):
 {
-  "text": "2–4 sentence answer displayed in the response card. Open with personality, close with an exact number from the data file.",
+  "text": "3–5 sentence answer displayed in the response card. First person singular. Only cite figures that answer the question.",
   "highlight_card": "metric",
   "updates": {
     "metric": { "value": "$2.4M", "label": "Operational cost reduction via AI automation", "sub": "Across D365 + Manhattan DFIO · 3 deployments at Kohl & Frisch" },
@@ -29,7 +29,7 @@ Response format (always return all fields):
 }
 
 Rules for highlight_card — pick exactly one:
-- "metric"     → cost, ROI, savings, financial impact, business value
+- "metric"     → cost, ROI, savings, financial impact, business value. The metric label must describe the figure honestly: 99.7% is a pick-accuracy LEVEL, 13% is a forecast-accuracy IMPROVEMENT, 30% is an operating-cost REDUCTION
 - "alert"      → real-time AI, monitoring, automation pipelines, agents acting on signals
 - "experience" → years of experience, career history, background, leadership
 - "skills"     → specific technologies, tools, platforms
