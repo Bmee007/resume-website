@@ -25,8 +25,9 @@ export function initHero() {
   // Scroll-out is wired only once the intro has settled, with explicit resting values,
   // so a scrubbed tween can never capture a mid-intro state as its "start".
   const wireScrollOut = () => {
-    gsap.fromTo(split.lines, { yPercent: 0, opacity: 1 }, {
-      yPercent: -40, opacity: 0, ease: 'none', immediateRender: false,
+    // Exit as a whole block: the line masks would clip glyphs mid-letter if lines moved individually
+    gsap.fromTo(statement, { y: 0, opacity: 1 }, {
+      y: -48, opacity: 0, ease: 'none', immediateRender: false,
       scrollTrigger: { trigger: hero, start: 'top top', end: '70% top', scrub: 0.6 },
     });
     gsap.fromTo([label, ...meta, hint], { opacity: 1, y: 0 }, {

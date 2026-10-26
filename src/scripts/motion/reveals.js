@@ -13,7 +13,7 @@ export function initSplitReveals(root = document) {
       autoSplit: true,
       onSplit(self) {
         el.classList.add('is-in');
-        return gsap.from(self.lines, {
+        const tw = gsap.from(self.lines, {
           yPercent: 110,
           rotate: 0.001,
           duration: 1.3,
@@ -21,6 +21,11 @@ export function initSplitReveals(root = document) {
           ease: 'expo.out',
           scrollTrigger: { trigger: el, start: 'top 85%', once: true },
         });
+        if (el.hasAttribute('data-split-exit')) {
+          gsap.fromTo(el, { opacity: 1, y: 0 }, { opacity: 0, y: -24, ease: 'none', immediateRender: false,
+            scrollTrigger: { trigger: el, start: 'bottom 55%', end: 'bottom 5%', scrub: 0.5 } });
+        }
+        return tw;
       },
     });
   });
