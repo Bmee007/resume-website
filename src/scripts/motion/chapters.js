@@ -58,51 +58,60 @@ export function initChapters() {
 
   // Lattice choreography: explicit from/to per section so fast scrolling can't desync
   if (lattice && !reduced()) {
-    // Every chapter owns the object while it is on screen. Pose, blend and opacity are computed from the
-    // section's position on each update, so fast scrolls and jumps can never leave a stale state behind,
-    // and a blend goes straight from the previous model to the next (never through the ones between).
+    // One driver owns the story object. On every scroll update it picks the chapter whose top has crossed
+    // that chapter's own entry line (derived from where its object sits, so the object never assembles
+    // over the previous chapter's text), assembles the object in place, and dissolves it from the
+    // chapter's own exit edge. No per-chapter tweens, so order of updates and fast jumps cannot desync it.
     const small = window.innerWidth < 900;
     const smooth = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
     const lerp = (a, b, t) => a + (b - a) * t;
     const num = (v, f) => (v !== undefined ? parseFloat(v) : f);
+    const chapters = [];
     let prev = { morph: 4, cx: small ? 0.5 : 0.62, cy: small ? 0.3 : 0.46, scale: small ? 0.86 : 0.78, rotX: 0.3, rotY: 0.5, opacity: 1 };
-    let prevOff = false;
     sections.forEach((s) => {
       const d = s.dataset; if (!d.lattice) return;
       const off = d.lattice === 'off';
       const pose = (name, cx, cy, sc, rx, ry, op) => ({ morph: LATTICE_INDEX[name] ?? prev.morph, cx, cy, scale: sc, rotX: rx, rotY: ry, opacity: op });
-      const next = off
-        ? { ...prev, opacity: 0 }
-        : small
-          ? pose(d.lattice, num(d.latticeCxSm, 0.5), num(d.latticeCySm, 0.3), num(d.latticeScaleSm, 0.82), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), 0.92)
-          : pose(d.lattice, num(d.latticeCx, prev.cx), num(d.latticeCy, prev.cy), num(d.latticeScale, prev.scale), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), num(d.latticeOpacity, 1));
-      // optional second model inside the chapter (desktop only)
+      const next = off ? { ...prev, opacity: 0 }
+        : small ? pose(d.lattice, num(d.latticeCxSm, 0.5), num(d.latticeCySm, 0.3), num(d.latticeScaleSm, 0.82), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), 0.92)
+        : pose(d.lattice, num(d.latticeCx, prev.cx), num(d.latticeCy, prev.cy), num(d.latticeScale, prev.scale), num(d.latticeRx, prev.rotX), num(d.latticeRy, prev.rotY), num(d.latticeOpacity, 1));
       const then = !small && !off && d.latticeThen && LATTICE_INDEX[d.latticeThen] !== undefined
         ? pose(d.latticeThen, num(d.latticeThenCx, next.cx), num(d.latticeThenCy, next.cy), num(d.latticeThenScale, next.scale), num(d.latticeThenRx, next.rotX), num(d.latticeThenRy, next.rotY), next.opacity)
         : null;
-      const from = prev, afterOff = prevOff;
-      ScrollTrigger.create({
-        trigger: s, start: 'top 100%', end: 'bottom bottom', // exactly one owner at any scroll position
-        onUpdate: () => {
-          const vh = window.innerHeight, top = s.getBoundingClientRect().top / vh; // in viewport heights
-          // enter window: phones wait for the object band to arrive; after an 'off' chapter (the pinned work
-          // track) wait until the previous content has left so nothing is drawn over it
-          const [e0, e1] = small ? [0.45, 0.08] : afterOff ? [0.35, 0.05] : [0.95, 0.3];
-          const tIn = smooth((e0 - top) / (e0 - e1));
-          const tThen = then ? smooth((0 - top) / 0.6) : 0;          // top → −60vh
-          const tOut = small ? smooth((-top - 0.1) / 0.3) : 0;        // phones: leave while top travels −10vh → −40vh
-          const target = then && tThen > 0 ? then : next;
-          const base = then && tThen > 0 ? next : from;
-          const t = then && tThen > 0 ? tThen : tIn;
-          const st = lattice.state;
-          st.blend = { a: base.morph, b: target.morph, t };
-          st.cx = lerp(base.cx, target.cx, t); st.cy = lerp(base.cy, target.cy, t); st.scale = lerp(base.scale, target.scale, t);
-          st.rotX = lerp(base.rotX, target.rotX, t); st.rotY = lerp(base.rotY, target.rotY, t);
-          st.opacity = lerp(base.opacity, target.opacity, t) * (1 - tOut);
-        },
-      });
-      prev = then || next; prevOff = off;
+      // entry line: the chapter's top must have risen past the object's top edge (in viewport heights)
+      const e0 = off ? 0.95 : Math.max(0.12, Math.min(0.95, next.cy - next.scale * 0.33));
+      const e1 = Math.max(0, e0 - 0.2);
+      chapters.push({ el: s, next, then, e0, e1, ghost: !off && next.opacity < 0.7 });
+      prev = then || next;
     });
+    const update = () => {
+      const vh = window.innerHeight;
+      let owner = chapters[0];
+      for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
+      const r = owner.el.getBoundingClientRect(); const top = r.top / vh, bottom = r.bottom / vh;
+      const { next, then, e0, e1, ghost } = owner;
+      const tIn = smooth((e0 - top) / (e0 - e1));
+      const tThen = then ? smooth((0 - top) / 0.6) : 0;                                   // in-chapter second model: top → −60vh
+      const tOut = owner === chapters[chapters.length - 1] ? 0
+        : (ghost || small) ? smooth((-top - (small ? 0.1 : 0.2)) / 0.3)                  // ghosts (and phones) leave once the heading has passed
+        : smooth((0.6 - bottom) / 0.35);                                                  // hero-size objects leave with the chapter's last content
+      const st = lattice.state;
+      if (then && tThen > 0) {
+        st.blend = { a: next.morph, b: then.morph, t: tThen }; st.assemble = 1;
+        st.cx = lerp(next.cx, then.cx, tThen); st.cy = lerp(next.cy, then.cy, tThen); st.scale = lerp(next.scale, then.scale, tThen);
+        st.rotX = lerp(next.rotX, then.rotX, tThen); st.rotY = lerp(next.rotY, then.rotY, tThen);
+        st.opacity = lerp(next.opacity, then.opacity, tThen) * (1 - tOut);
+      } else {
+        st.blend = { a: next.morph, b: next.morph, t: 0 }; st.assemble = tIn;
+        st.cx = next.cx; st.cy = next.cy; st.scale = next.scale; st.rotX = next.rotX; st.rotY = next.rotY;
+        st.opacity = next.opacity * tIn * (1 - tOut);
+      }
+    };
+    // Drive from the ticker (not a scroll-bounded trigger, whose updates stop once scrolled past its end)
+    let lastY = -1, lastH = -1;
+    gsap.ticker.add(() => { if (window.scrollY !== lastY || window.innerHeight !== lastH) { lastY = window.scrollY; lastH = window.innerHeight; update(); } });
+    ScrollTrigger.addEventListener('refresh', update);
+    update();
     if (small) {
       const line = document.getElementById('progress-line');
       if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });

@@ -183,3 +183,14 @@ tweens, blends go directly previous→next model via `state.blend`); chapter num
 telemetry number the chapters); fresnel rim + stronger key/rim/env on the clay material; post-Work
 entry delayed to 35vh so nothing draws over the cards; tap targets ≥44px via id-scoped rules; Illumi
 answers 3–5 grounded sentences with no opening simile and streams text as it arrives.
+
+### Jury pass 5 → single owner driver (2026-10-26)
+Jury #5 (production): 8.3 / 8.0 / 8.1 / 7.6 → **8.1, upper Honorable Mention**, "close but no"; remaining gap:
+object choreography vs typography (brain through the Network KPI figures on handoff, Contact brain cropped,
+Record map arriving in Change, truck/computer still matte). Response: the story object is now driven by one
+ticker-fed function — the owning chapter is the last whose top has crossed its own entry line (derived from
+its object's top edge), objects assemble in place (`state.assemble`) instead of travelling between chapters,
+hero-size objects leave with the chapter's last content and ghosts leave once the heading has passed. Fast
+full-page scrolls now land on the right model every time (3/3). Material: roughness .42, clearcoat .45,
+env 1.8. Contact brain sits below the form in frame; Contact's desktop top padding reduced; hamburger 44px;
+Illumi: similes banned outright, no unrelated stats.

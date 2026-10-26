@@ -31,12 +31,12 @@ gl_FragColor.rgb += uGlow * 0.25;`;
 
 function makeMaterial(shadeAttr) {
   const mat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.5, metalness: 0.02,
-    clearcoat: 0.3, clearcoatRoughness: 0.3, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
+    color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.42, metalness: 0.03,
+    clearcoat: 0.45, clearcoatRoughness: 0.25, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
     transparent: true, side: THREE.DoubleSide, vertexColors: !!shadeAttr,
   });
   mat.userData.uniforms = { uProgress: { value: 1 }, uGlow: { value: 0 }, uRim: { value: new THREE.Vector3(0.22, 0.28, 0.36) } };
-  mat.envMapIntensity = 1.35;
+  mat.envMapIntensity = 1.8;
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, mat.userData.uniforms);
     shader.vertexShader = shader.vertexShader
@@ -150,8 +150,9 @@ export function createScene(canvas, labelLayer) {
       const mesh = meshes[name];
       const u = mesh.material.userData.uniforms;
       let prog = 1; // 1 = fully dissolved (hidden)
-      if (name === STATES[si]) prog = ease;
-      else if (name === STATES[sj] && sj !== si) prog = 1 - ease;
+      if (si === sj) { if (name === STATES[si]) prog = 1 - (state.assemble ?? 1); }   // assembling in place
+      else if (name === STATES[si]) prog = ease;
+      else if (name === STATES[sj]) prog = 1 - ease;
       mesh.visible = prog < 0.999;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
