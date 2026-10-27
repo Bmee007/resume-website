@@ -37,7 +37,7 @@ const ledger = [
 
     <figure class="portrait" data-reveal>
       <div class="portrait-frame">
-        <img src="/images/Profile.jpg" alt="Borina Keo" width="1254" height="1254" loading="lazy" decoding="async" />
+        <img src="/images/borina-portrait.jpg" alt="Borina Keo, in a navy suit and tie, seated in a café" width="1376" height="1824" loading="lazy" decoding="async" />
       </div>
       <figcaption class="t-mono portrait-cap">
         <strong>Borina Keo</strong><span>Toronto · AI &amp; Agent Systems Lead, Kohl &amp; Frisch</span>
@@ -87,13 +87,10 @@ const ledger = [
      and a cool soft-light wash that pulls the tones toward the palette */
   .portrait { grid-column: 1 / -1; margin: 2rem 0 0; display: grid; gap: 0.9rem; max-width: 22rem; }
   .portrait-frame {
-    position: relative; aspect-ratio: 4 / 5; overflow: hidden;
-    -webkit-mask-image: radial-gradient(ellipse 78% 82% at 50% 40%, black 58%, transparent 100%);
-    mask-image: radial-gradient(ellipse 78% 82% at 50% 40%, black 58%, transparent 100%);
+    position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 2px;
   }
-  .portrait-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; display: block; }
+  .portrait-frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
   /* The backdrop is already in the palette; only a faint edge vignette so it melts into the chapter */
-  .portrait-frame::before { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse 62% 55% at 50% 38%, transparent 60%, var(--storm) 100%); opacity: 0.35; pointer-events: none; }
   .portrait-cap { display: grid; gap: 0.2rem; color: var(--ink-3); }
   .portrait-cap strong { color: var(--ink); font-weight: 500; }
   .origin-fig { grid-column: 1 / -1; margin-top: 2.5rem; }
