@@ -104,17 +104,68 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
     ring.push([I1, J0]); if (finer(u1 + du, (v0 + v1) / 2)) ring.push([I1, Jm]);
     ring.push([I1, J1]); if (finer((u0 + u1) / 2, v1 + dv)) ring.push([Im, J1]);
     ring.push([I0, J1]); if (finer(u0 - du, (v0 + v1) / 2)) ring.push([I0, Jm]);
-    const ids = ring.map(([I, J]) => vtx(I, J));
-    if (ids.length === 4) idx.push(ids[0], ids[1], ids[2], ids[0], ids[2], ids[3]);
-    else for (let k = 1; k < ids.length - 1; k++) idx.push(ids[0], ids[k], ids[k + 1]); // corner fan (polygon is near-planar)
+    earClip(ring.map(([I, J]) => ({ I, J, id: vtx(I, J) })), pos, idx);
   }
+  return finishSurface(pos, idx);
+}
+
+// Triangulate a convex (in uv) cell ring that may carry collinear hanging nodes. Clips strictly convex corners only,
+// picking the best-shaped triangle first, so no zero-area slivers are produced (a corner fan makes
+// corner/midpoint/corner collinear triples, whose faces flip or collapse under quantisation and show as dark flecks).
+function earClip(ring, pos, idx) {
+  const quality = (a, b, c) => {
+    const ax = pos[3 * a], ay = pos[3 * a + 1], az = pos[3 * a + 2], bx = pos[3 * b], by = pos[3 * b + 1], bz = pos[3 * b + 2], cx = pos[3 * c], cy = pos[3 * c + 1], cz = pos[3 * c + 2];
+    const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
+    const area2 = Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx);
+    const l2 = ux * ux + uy * uy + uz * uz + vx * vx + vy * vy + vz * vz + (cx - bx) ** 2 + (cy - by) ** 2 + (cz - bz) ** 2;
+    return l2 > 0 ? (2 * Math.sqrt(3) * area2) / l2 : 0;
+  };
+  const r = ring.slice();
+  while (r.length > 3) {
+    let best = -1, bestQ = -1; const n = r.length;
+    for (let k = 0; k < n; k++) {
+      const p = r[(k + n - 1) % n], c = r[k], q = r[(k + 1) % n];
+      if ((c.I - p.I) * (q.J - c.J) - (c.J - p.J) * (q.I - c.I) <= 0) continue; // collinear or reflex in uv
+      const sc = quality(p.id, c.id, q.id); if (sc > bestQ) { bestQ = sc; best = k; }
+    }
+    if (best < 0) best = 0; // cannot happen for a convex ring; keeps the loop finite
+    const n2 = r.length; idx.push(r[(best + n2 - 1) % n2].id, r[best].id, r[(best + 1) % n2].id); r.splice(best, 1);
+  }
+  idx.push(r[0].id, r[1].id, r[2].id);
+}
+
+// Weld, drop degenerate faces, orient the shell outward (positive signed volume) and compute angle-weighted smooth
+// normals. Consistent outward winding matters: the site's double-sided material flips the normal of every back face,
+// so any face wound against its neighbours renders as a dark fleck.
+function finishSurface(pos, idx) {
   let g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
   g = mergeVertices(g, 1e-3);
-  const ix = g.index.array; const keep = [];
-  for (let t = 0; t < ix.length; t += 3) { const a = ix[t], b = ix[t + 1], c = ix[t + 2]; if (a !== b && b !== c && a !== c) keep.push(a, b, c); }
-  g.setIndex(keep); g.computeVertexNormals();
+  const P = g.attributes.position; const ix = g.index.array; let keep = []; let vol = 0;
+  const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+  for (let t = 0; t < ix.length; t += 3) {
+    const a = ix[t], b = ix[t + 1], c = ix[t + 2]; if (a === b || b === c || a === c) continue;
+    keep.push(a, b, c); A.fromBufferAttribute(P, a); B.fromBufferAttribute(P, b); C.fromBufferAttribute(P, c); vol += A.dot(B.clone().cross(C));
+  }
+  if (vol < 0) for (let t = 0; t < keep.length; t += 3) { const tmp = keep[t + 1]; keep[t + 1] = keep[t + 2]; keep[t + 2] = tmp; }
+  g.setIndex(keep); setAngleWeightedNormals(g);
   return g;
+}
+
+function setAngleWeightedNormals(g) {
+  const P = g.attributes.position, ix = g.index.array; const N = new Float32Array(P.count * 3);
+  const v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), fn = new THREE.Vector3();
+  for (let t = 0; t < ix.length; t += 3) {
+    for (let k = 0; k < 3; k++) v[k].fromBufferAttribute(P, ix[t + k]);
+    fn.crossVectors(e1.subVectors(v[1], v[0]), e2.subVectors(v[2], v[0])); const l = fn.length(); if (l < 1e-12) continue; fn.divideScalar(l);
+    for (let k = 0; k < 3; k++) {
+      e1.subVectors(v[(k + 1) % 3], v[k]).normalize(); e2.subVectors(v[(k + 2) % 3], v[k]).normalize();
+      const w = Math.acos(clamp(e1.dot(e2), -1, 1)); const i = ix[t + k];
+      N[3 * i] += fn.x * w; N[3 * i + 1] += fn.y * w; N[3 * i + 2] += fn.z * w;
+    }
+  }
+  for (let i = 0; i < P.count; i++) { const l = Math.hypot(N[3 * i], N[3 * i + 1], N[3 * i + 2]) || 1; N[3 * i] /= l; N[3 * i + 1] /= l; N[3 * i + 2] /= l; }
+  g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
 }
 
 // Surface of revolution around Y from a 2D profile (array of [r, y], bottom -> top) smoothed with a centripetal

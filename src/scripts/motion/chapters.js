@@ -84,8 +84,11 @@ export function initChapters() {
         : null;
       // entry line: the chapter's top must have risen past the object's top edge (in viewport heights)
       // entry line in viewport heights; data-lattice-enter overrides the derived one (e.g. to wait for a heading to pass)
-      const e0 = off ? 0.25 : d.latticeEnter !== undefined ? Math.max(0.05, Math.min(0.95, parseFloat(d.latticeEnter))) : Math.max(0.12, Math.min(0.95, next.cy - next.scale * 0.33));
-      const e1 = Math.max(0, e0 - (!off && next.opacity < 0.7 ? 0.1 : 0.2)); // ghosts finish assembling sooner, so they are formed when the headline lands
+      const isGhost = !off && next.opacity < 0.7;
+      const e0 = off ? 0.25 : d.latticeEnter !== undefined ? Math.max(0.05, Math.min(0.95, parseFloat(d.latticeEnter))) : Math.min(0.95, Math.max(0.12, next.cy - next.scale * 0.33) + (isGhost ? 0.12 : 0)); // ghosts may start earlier: the previous chapter's bottom padding clears them
+      const e1 = Math.max(0, e0 - (isGhost ? 0.12 : 0.2)); // ghosts finish assembling sooner, so they are formed when the headline lands
+      const tintOf = (v) => { const a = (v || '').split(',').map(parseFloat); return a.length === 3 && a.every((n) => !Number.isNaN(n)) ? a : [1, 1, 1]; };
+      next.tint = tintOf(d.latticeTint); if (then) then.tint = tintOf(d.latticeThenTint);
       // data-lattice-then-at="<selector>": the second model assembles as that element rises into view
       const thenAt = then && d.latticeThenAt ? s.querySelector(d.latticeThenAt) : null;
       // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
@@ -97,7 +100,7 @@ export function initChapters() {
     // The zone closest to the viewport's upper-middle owns the object, which assembles as the zone arrives and shatters as it leaves.
     const zones = [];
     const zoneOf = (el, name, own) => ({ el, name, own, morph: LATTICE_INDEX[name] ?? 0, pad: 0,
-      scale: num(el.dataset.latticeScaleSm ?? el.dataset.zoneScale, 0.82), rx: num(el.dataset.latticeRx ?? el.dataset.zoneRx, 0.3), ry: num(el.dataset.latticeRy ?? el.dataset.zoneRy, 0.5) });
+      cy: el.dataset.latticeCySm !== undefined ? parseFloat(el.dataset.latticeCySm) : null, scale: num(el.dataset.latticeScaleSm ?? el.dataset.zoneScale, 0.82), rx: num(el.dataset.latticeRx ?? el.dataset.zoneRx, 0.3), ry: num(el.dataset.latticeRy ?? el.dataset.zoneRy, 0.5) });
     if (small) {
       sections.forEach((s) => { if (s.dataset.lattice && s.dataset.lattice !== 'off') zones.push(zoneOf(s, s.dataset.lattice, false)); });
       document.querySelectorAll('[data-zone-model]').forEach((el) => zones.push(zoneOf(el, el.dataset.zoneModel, true)));
@@ -107,7 +110,9 @@ export function initChapters() {
       const vh = window.innerHeight; const target = 0.4 * vh;
       let best = null, bd = Infinity;
       for (const z of zones) {
-        const r = z.el.getBoundingClientRect(); const cy = z.own ? r.top + r.height / 2 : r.top + z.pad / 2;
+        const r = z.el.getBoundingClientRect();
+        // spacer zones: their own centre; chapters with an explicit phone y (the hero): that fraction of the viewport below their top; the rest: the middle of their top padding
+        const cy = z.own ? r.top + r.height / 2 : z.cy !== null ? r.top + z.cy * vh : r.top + z.pad / 2;
         const d = Math.abs(cy - target); if (d < bd) { bd = d; best = { z, cy }; }
       }
       if (!best) return;
@@ -138,10 +143,12 @@ export function initChapters() {
         st.cx = lerp(next.cx, then.cx, tThen); st.cy = lerp(next.cy, then.cy, tThen); st.scale = lerp(next.scale, then.scale, tThen);
         st.rotX = lerp(next.rotX, then.rotX, tThen); st.rotY = lerp(next.rotY, then.rotY, tThen);
         st.opacity = lerp(next.opacity, then.opacity, tThen) * (1 - tOut);
+        st.tint = next.tint.map((v, i) => lerp(v, then.tint[i], tThen));
       } else {
         st.blend = { a: next.morph, b: next.morph, t: 0 }; st.assemble = tIn;
         st.cx = next.cx; st.cy = next.cy; st.scale = next.scale; st.rotX = next.rotX; st.rotY = next.rotY;
         st.opacity = next.opacity * tIn * (1 - tOut);
+        st.tint = next.tint;
       }
     };
     // The dark chapters' scrim has a soft hole around the story object (see global.css); keep it on the object
@@ -154,7 +161,7 @@ export function initChapters() {
       const x = st.cx * w, y = st.cy * h;
       for (const s of darkSecs) {
         const top = s.getBoundingClientRect().top;
-        s.style.setProperty('--ox', `${x.toFixed(0)}px`); s.style.setProperty('--oy', `${(y - top).toFixed(0)}px`);
+        s.style.setProperty('--ox', `${x.toFixed(0)}px`); s.style.setProperty('--oy', `${(y - top - 0.2 * h).toFixed(0)}px`); // the body gradient starts one edge ramp (20vh) below the section top
         s.style.setProperty('--or', `${r.toFixed(0)}px`); s.style.setProperty('--oa', a.toFixed(3));
       }
     };

@@ -109,7 +109,7 @@ export function createScene(canvas, labelLayer) {
     intro: 1, // loader multiplier on scale, so the intro never fights a chapter's own scale
     userY: 0, userX: 0, spinY: 0, spinX: 0, // drag rotation + inertia
   };
-  const smooth = { tiltX: 0, tiltY: 0 };
+  const smooth = { tiltX: 0, tiltY: 0, tint: [1, 1, 1] };
   let w = 1, h = 1;
 
   function resize() {
@@ -133,6 +133,8 @@ export function createScene(canvas, labelLayer) {
     const ease = f * f * (3 - 2 * f);
     const isDark = state.ink[0] > 128;
 
+    const tt = state.tint || [1, 1, 1];
+    for (let i = 0; i < 3; i++) smooth.tint[i] += (tt[i] - smooth.tint[i]) * 0.08;
     smooth.tiltX += (state.tiltX - smooth.tiltX) * 0.06;
     smooth.tiltY += (state.tiltY - smooth.tiltY) * 0.06;
     const [vw, vh] = visible();
@@ -157,7 +159,8 @@ export function createScene(canvas, labelLayer) {
       u.uGlow.value = state.glow;
       u.uRim.value.set(...(isDark ? [0.38, 0.48, 0.6] : [0.2, 0.26, 0.34]));
       mesh.material.opacity = state.opacity;
-      mesh.material.color.setRGB(...(isDark ? [0.78, 0.84, 0.92] : [0.5, 0.56, 0.65]));
+      const base = isDark ? [0.78, 0.84, 0.92] : [0.5, 0.56, 0.65];
+      mesh.material.color.setRGB(base[0] * smooth.tint[0], base[1] * smooth.tint[1], base[2] * smooth.tint[2]); // a quiet per-chapter hue on the clay
     }
     renderer.render(scene, camera);
 

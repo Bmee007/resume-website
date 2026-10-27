@@ -19,7 +19,7 @@ export function initWork() {
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${distance() + window.innerHeight * 0.3}`,
+          end: () => `+=${distance() * 0.8 + window.innerHeight * 0.1}`, // the track moves ~25% faster than the scroll: less dead travel
           pin: true,
           scrub: 1,
           anticipatePin: 1,
