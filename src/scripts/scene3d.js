@@ -118,7 +118,7 @@ export function createScene(canvas, labelLayer) {
     intro: 1, // loader multiplier on scale, so the intro never fights a chapter's own scale
     userY: 0, userX: 0, spinY: 0, spinX: 0, // drag rotation + inertia
   };
-  const smooth = { tiltX: 0, tiltY: 0, tint: [1, 1, 1] };
+  const smooth = { tiltX: 0, tiltY: 0, twist: 0, tint: [1, 1, 1] };
   let w = 1, h = 1;
 
   function resize() {
@@ -141,7 +141,10 @@ export function createScene(canvas, labelLayer) {
     else { const m = Math.max(0, Math.min(STATES.length - 1, state.morph)); si = Math.floor(m); sj = Math.min(STATES.length - 1, si + 1); f = m - si; }
     const ease = f * f * (3 - 2 * f);
     const isDark = state.ink[0] > 128;
+    renderer.toneMappingExposure += ((isDark ? 0.92 : 0.74) - renderer.toneMappingExposure) * 0.08;   // a deeper exposure on light chapters so part colours separate
 
+    state.twist = (state.twist || 0) * 0.9;                       // scroll twist decays quickly; smooth follows it
+    smooth.twist += ((state.twist || 0) - smooth.twist) * 0.2;
     const tt = state.tint || [1, 1, 1];
     for (let i = 0; i < 3; i++) smooth.tint[i] += (tt[i] - smooth.tint[i]) * 0.08;
     smooth.tiltX += (state.tiltX - smooth.tiltX) * 0.06;
@@ -152,7 +155,7 @@ export function createScene(canvas, labelLayer) {
     state.userY += state.spinY; state.userX += state.spinX;
     state.spinY *= 0.95; state.spinX *= 0.95;
     state.userY *= 0.985; state.userX *= 0.97;
-    group.rotation.set(state.rotX + smooth.tiltY * 0.18 + state.userX, state.rotY + Math.sin(t * 0.14) * 0.2 + smooth.tiltX * 0.3 + state.userY, 0);
+    group.rotation.set(state.rotX + smooth.tiltY * 0.18 + state.userX, state.rotY + Math.sin(t * 0.14) * 0.2 + smooth.tiltX * 0.3 + state.userY + smooth.twist, 0);
     const base = Math.min(vw, vh) * 0.3 * state.scale * state.intro;
     group.scale.setScalar(base);
 

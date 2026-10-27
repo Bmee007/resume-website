@@ -202,6 +202,7 @@ export function initAsk() {
     if (send) send.disabled = true;
     if (status) status.textContent = 'PROCESSING…';
     if (promptEl) fadeSwap(promptEl, () => { promptEl.textContent = prompt; });
+    if (window.innerWidth < 900) document.getElementById('card-ai')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); // phones: the answer is far below the input
     const canned = CANNED[prompt] || await bestQa(prompt).then((q) => (q ? { card: CARD_FOR[q.category] || 'ai', text: q.text } : null));
     if (online === false && canned) {
       if (status) status.textContent = '';

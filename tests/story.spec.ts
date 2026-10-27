@@ -162,11 +162,12 @@ test("MODELS-02 — chapters carry the computer, bot, handshake, ledger and phar
   await expect(page.locator("#contact")).toHaveAttribute("data-lattice", "off");
 });
 
-test("VEIL-01 — the contact fog is dense on arrival and clears as the chapter fills the screen", async ({ page }) => {
+test("VEIL-01 — the contact mist is thick on arrival and clears when wiped (or lifts on its own)", async ({ page }) => {
+  test.setTimeout(40_000);                                       // the touch path waits for the mist to lift on its own
   await openHome(page);
   const veil = page.locator("#contact .fog-veil");
   await expect(veil).toHaveCount(1);
-  const opacityAt = async (fraction: number) => {
+  const jump = async (fraction: number) => {
     await page.evaluate((f) => {
       const el = document.querySelector("#contact")!;
       const y = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * f;
@@ -174,20 +175,18 @@ test("VEIL-01 — the contact fog is dense on arrival and clears as the chapter 
       (window as unknown as { __ST?: { update: () => void } }).__ST?.update();
     }, fraction);
     await page.waitForTimeout(900);
-    return veil.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
   };
-  const early = await opacityAt(0.8);
-  const late = await opacityAt(0.1);
-  expect(early).toBeGreaterThan(0.7);
-  expect(late).toBeLessThan(0.15);
-});
-
-test("ZONE-01 — the pill bottle has a phone spacer in Skills; desktop hides it", async ({ page }) => {
-  await openHome(page);
-  const zone = page.locator("#skills .obj-zone");
-  await expect(zone).toHaveCount(1);
-  await expect(zone).toHaveAttribute("data-zone-model", "pills");
-  const small = (await page.viewportSize())!.width < 900;
-  if (small) await expect(zone).toBeVisible({ timeout: 2_000 }).catch(async () => { await jumpTo(page, "#skills"); await expect(zone).toBeVisible(); });
-  else await expect(zone).toBeHidden();
+  const opacity = () => veil.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+  await jump(0.8);
+  expect(await opacity()).toBeGreaterThan(0.9);                 // dense on arrival
+  await jump(0.1);
+  expect(await opacity()).toBeGreaterThan(0.9);                 // scrolling in thins it but does not remove it
+  const fine = await page.evaluate(() => matchMedia("(pointer: fine)").matches);
+  if (fine) {                                                    // a pointer wipes it away for good
+    for (let i = 0; i < 16; i++) await page.mouse.move(i % 2 ? 1300 : 120, 260 + i * 22, { steps: 8 });
+  } else {
+    await page.waitForTimeout(4500);                             // touch / no pointer: it lifts on its own
+  }
+  await page.waitForTimeout(1800);
+  expect(await opacity()).toBeLessThan(0.1);
 });

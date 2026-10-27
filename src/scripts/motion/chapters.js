@@ -93,7 +93,7 @@ export function initChapters() {
       const thenAt = then && d.latticeThenAt ? s.querySelector(d.latticeThenAt) : null;
       // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
       const exitAt = d.latticeExit !== undefined ? parseFloat(d.latticeExit) : null;
-      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, ghost: !off && next.opacity < 0.7 });
+      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, gap: d.latticeGap !== undefined, ghost: !off && next.opacity < 0.7 });
       prev = then || next;
     });
     // Phones: each object lives in its own zone (a chapter's top padding, or a [data-zone-model] spacer) and scrolls with it.
@@ -128,7 +128,7 @@ export function initChapters() {
       let owner = chapters[0];
       for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
       const r = owner.el.getBoundingClientRect(); const top = r.top / vh, bottom = r.bottom / vh;
-      const { next, then, thenAt, e0, e1, exitAt, ghost } = owner;
+      const { next, then, thenAt, e0, e1, exitAt, ghost, gap } = owner;
       const tIn = smooth((e0 - top) / (e0 - e1));
       const tThen = !then ? 0
         : thenAt ? smooth((0.85 - thenAt.getBoundingClientRect().top / vh) / 0.45)        // keyed element: 85vh → 40vh
@@ -138,7 +138,15 @@ export function initChapters() {
         : ((ghost && !then) || small) ? smooth((-top - (small ? 0.1 : 0.2)) / 0.3)       // single-model ghosts (and phones) leave once the heading has passed
         : smooth((0.6 - bottom) / 0.35);                                                  // hero-size objects leave with the chapter's last content
       const st = lattice.state;
-      if (then && tThen > 0) {
+      if (then && gap && tThen > 0) {                       // gap mode: the second object assembles in place (no morph through the first)
+        st.blend = { a: then.morph, b: then.morph, t: 0 }; st.assemble = tThen;
+        st.cx = then.cx; st.cy = then.cy; st.scale = then.scale; st.rotX = then.rotX; st.rotY = then.rotY;
+        st.opacity = then.opacity * (1 - tOut); st.tint = then.tint;
+      } else if (then && gap) {                             // first object: formed at the heading, gone before the roles start
+        st.blend = { a: next.morph, b: next.morph, t: 0 }; st.assemble = tIn * (1 - smooth((-top - 0.22) / 0.3));
+        st.cx = next.cx; st.cy = next.cy; st.scale = next.scale; st.rotX = next.rotX; st.rotY = next.rotY;
+        st.opacity = next.opacity * (1 - tOut); st.tint = next.tint;
+      } else if (then && tThen > 0) {
         st.blend = { a: next.morph, b: then.morph, t: tThen }; st.assemble = 1;
         st.cx = lerp(next.cx, then.cx, tThen); st.cy = lerp(next.cy, then.cy, tThen); st.scale = lerp(next.scale, then.scale, tThen);
         st.rotX = lerp(next.rotX, then.rotX, tThen); st.rotY = lerp(next.rotY, then.rotY, tThen);
@@ -161,7 +169,7 @@ export function initChapters() {
       const x = st.cx * w, y = st.cy * h;
       for (const s of darkSecs) {
         const top = s.getBoundingClientRect().top;
-        s.style.setProperty('--ox', `${x.toFixed(0)}px`); s.style.setProperty('--oy', `${(y - top - 0.2 * h).toFixed(0)}px`); // the body gradient starts one edge ramp (20vh) below the section top
+        s.style.setProperty('--ox', `${x.toFixed(0)}px`); s.style.setProperty('--oy', `${(y - top).toFixed(0)}px`);
         s.style.setProperty('--or', `${r.toFixed(0)}px`); s.style.setProperty('--oa', a.toFixed(3));
       }
     };
@@ -171,8 +179,8 @@ export function initChapters() {
       if (window.scrollY !== lastY || window.innerHeight !== lastH) {
         const dy = lastY < 0 ? 0 : window.scrollY - lastY;
         lastY = window.scrollY; lastH = window.innerHeight; update(); punchHoles();
-        // the object reacts to scroll speed: a quick scroll gives it a little spin that settles on its own
-        lattice.state.spinY += Math.max(-0.035, Math.min(0.035, dy * 0.00018));
+        // the object reacts to scroll speed: a bounded twist (never more than ~0.3 rad) that springs back to the chapter pose
+        lattice.state.twist = Math.max(-0.32, Math.min(0.32, (lattice.state.twist || 0) + dy * 0.0009));
       }
     });
     ScrollTrigger.addEventListener('refresh', () => { measureZones(); update(); punchHoles(); });

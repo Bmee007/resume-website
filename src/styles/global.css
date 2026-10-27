@@ -60,19 +60,17 @@
 }
 
 /* Dark chapters invert the ink and carry a storm tint so text contrast is real, not fog-dependent */
-section[data-tone="dark"] {
-  /* The 3D canvas sits under this scrim. Three layers, all in the background (so no text is ever masked or faded):
-     a soft top ramp and a soft bottom ramp (storm rolls in like weather), and the body scrim with a hole that follows the story object
-     (chapters.js sets --ox/--oy/--or/--oa), so the object shows at full brightness while text elsewhere keeps the full scrim. */
-  --scrim: 0.76;
-  --edge: 20vh;
-  background:
-    linear-gradient(to bottom, transparent, oklch(0.18 0.03 245 / var(--scrim))) top / 100% var(--edge) no-repeat,
-    linear-gradient(to top, transparent, oklch(0.18 0.03 245 / var(--scrim))) bottom / 100% var(--edge) no-repeat,
-    radial-gradient(circle at var(--ox, 50%) var(--oy, -300px),
-      oklch(0.18 0.03 245 / calc(var(--scrim) * (1 - var(--oa, 0)))) 0,
-      oklch(0.18 0.03 245 / calc(var(--scrim) * (1 - var(--oa, 0)))) calc(var(--or, 0px) * 0.75),
-      oklch(0.18 0.03 245 / var(--scrim)) calc(var(--or, 0px) * 1.9)) 0 var(--edge) / 100% calc(100% - var(--edge) * 2) no-repeat;
+section[data-tone="dark"] { position: relative; --scrim: 0.76; --edge: 20vh; }
+/* The 3D canvas sits under this scrim. It is a pseudo-element so its soft top/bottom ramp is a mask on the scrim only (copy is never faded),
+   and it carries a soft hole that follows the story object (chapters.js sets --ox/--oy/--or/--oa) so the object shows at full brightness. */
+section[data-tone="dark"]::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(circle at var(--ox, 50%) var(--oy, -300px),
+    oklch(0.18 0.03 245 / calc(var(--scrim) * (1 - var(--oa, 0)))) 0,
+    oklch(0.18 0.03 245 / calc(var(--scrim) * (1 - var(--oa, 0)))) calc(var(--or, 0px) * 0.75),
+    oklch(0.18 0.03 245 / var(--scrim)) calc(var(--or, 0px) * 1.9));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, black var(--edge), black calc(100% - var(--edge)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, black var(--edge), black calc(100% - var(--edge)), transparent 100%);
 }
 /* the tint is masked, so the ink flip must come from the html tone (already set by the director) */
 [data-tone="dark"] {
