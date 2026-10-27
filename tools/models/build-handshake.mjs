@@ -447,12 +447,16 @@ function buildRobotHand() {
 const scene = new THREE.Scene(); let tris = 0;
 const mat = new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.55, metalness: 0 });
 const SCENE_ROLL = new THREE.Matrix4().makeRotationZ(5 * DEG); // balance the V: both forearms ~37 degrees below horizontal
-const addMesh = (name, g) => { g.applyMatrix4(SCENE_ROLL); g.computeVertexNormals(); tris += g.index.count / 3; const m = new THREE.Mesh(g, mat); m.name = name; scene.add(m); };
+// second, small rigid refinement of the robot after the roll (penetration + contact search): [dx, dy, dz, rotY deg, rotZ deg] about PIVOT
+const ROBOT_FIT2 = [0.002, 0.039, -0.058, -3.723, -7.688]; const FIT2_PIVOT = new THREE.Vector3(0.42, 0, -0.19);
+const fit2 = () => { const [x, y, z, ry, rz] = ROBOT_FIT2; const p = FIT2_PIVOT; return new THREE.Matrix4().makeTranslation(x, y, z).multiply(new THREE.Matrix4().makeTranslation(p.x, p.y, p.z)).multiply(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(0, ry * DEG, rz * DEG))).multiply(new THREE.Matrix4().makeTranslation(-p.x, -p.y, -p.z)); };
+const addMesh = (name, g) => { g.applyMatrix4(SCENE_ROLL); if (name === 'robot' && !process.env.DBG_CUFF) g.applyMatrix4(fit2()); g.computeVertexNormals(); tris += g.index.count / 3; const m = new THREE.Mesh(g, mat); m.name = name; scene.add(m); };
 if (ONLY !== '--robot-only') addMesh('human', buildHumanHand());
 if (globalThis.__dbgCuff) addMesh('robot', globalThis.__dbgCuff);
 if (ONLY !== '--human-only') addMesh('robot', buildRobotHand());
 const buf = await new GLTFExporter().parseAsync(scene, { binary: true });
 const tmp = OUT.replace(/\.glb$/, '.raw.glb'); fs.writeFileSync(tmp, Buffer.from(buf));
 execFileSync('npx', ['-y', '@gltf-transform/cli', 'meshopt', tmp, OUT, '--level', 'high'], { stdio: ['ignore', 'ignore', 'inherit'] });
+if (process.env.KEEP_RAW) fs.copyFileSync(tmp, process.env.KEEP_RAW); // uncompressed copy for analysis (identity node transforms)
 fs.unlinkSync(tmp);
 console.log(JSON.stringify({ tris, bytes: fs.statSync(OUT).size, out: OUT }));

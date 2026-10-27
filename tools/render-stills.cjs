@@ -2,7 +2,7 @@
 // lighting. Phones show these instead of loading Three.js + GLBs.  Usage: node tools/render-stills.cjs
 const { chromium } = require('playwright'); const http = require('http'); const fs = require('fs'); const path = require('path');
 const root = path.resolve(__dirname, '..');
-const POSES = { brain: [0.3, 0.5], truck: [0.2, 0.5], computer: [0.22, 0.4], warehouse: [0.42, 0.55], canada: [0.95, 0.12], pills: [0.12, -0.55], bot: [0.12, -0.4], handshake: [0.18, -0.35], ledger: [0.72, -0.35] };
+const POSES = { brain: [0.3, 0.5], truck: [0.2, 0.5], computer: [0.22, 0.4], warehouse: [0.42, 0.55], canada: [0.95, 0.12], pills: [0.12, -0.55], bot: [0.12, -0.4], handshake: [0.1, -0.8], ledger: [0.72, -0.35] };
 const only = process.argv.slice(2); // optional: names to (re)render
 const page = `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:transparent}</style>
 <script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/","three/examples/jsm/":"/node_modules/three/examples/jsm/"}}</script></head><body>
