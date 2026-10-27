@@ -7,28 +7,43 @@ import { gsap, ScrollTrigger } from './core.js';
 const N = 12;                                   // wipe points kept for the trail
 const VERT = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
 const FRAG = /* glsl */`
-precision mediump float;
+precision highp float;
 uniform vec2 uRes; uniform float uTime; uniform float uProg; uniform vec3 uPts[${N}];
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
-float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int i = 0; i < 5; i++) { v += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= 0.5; } return v; }
+float fbm(vec2 p){ float v = 0.0, a = 0.5; mat2 r = mat2(0.8, -0.6, 0.6, 0.8);
+  for (int i = 0; i < 6; i++) { v += a * noise(p); p = r * p * 2.04 + vec2(3.1, 7.7); a *= 0.5; } return v; }
+// cumulus-style density: warped, billowy base plus finer curl at the edges
+float density(vec2 p, float t){
+  vec2 q = vec2(fbm(p * 0.9 + vec2(t, -t * 0.5)), fbm(p * 0.9 + vec2(5.2, 1.3) - vec2(t * 0.7, -t * 0.2)));
+  float base = fbm(p * 1.35 + q * 1.8 + vec2(t * 1.3, t * 0.25));
+  float billow = 1.0 - abs(2.0 * fbm(p * 2.6 + q * 2.4 - vec2(t * 0.9, 0.0)) - 1.0);   // puffy ridges on the surface
+  return clamp(base * 0.62 + billow * 0.52 - 0.18, 0.0, 1.2);
+}
 void main(){
   vec2 uv = gl_FragCoord.xy / uRes; float asp = uRes.x / uRes.y; vec2 p = vec2(uv.x * asp, uv.y);
-  float t = uTime * 0.035;
-  vec2 q = vec2(fbm(p * 1.5 + vec2(t, -t * 0.6)), fbm(p * 1.5 + vec2(5.2, 1.3) - vec2(t * 0.8)));
-  float n = fbm(p * 2.1 + q * 1.7 + vec2(t * 1.4, t * 0.3));
-  float thr = mix(-0.25, 1.0, uProg);
-  float cover = smoothstep(thr - 0.28, thr + 0.16, n);
-  float body = 0.5 + 0.5 * n;
-  float a = clamp(cover * (0.62 + 0.5 * body), 0.0, 0.97);
-  float rough = 0.05 * n;
-  for (int i = 0; i < ${N}; i++) {                          // each wipe point: x, y (0..1), radius (height units; 0 = unused)
+  float t = uTime * 0.03;
+  float d = density(p, t);
+  // a second, nearer bank drifting faster gives depth
+  float d2 = density(p * 1.7 + vec2(7.3, 2.1), t * 1.8);
+  float dens = mix(d, d * 0.6 + d2 * 0.55, 0.42);
+  float thr = mix(-0.1, 0.98, uProg);                                   // scrolling / wiping raises the threshold: the bank tears apart
+  float cover = smoothstep(thr - 0.20, thr + 0.12, dens);
+  // lighting: compare density here with density a step toward the light (above-left): lit crowns, shadowed undersides
+  float dl = density(p + vec2(-0.03, 0.05), t);
+  float shade = clamp(0.52 + (dens - dl) * 8.0, 0.0, 1.0);
+  vec3 lit = vec3(0.99, 0.995, 1.0), mid = vec3(0.86, 0.895, 0.94), shadow = vec3(0.50, 0.58, 0.71);
+  vec3 col = mix(shadow, mid, smoothstep(0.0, 0.55, shade)); col = mix(col, lit, smoothstep(0.5, 1.0, shade));
+  col *= 0.9 + 0.12 * smoothstep(0.3, 1.0, dens);
+  float a = clamp(cover * (0.50 + 0.62 * dens), 0.0, 0.97);
+  col = mix(col, lit, (1.0 - a) * 0.55 * cover);                       // silver lining where the cloud thins out
+  float rough = 0.05 * dens;
+  for (int i = 0; i < ${N}; i++) {
     vec3 w = uPts[i]; if (w.z <= 0.001) continue;
-    float d = distance(p, vec2(w.x * asp, w.y));
-    a *= smoothstep(w.z * 0.5 + rough, w.z + rough * 2.0, d);
+    float dd = distance(p, vec2(w.x * asp, w.y));
+    a *= smoothstep(w.z * 0.45 + rough, w.z + rough * 2.0, dd);
   }
-  vec3 col = vec3(0.90, 0.935, 0.965) * (0.84 + 0.2 * n);
   gl_FragColor = vec4(col * a, a);
 }`;
 
