@@ -17,6 +17,8 @@ export function initVeil() {
     const el = veil.querySelector(sel); if (!el) return;
     gsap.fromTo(el, { '--vx': '0vw', '--vy': '0vh' }, { '--vx': vx, '--vy': vy, ease: 'power2.inOut', scrollTrigger: { trigger: section, start: 'top 80%', end: 'top 5%', scrub: 0.6 } });
   });
+  // the headline sharpens out of the haze: the veil's backdrop blur drops to zero as it thins
+  gsap.fromTo(veil, { '--vb': '22px' }, { '--vb': '0px', ease: 'power1.in', scrollTrigger: { trigger: section, start: 'top 88%', end: 'top 25%', scrub: 0.5 } });
   gsap.fromTo(veil, { opacity: 1 }, {
     opacity: 0, ease: 'power2.in',
     scrollTrigger: {

@@ -42,7 +42,7 @@ const spec = [
   id="experience" class="chapter record"
   data-scene="clearing" data-tone="light" data-chapter="05" data-label="Record"
   data-lattice="ledger" data-lattice-cx="0.81" data-lattice-cy="0.3" data-lattice-scale="0.5" data-lattice-opacity="0.55" data-lattice-rx="0.72" data-lattice-ry="-0.35"
-  data-lattice-then="pills" data-lattice-then-at="#skills" data-lattice-then-cx="0.91" data-lattice-then-cy="0.36" data-lattice-then-scale="0.3" data-lattice-then-rx="0.1" data-lattice-then-ry="-0.5"
+  data-lattice-then="pills" data-lattice-then-at="#skills" data-lattice-then-cx="0.885" data-lattice-then-cy="0.36" data-lattice-then-scale="0.3" data-lattice-then-rx="0.1" data-lattice-then-ry="-0.5"
 >
   <span class="chapter-mark" aria-hidden="true">05</span>
 
@@ -85,6 +85,8 @@ const spec = [
     </section>
 
     <section id="skills" class="spec" aria-label="Skills and expertise">
+      <!-- Phones: the pill bottle lives in this spacer (desktop gets it from the story-object director) -->
+      <div class="obj-zone" data-zone-model="pills" data-zone-scale="0.8" data-zone-rx="0.1" data-zone-ry="-0.5" aria-hidden="true"></div>
       <div class="spec-head">
         <p class="telemetry" data-scramble><span class="ch">05.2</span> Spec sheet</p>
         <h3 class="t-display spec-heading" data-split>Skills &amp; expertise</h3>
@@ -149,6 +151,8 @@ const spec = [
 
   /* Spec sheet */
   .spec { margin-top: clamp(5rem, 10vw, 9rem); }
+  .obj-zone { display: none; }
+  @media (max-width: 899px) { .obj-zone { display: block; height: min(46vh, 22rem); margin-bottom: 1rem; } }
   .spec-head { display: grid; gap: 1rem; }
   .spec-heading { font-size: clamp(1.8rem, 3.4vw, 3rem); }
   .spec-grid {

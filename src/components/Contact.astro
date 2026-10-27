@@ -68,7 +68,7 @@ import Icon from "./Icon.astro";
 
 <style>
   .contact { position: relative; padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
-  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); will-change: opacity; -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 26vh); mask-image: linear-gradient(to bottom, transparent 0, black 26vh); }
+  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(var(--vb, 18px)); -webkit-backdrop-filter: blur(var(--vb, 18px)); will-change: opacity; -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 26vh); mask-image: linear-gradient(to bottom, transparent 0, black 26vh); }
   .veil-layer { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; filter: blur(60px); background: radial-gradient(closest-side, color-mix(in oklch, white 86%, var(--bg)) 0%, transparent 72%); animation: veil-drift 22s var(--ease-in-out) infinite alternate; translate: var(--vx, 0) var(--vy, 0); }
   .veil-a { left: -25vmax; top: -30vmax; }
   .veil-b { right: -30vmax; top: 10vmax; animation-duration: 27s; animation-delay: -9s; background: radial-gradient(closest-side, color-mix(in oklch, var(--storm) 28%, white) 0%, transparent 72%); }

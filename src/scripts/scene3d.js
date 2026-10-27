@@ -155,9 +155,9 @@ export function createScene(canvas, labelLayer) {
       mesh.visible = prog < 0.999;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
-      u.uRim.value.set(...(isDark ? [0.5, 0.6, 0.72] : [0.16, 0.2, 0.26]));
+      u.uRim.value.set(...(isDark ? [0.38, 0.48, 0.6] : [0.2, 0.26, 0.34]));
       mesh.material.opacity = state.opacity;
-      mesh.material.color.setRGB(...(isDark ? [0.95, 0.98, 1.0] : [0.64, 0.7, 0.77]));
+      mesh.material.color.setRGB(...(isDark ? [0.78, 0.84, 0.92] : [0.5, 0.56, 0.65]));
     }
     renderer.render(scene, camera);
 

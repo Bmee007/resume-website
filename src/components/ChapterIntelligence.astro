@@ -129,7 +129,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
 </section>
 
 <style>
-  .intel { padding-block: clamp(8rem, 16vw, 14rem); }
+  .intel { padding-block: clamp(6rem, 11vw, 9.5rem); }
   .intel-tel { grid-column: 1 / -1; }
   .intel-heading { grid-column: 1 / -1; font-size: clamp(2.4rem, 6.2vw, 6.2rem); max-width: 12ch; margin-top: 1rem; }
   .intel-copy { grid-column: 1 / -1; margin-top: 1rem; }
@@ -205,6 +205,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
 
   /* Readout ledger */
   .readout { display: grid; align-content: start; padding-block: 1rem; }
+  #card-ai { min-height: 9.5rem; } /* reserve the answer height so a reply never shoves the rows below it */
   .readout-row {
     display: grid;
     grid-template-columns: 9rem 1fr;

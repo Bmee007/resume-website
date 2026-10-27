@@ -181,3 +181,13 @@ test("VEIL-01 — the contact fog is dense on arrival and clears as the chapter 
   expect(early).toBeGreaterThan(0.7);
   expect(late).toBeLessThan(0.15);
 });
+
+test("ZONE-01 — the pill bottle has a phone spacer in Skills; desktop hides it", async ({ page }) => {
+  await openHome(page);
+  const zone = page.locator("#skills .obj-zone");
+  await expect(zone).toHaveCount(1);
+  await expect(zone).toHaveAttribute("data-zone-model", "pills");
+  const small = (await page.viewportSize())!.width < 900;
+  if (small) await expect(zone).toBeVisible({ timeout: 2_000 }).catch(async () => { await jumpTo(page, "#skills"); await expect(zone).toBeVisible(); });
+  else await expect(zone).toBeHidden();
+});

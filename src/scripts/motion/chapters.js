@@ -33,6 +33,9 @@ export function initChapters() {
     });
   };
 
+  // Spacer zones (phones) preload their model a couple of screens ahead too
+  if (lattice && lattice.ensure) document.querySelectorAll('[data-zone-model]').forEach((el) => ScrollTrigger.create({ trigger: el, start: 'top 220%', once: true, onEnter: () => lattice.ensure(el.dataset.zoneModel) }));
+
   // Model assets: the first chapter's model now, the rest when their chapter is within ~1.5 screens
   if (lattice && lattice.ensure) {
     sections.forEach((s, i) => {
@@ -90,7 +93,32 @@ export function initChapters() {
       chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, ghost: !off && next.opacity < 0.7 });
       prev = then || next;
     });
+    // Phones: each object lives in its own zone (a chapter's top padding, or a [data-zone-model] spacer) and scrolls with it.
+    // The zone closest to the viewport's upper-middle owns the object, which assembles as the zone arrives and shatters as it leaves.
+    const zones = [];
+    const zoneOf = (el, name, own) => ({ el, name, own, morph: LATTICE_INDEX[name] ?? 0, pad: 0,
+      scale: num(el.dataset.latticeScaleSm ?? el.dataset.zoneScale, 0.82), rx: num(el.dataset.latticeRx ?? el.dataset.zoneRx, 0.3), ry: num(el.dataset.latticeRy ?? el.dataset.zoneRy, 0.5) });
+    if (small) {
+      sections.forEach((s) => { if (s.dataset.lattice && s.dataset.lattice !== 'off') zones.push(zoneOf(s, s.dataset.lattice, false)); });
+      document.querySelectorAll('[data-zone-model]').forEach((el) => zones.push(zoneOf(el, el.dataset.zoneModel, true)));
+    }
+    const measureZones = () => zones.forEach((z) => { if (!z.own) z.pad = parseFloat(getComputedStyle(z.el).paddingTop) || 0; });
+    const phoneUpdate = () => {
+      const vh = window.innerHeight; const target = 0.4 * vh;
+      let best = null, bd = Infinity;
+      for (const z of zones) {
+        const r = z.el.getBoundingClientRect(); const cy = z.own ? r.top + r.height / 2 : r.top + z.pad / 2;
+        const d = Math.abs(cy - target); if (d < bd) { bd = d; best = { z, cy }; }
+      }
+      if (!best) return;
+      const vis = 1 - smooth((bd / vh - 0.3) / 0.35);               // fully formed within 0.3vh of the sweet spot, gone beyond 0.65vh
+      const st = lattice.state;
+      st.blend = { a: best.z.morph, b: best.z.morph, t: 0 }; st.assemble = vis;
+      st.cx = 0.5; st.cy = best.cy / vh; st.scale = best.z.scale; st.rotX = best.z.rx; st.rotY = best.z.ry;
+      st.opacity = vis > 0.001 ? 0.92 : 0;
+    };
     const update = () => {
+      if (small) { phoneUpdate(); return; }
       const vh = window.innerHeight;
       let owner = chapters[0];
       for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
@@ -116,11 +144,25 @@ export function initChapters() {
         st.opacity = next.opacity * tIn * (1 - tOut);
       }
     };
+    // The dark chapters' scrim has a soft hole around the story object (see global.css); keep it on the object
+    const darkSecs = sections.filter((s) => s.dataset.tone === 'dark');
+    const punchHoles = () => {
+      if (!darkSecs.length) return;
+      const st = lattice.state; const w = window.innerWidth, h = window.innerHeight;
+      const r = lattice.isStills ? Math.min(w, h) * 0.92 * st.scale * 0.58 : Math.min(w, h) * 0.3 * st.scale * 1.2 * (h > 0 ? 1 : 1);
+      const a = Math.max(0, Math.min(1, st.opacity * (st.assemble ?? 1)));
+      const x = st.cx * w, y = st.cy * h;
+      for (const s of darkSecs) {
+        const top = s.getBoundingClientRect().top;
+        s.style.setProperty('--ox', `${x.toFixed(0)}px`); s.style.setProperty('--oy', `${(y - top).toFixed(0)}px`);
+        s.style.setProperty('--or', `${r.toFixed(0)}px`); s.style.setProperty('--oa', a.toFixed(3));
+      }
+    };
     // Drive from the ticker (not a scroll-bounded trigger, whose updates stop once scrolled past its end)
     let lastY = -1, lastH = -1;
-    gsap.ticker.add(() => { if (window.scrollY !== lastY || window.innerHeight !== lastH) { lastY = window.scrollY; lastH = window.innerHeight; update(); } });
-    ScrollTrigger.addEventListener('refresh', update);
-    update();
+    gsap.ticker.add(() => { if (window.scrollY !== lastY || window.innerHeight !== lastH) { lastY = window.scrollY; lastH = window.innerHeight; update(); punchHoles(); } });
+    ScrollTrigger.addEventListener('refresh', () => { measureZones(); update(); punchHoles(); });
+    measureZones(); update(); punchHoles();
     if (small) {
       const line = document.getElementById('progress-line');
       if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });
