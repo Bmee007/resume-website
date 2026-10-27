@@ -7,8 +7,7 @@
 import * as THREE from 'three';
 import { MODELS, loadModel } from './models.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-
-const STATES = ['truck', 'computer', 'warehouse', 'canada', 'brain'];
+import { STATES } from './states.js';
 
 // Shatter displacement + fade, injected into Three's physical material so lighting stays PBR.
 const SHATTER_PARS_V = /* glsl */`
@@ -81,7 +80,7 @@ export function createScene(canvas, labelLayer) {
   };
   // Procedural stand-ins first (instant). Lifelike GLBs load on demand (see ensure) so the
   // first paint doesn't pay for models whose chapters are a long scroll away.
-  for (const name of STATES) attach(name, MODELS[name]());
+  for (const name of STATES) if (MODELS[name]) attach(name, MODELS[name]()); // models without a stand-in appear when their GLB lands
   const loaded = new Set();
   function ensure(name) {
     if (!STATES.includes(name) || loaded.has(name)) return;
@@ -93,7 +92,7 @@ export function createScene(canvas, labelLayer) {
   const labelEls = {};
   if (labelLayer) {
     for (const name of STATES) {
-      labelEls[name] = labels[name].map((lb) => {
+      labelEls[name] = (labels[name] || []).map((lb) => {
         const el = document.createElement('span');
         el.className = 'lat-label';
         el.textContent = lb.text;
@@ -147,7 +146,7 @@ export function createScene(canvas, labelLayer) {
     group.scale.setScalar(base);
 
     for (const name of STATES) {
-      const mesh = meshes[name];
+      const mesh = meshes[name]; if (!mesh) continue;
       const u = mesh.material.userData.uniforms;
       let prog = 1; // 1 = fully dissolved (hidden)
       if (si === sj) { if (name === STATES[si]) prog = 1 - (state.assemble ?? 1); }   // assembling in place
@@ -158,7 +157,7 @@ export function createScene(canvas, labelLayer) {
       u.uGlow.value = state.glow;
       u.uRim.value.set(...(isDark ? [0.34, 0.42, 0.52] : [0.16, 0.2, 0.26]));
       mesh.material.opacity = state.opacity;
-      mesh.material.color.setRGB(...(isDark ? [0.6, 0.68, 0.79] : [0.64, 0.7, 0.77]));
+      mesh.material.color.setRGB(...(isDark ? [0.74, 0.8, 0.88] : [0.64, 0.7, 0.77]));
     }
     renderer.render(scene, camera);
 
@@ -166,7 +165,8 @@ export function createScene(canvas, labelLayer) {
     group.updateMatrixWorld();
     for (const name of STATES) {
       const els = labelEls[name]; if (!els || !els.length) continue;
-      const prog = meshes[name].visible ? meshes[name].material.userData.uniforms.uProgress.value : 1;
+      const mesh = meshes[name]; if (!mesh) continue;
+      const prog = mesh.visible ? mesh.material.userData.uniforms.uProgress.value : 1;
       // City labels only when the map is the subject, not a ghost in a corner
       const legible = state.scale * state.intro >= 0.55 && state.opacity >= 0.5 ? 1 : 0;
       const alpha = (1 - prog) * state.opacity * legible;

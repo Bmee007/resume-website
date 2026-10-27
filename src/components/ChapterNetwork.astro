@@ -2,6 +2,9 @@
 // ChapterNetwork.astro — CH.02. Dynamics 365 + Manhattan DFIO across seven distribution centres, coast to coast.
 import { DCS } from "../scripts/shapes.js";
 import ChartGauge from "./charts/ChartGauge.astro";
+import mapPins from "../../public/models/still/canada-pins.json";
+// Phone map: label side per city so the Toronto / Montreal pair never collides
+const LABEL_SIDE: Record<string, string> = { DELTA: "above", CALGARY: "below", REGINA: "above", WINNIPEG: "below", TORONTO: "left", MONTREAL: "right", MONCTON: "above" };
 const fmt = (v: number, pos: string, neg: string) => `${Math.abs(v).toFixed(2)}°${v >= 0 ? pos : neg}`;
 const stats = [
   { value: 7,    suffix: "",  decimals: 0, label: "distribution centres on one ERP and WMS" },
@@ -14,7 +17,7 @@ const stats = [
   id="network" class="chapter network"
   data-scene="steel" data-tone="light" data-chapter="02" data-label="Network"
   data-lattice="warehouse" data-lattice-cx="0.23" data-lattice-cy="0.5" data-lattice-scale="0.58" data-lattice-rx="0.42" data-lattice-ry="0.55"
-  data-lattice-then="canada" data-lattice-then-cx="0.21" data-lattice-then-cy="0.46" data-lattice-then-scale="0.64" data-lattice-then-rx="0.95" data-lattice-then-ry="0.12"
+  data-lattice-then="canada" data-lattice-then-at=".dc-roster" data-lattice-then-cx="0.21" data-lattice-then-cy="0.46" data-lattice-then-scale="0.64" data-lattice-then-rx="0.95" data-lattice-then-ry="0.12"
 >
   <span class="chapter-mark" aria-hidden="true">02</span>
 
@@ -31,6 +34,21 @@ const stats = [
       truth in the other. With AI-driven pick-path optimisation on top, throughput rose 15%, pick accuracy
       reached 99.7%, and labour cost per order fell 5%.
     </p>
+
+    <!-- Phones: the map sits in flow beside the roster (desktop draws it as the 3D story object) -->
+    <figure class="dc-map-sm" aria-hidden="true">
+      <img src="/models/still/canada.webp" alt="" loading="lazy" decoding="async" width="816" height="528" />
+      <svg class="dc-map-labels" viewBox="0 0 816 528" preserveAspectRatio="none">
+        {mapPins.pins.map((p, i) => {
+          const side = LABEL_SIDE[p.text] ?? "above";
+          const x = (p.x / 100) * 816, y = (p.y / 100) * 528;
+          const tx = side === "left" ? x - 14 : side === "right" ? x + 14 : x;
+          const ty = side === "above" ? y - 18 : side === "below" ? y + 36 : y + 9;
+          const anchor = side === "left" ? "end" : side === "right" ? "start" : "middle";
+          return (<g class="dc-map-pin" style={`--i:${i}`}><circle cx={x} cy={y} r="7" /><text x={tx} y={ty} text-anchor={anchor}>{p.text}</text></g>);
+        })}
+      </svg>
+    </figure>
 
     <ol class="dc-roster" aria-label="Distribution centres, west to east">
       {DCS.map((d, i) => (
@@ -68,6 +86,15 @@ const stats = [
   .net-tel { grid-column: 1 / -1; }
   .net-heading { grid-column: 1 / -1; font-size: clamp(2.2rem, 5.4vw, 5.4rem); max-width: none; margin-top: 1rem; }
   .net-copy { grid-column: 1 / -1; margin-top: 1rem; }
+
+  .dc-map-sm { grid-column: 1 / -1; margin: 2.5rem 0 0; }
+  .dc-map-sm { position: relative; }
+  .dc-map-sm img { display: block; width: 100%; height: auto; filter: drop-shadow(0 18px 28px color-mix(in oklch, var(--storm) 22%, transparent)); }
+  .dc-map-labels { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  /* SVG units: the 816-wide viewBox renders at ~350px on a phone, so 24 units ≈ 10px */
+  .dc-map-pin circle { fill: var(--accent); stroke: var(--bg); stroke-width: 3; }
+  .dc-map-pin text { font-family: var(--font-mono); font-size: 24px; letter-spacing: 0.08em; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 7px; stroke-linejoin: round; }
+  @media (min-width: 900px) { .dc-map-sm { display: none; } }
 
   /* Roster: a ledger of cities, west → east, matching the pins on the map */
   .dc-roster {

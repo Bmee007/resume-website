@@ -3,5 +3,8 @@
   "brain": "brain.glb",
   "warehouse": "warehouse.glb",
   "truck": "truck.glb",
-  "canada": "canada.glb"
+  "canada": "canada.glb",
+  "pills": "pills.glb",
+  "ledger": "ledger.glb",
+  "bot": "bot.glb"
 }

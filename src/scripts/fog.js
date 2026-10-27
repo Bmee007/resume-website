@@ -136,6 +136,7 @@ export function createFog(canvas) {
   // Live state (lerped) and target state (set by chapters)
   const s = FOG_SCENES.mist;
   const live = { a: [...s.a], b: [...s.b], density: s.density, horizon: s.horizon, glitch: 0, mouse: [0, 0] };
+  let densityBoost = 0; // added on top of the chapter density (Contact's clearing veil)
   const target = { a: [...s.a], b: [...s.b], density: s.density, horizon: s.horizon, mouse: [0, 0] };
 
   let dpr = 1;
@@ -156,7 +157,7 @@ export function createFog(canvas) {
     if (paused) return;
     const k = 0.045;
     for (let i = 0; i < 3; i++) { live.a[i] = lerp(live.a[i], target.a[i], k); live.b[i] = lerp(live.b[i], target.b[i], k); }
-    live.density = lerp(live.density, target.density, k);
+    live.density = lerp(live.density, target.density + densityBoost, k);
     live.horizon = lerp(live.horizon, target.horizon, k);
     live.mouse[0] = lerp(live.mouse[0], target.mouse[0], 0.03);
     live.mouse[1] = lerp(live.mouse[1], target.mouse[1], 0.03);
@@ -184,6 +185,8 @@ export function createFog(canvas) {
     /** Pulse chromatic aberration: 0..1, decays in render via GSAP tween outside. */
     glitch(v) { live.glitch = v; },
     setMouse(x, y) { target.mouse = [x, y]; },
+    /** Extra fog on top of the chapter preset, 0..1 (the Contact veil scrubs this to 0). */
+    setDensityBoost(v) { densityBoost = Math.max(0, v || 0); },
     pause() { paused = true; },
     resume() { paused = false; },
     state: live,

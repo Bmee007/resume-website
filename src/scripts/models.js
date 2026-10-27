@@ -142,18 +142,20 @@ export function canadaPlan() {
 export function canadaPins() {
   const { pins } = canadaPlan();
   const P = [];
-  const H = 0.13;
+  const H = 0.22;
   pins.forEach(({ xz: [x, z] }) => {
-    P.push(part(cyl(0.007, 0.007, H), { p: [x, H / 2, z], shade: 0.2 }));
-    P.push(part(new THREE.SphereGeometry(0.022, 16, 12), { p: [x, H, z], shade: 0.15 }));
+    P.push(part(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 32), { p: [x, 0.05, z], shade: 0.95 }));          // halo disc on the slab
+    P.push(part(new THREE.TorusGeometry(0.075, 0.009, 10, 40), { p: [x, 0.056, z], r: [Math.PI / 2, 0, 0], shade: 0.15 }));
+    P.push(part(cyl(0.012, 0.016, H), { p: [x, 0.05 + H / 2, z], shade: 0.2 }));
+    P.push(part(new THREE.SphereGeometry(0.042, 20, 14), { p: [x, 0.05 + H, z], shade: 0.15 }));
   });
   const pts = [];
   for (let i = 0; i < pins.length; i++) {
-    const [x, z] = pins[i].xz; pts.push(new THREE.Vector3(x, H, z));
-    if (i < pins.length - 1) { const [nx, nz] = pins[i + 1].xz; pts.push(new THREE.Vector3((x + nx) / 2, H + 0.07, (z + nz) / 2)); }
+    const [x, z] = pins[i].xz; pts.push(new THREE.Vector3(x, 0.05 + H, z));
+    if (i < pins.length - 1) { const [nx, nz] = pins[i + 1].xz; pts.push(new THREE.Vector3((x + nx) / 2, 0.05 + H + 0.09, (z + nz) / 2)); }
   }
-  P.push(part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 96, 0.007, 8, false), { shade: 0.3 }));
-  const labels = pins.map((p) => ({ text: p.city.toUpperCase(), pos: [p.xz[0], H + 0.07, p.xz[1]] }));
+  P.push(part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 96, 0.011, 8, false), { shade: 0.3 }));
+  const labels = pins.map((p) => ({ text: p.city.toUpperCase(), pos: [p.xz[0], 0.05 + H + 0.1, p.xz[1]] }));
   return { parts: P, labels };
 }
 

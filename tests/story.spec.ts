@@ -133,3 +133,51 @@ test("NETWORK-02 — network chapter credits Dynamics 365 as the larger integrat
   await expect(page.locator("#network .net-copy")).toContainText("Dynamics 365 was the larger integration");
   expect(await page.locator("#network .dc .sys--erp").count()).toBe(7);
 });
+
+test("MAP-01 — the Canada map carries the seven distribution-centre pins and labels", async ({ page }) => {
+  await openHome(page);
+  const small = (await page.viewportSize())!.width < 900;
+  await jumpTo(page, "#network .dc-roster");
+  if (small) {
+    // Phones draw the map in flow beside the roster
+    const img = page.locator("#network .dc-map-sm img");
+    await expect(img).toBeVisible();
+    expect(await img.evaluate((el: HTMLImageElement) => el.naturalWidth)).toBeGreaterThan(0);
+  } else {
+    await expect(page.locator("#network")).toHaveAttribute("data-lattice-then-at", ".dc-roster");
+    await page.waitForFunction(() => document.querySelectorAll("#lattice-labels .lat-label").length >= 7, null, { timeout: 15_000 });
+    const cities = await page.locator("#lattice-labels .lat-label").allTextContents();
+    for (const c of ["DELTA", "CALGARY", "REGINA", "WINNIPEG", "TORONTO", "MONTREAL", "MONCTON"]) expect(cities).toContain(c);
+  }
+});
+
+test("MODELS-02 — chapters carry the computer, bot, handshake, ledger and pharma objects; nothing after the record", async ({ page }) => {
+  await openHome(page);
+  await expect(page.locator("#about")).toHaveAttribute("data-lattice", "computer");
+  await expect(page.locator("#ask")).toHaveAttribute("data-lattice", "bot");
+  await expect(page.locator("#change")).toHaveAttribute("data-lattice", "handshake");
+  await expect(page.locator("#experience")).toHaveAttribute("data-lattice", "ledger");
+  await expect(page.locator("#experience")).toHaveAttribute("data-lattice-then", "pills");
+  await expect(page.locator("#projects")).toHaveAttribute("data-lattice", "off");
+  await expect(page.locator("#contact")).toHaveAttribute("data-lattice", "off");
+});
+
+test("VEIL-01 — the contact fog is dense on arrival and clears as the chapter fills the screen", async ({ page }) => {
+  await openHome(page);
+  const veil = page.locator("#contact .fog-veil");
+  await expect(veil).toHaveCount(1);
+  const opacityAt = async (fraction: number) => {
+    await page.evaluate((f) => {
+      const el = document.querySelector("#contact")!;
+      const y = el.getBoundingClientRect().top + window.scrollY - window.innerHeight * f;
+      window.scrollTo({ top: y, behavior: "auto" });
+      (window as unknown as { __ST?: { update: () => void } }).__ST?.update();
+    }, fraction);
+    await page.waitForTimeout(900);
+    return veil.evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+  };
+  const early = await opacityAt(0.8);
+  const late = await opacityAt(0.1);
+  expect(early).toBeGreaterThan(0.7);
+  expect(late).toBeLessThan(0.15);
+});

@@ -203,3 +203,21 @@ Illumi: similes banned outright, no unrelated stats.
 - Work track end padding +1.5rem so the rail no longer overprints the last panel's caption.
 - Gate "Enter without sound" button is 44px tall.
 - Illumi: instructions lock first-person singular, forbid invented incidents ("not documented" fallback), append a KPI only for results questions; the metric label rule names 99.7% a pick-accuracy level. Saved Q&A rewritten against agent-data.md only.
+
+### Pass 13 — new story objects, map pins, the clearing veil (2026-10-26)
+Request: more 3D models (an Rx pill bottle, an AI bot for Ask Illumi, people interacting with technology for
+Change, an object for Record), the Canada map showing the seven DC locations when the city roster is shown,
+no models after Record, and a heavy-to-light fog that clears over Contact.
+- Objects, in morph order (`src/scripts/states.js`, shared by scene3d / stills / chapters): truck, computer,
+  warehouse, canada, brain, pills, bot, people, ledger. Models without a procedural stand-in appear when their
+  GLB lands (preloaded 2.5 screens ahead).
+- Assignments: Hero brain · Manifesto truck · Origin **pills** (Kohl & Frisch is pharma) · Network warehouse →
+  canada keyed to the roster (`data-lattice-then-at=".dc-roster"`, 85vh → 40vh) · Intelligence **bot** · Change
+  **handshake** (human hand + robot hand; the people-at-a-laptop scene was rejected) · Record **ledger** (open journal + pen = the record) · Work off · Contact off.
+- Pins: halo disc + ring on the slab, taller shaft, bigger head, thicker route; labels lifted. Phones get the
+  map in flow beside the roster (`.dc-map-sm`): the Canada still now includes the pins, and
+  `tools/render-stills.cjs` exports projected pin positions (`still/canada-pins.json`, % of the trimmed image)
+  which the figure draws as an SVG label overlay. `tools/trim-stills.py` replaces the inline crop snippet.
+- Contact veil (`motion/veil.js`, `.fog-veil`): a blurred mist layer with three drifting blobs over the chapter,
+  opacity 1 → 0 scrubbed from section top at 88vh to 12vh (power2.in, so it holds then clears); the WebGL fog
+  density gets a matching boost (`fog.setDensityBoost`). Reduced motion: no veil.

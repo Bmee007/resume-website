@@ -61,7 +61,7 @@
 
 /* Dark chapters invert the ink and carry a storm tint so text contrast is real, not fog-dependent */
 section[data-tone="dark"] {
-  background: oklch(0.2 0.03 245 / 0.86);
+  background: oklch(0.2 0.03 245 / 0.86); /* dark enough for AA contrast on the mono labels; the object is lifted instead (scene3d dark clay) */
   /* feather the top and bottom edges so the storm tint rolls in like weather, not a band */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 18vh, black calc(100% - 18vh), transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, black 18vh, black calc(100% - 18vh), transparent 100%);
@@ -186,6 +186,7 @@ body::after {
   background: var(--line-2);
 }
 .telemetry .ch { color: var(--accent); }
+section[data-tone="dark"] .telemetry .ch, [data-tone="dark"] .telemetry .ch { color: oklch(0.80 0.07 245); } /* the accent needs lifting on the storm tint to pass contrast */
 
 /* Big ghost chapter number (hairline stroke, like a survey marker) */
 .chapter-mark {

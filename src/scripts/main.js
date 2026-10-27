@@ -4,6 +4,7 @@ import { initBackdrop } from './motion/backdrop.js';
 import { runLoader } from './motion/loader.js';
 import { initHero } from './motion/hero.js';
 import { initChapters } from './motion/chapters.js';
+import { initVeil } from './motion/veil.js';
 import { initSplitReveals, initBlockReveals, initScrambles, initCounters, initRules } from './motion/reveals.js';
 import { initMagnetic, initNavScramble } from './motion/magnetic.js';
 import { initWork } from './motion/work.js';
@@ -24,6 +25,7 @@ export async function boot() {
   await runLoader();
   initHero();
   initChapters();
+  initVeil();
   initSplitReveals();
   initBlockReveals();
   initScrambles();

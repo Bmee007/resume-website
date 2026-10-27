@@ -3,8 +3,7 @@
 // lattice morph/position, the progress rail, and a glitch pulse on entry.
 import { gsap, ScrollTrigger, reduced } from './core.js';
 import { getFog, getLattice, glitchPulse, setLatticeInk } from './backdrop.js';
-
-const LATTICE_INDEX = { truck: 0, computer: 1, warehouse: 2, canada: 3, brain: 4 };
+import { LATTICE_INDEX } from '../states.js';
 
 export function initChapters() {
   const sections = Array.from(document.querySelectorAll('section[data-scene]'));
@@ -81,9 +80,14 @@ export function initChapters() {
         ? pose(d.latticeThen, num(d.latticeThenCx, next.cx), num(d.latticeThenCy, next.cy), num(d.latticeThenScale, next.scale), num(d.latticeThenRx, next.rotX), num(d.latticeThenRy, next.rotY), next.opacity)
         : null;
       // entry line: the chapter's top must have risen past the object's top edge (in viewport heights)
-      const e0 = off ? 0.95 : Math.max(0.12, Math.min(0.95, next.cy - next.scale * 0.33));
+      // entry line in viewport heights; data-lattice-enter overrides the derived one (e.g. to wait for a heading to pass)
+      const e0 = off ? 0.25 : d.latticeEnter !== undefined ? Math.max(0.05, Math.min(0.95, parseFloat(d.latticeEnter))) : Math.max(0.12, Math.min(0.95, next.cy - next.scale * 0.33));
       const e1 = Math.max(0, e0 - 0.2);
-      chapters.push({ el: s, next, then, e0, e1, ghost: !off && next.opacity < 0.7 });
+      // data-lattice-then-at="<selector>": the second model assembles as that element rises into view
+      const thenAt = then && d.latticeThenAt ? s.querySelector(d.latticeThenAt) : null;
+      // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
+      const exitAt = d.latticeExit !== undefined ? parseFloat(d.latticeExit) : null;
+      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, ghost: !off && next.opacity < 0.7 });
       prev = then || next;
     });
     const update = () => {
@@ -91,11 +95,14 @@ export function initChapters() {
       let owner = chapters[0];
       for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
       const r = owner.el.getBoundingClientRect(); const top = r.top / vh, bottom = r.bottom / vh;
-      const { next, then, e0, e1, ghost } = owner;
+      const { next, then, thenAt, e0, e1, exitAt, ghost } = owner;
       const tIn = smooth((e0 - top) / (e0 - e1));
-      const tThen = then ? smooth((0 - top) / 0.6) : 0;                                   // in-chapter second model: top → −60vh
+      const tThen = !then ? 0
+        : thenAt ? smooth((0.85 - thenAt.getBoundingClientRect().top / vh) / 0.45)        // keyed element: 85vh → 40vh
+        : smooth((0 - top) / 0.6);                                                        // else chapter top → −60vh
       const tOut = owner === chapters[chapters.length - 1] ? 0
-        : (ghost || small) ? smooth((-top - (small ? 0.1 : 0.2)) / 0.3)                  // ghosts (and phones) leave once the heading has passed
+        : (exitAt !== null && !small) ? smooth((-top - exitAt) / 0.3)                    // chapter-specified exit line
+        : ((ghost && !then) || small) ? smooth((-top - (small ? 0.1 : 0.2)) / 0.3)       // single-model ghosts (and phones) leave once the heading has passed
         : smooth((0.6 - bottom) / 0.35);                                                  // hero-size objects leave with the chapter's last content
       const st = lattice.state;
       if (then && tThen > 0) {

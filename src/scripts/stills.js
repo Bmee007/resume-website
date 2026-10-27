@@ -3,7 +3,7 @@
 // scene3d (morph / cx / cy / scale / opacity / intro / ink / glow), so the chapter director is unchanged.
 // Crossfade between images with a soft blur so chapter changes still feel like a dissolve.
 
-const STATES = ['truck', 'computer', 'warehouse', 'canada', 'brain'];
+import { STATES } from './states.js';
 
 export function createStills(layer) {
   const imgs = {};

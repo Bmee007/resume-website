@@ -5,9 +5,11 @@ import Icon from "./Icon.astro";
 <section
   id="contact" class="chapter contact"
   data-scene="mist" data-tone="light" data-chapter="07" data-label="Contact"
-  data-lattice="brain" data-lattice-cx="0.3" data-lattice-cy="0.8" data-lattice-scale="0.26" data-lattice-opacity="0.6" data-lattice-rx="0.3"
+  data-lattice="off"
 >
   <span class="chapter-mark" aria-hidden="true">07</span>
+  <!-- The fog: dense on arrival, cleared by scrolling (motion/veil.js) -->
+  <div class="fog-veil" aria-hidden="true"><span class="veil-layer veil-a"></span><span class="veil-layer veil-b"></span><span class="veil-layer veil-c"></span></div>
 
   <div class="wrap grid-12">
     <div class="contact-left">
@@ -65,7 +67,14 @@ import Icon from "./Icon.astro";
 </section>
 
 <style>
-  .contact { padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
+  .contact { position: relative; padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
+  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); will-change: opacity; }
+  .veil-layer { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; filter: blur(60px); background: radial-gradient(closest-side, color-mix(in oklch, white 70%, var(--bg)) 0%, transparent 72%); animation: veil-drift 22s var(--ease-in-out) infinite alternate; }
+  .veil-a { left: -25vmax; top: -30vmax; }
+  .veil-b { right: -30vmax; top: 10vmax; animation-duration: 27s; animation-delay: -9s; background: radial-gradient(closest-side, color-mix(in oklch, var(--storm) 28%, white) 0%, transparent 72%); }
+  .veil-c { left: 20vmax; bottom: -45vmax; animation-duration: 31s; animation-delay: -17s; }
+  @keyframes veil-drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(12vmax, -8vmax, 0) scale(1.18); } }
+  @media (prefers-reduced-motion: reduce) { .fog-veil { display: none; } }
   @media (min-width: 900px) { .contact { padding-top: 7rem; } }
   .contact-left { grid-column: 1 / -1; display: grid; gap: 1.5rem; align-content: start; }
   .contact-heading { font-size: clamp(2.6rem, 7vw, 7rem); max-width: 10ch; }
