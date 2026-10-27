@@ -8,6 +8,10 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 
 export { THREE, LoftGeometry, RoundedBoxGeometry, mergeGeometries, mergeVertices, toCreasedNormals };
 export const parts = [];
+// Material tag of each part (parallel to `parts`); set with setMat() before adding a group of parts.
+export const partMats = [];
+let CUR = 'cab';
+export const setMat = (m) => { CUR = m; };
 export const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
 export const V2 = (x, y) => new THREE.Vector2(x, y);
 export const T = (x = 0, y = 0, z = 0) => new THREE.Matrix4().makeTranslation(x, y, z);
@@ -54,7 +58,7 @@ export function add(g, m) {
   if (!g.attributes.normal) g.computeVertexNormals();
   if (g.index) g = g.toNonIndexed();
   if (MIR) { g.applyMatrix4(MIR); flipWinding(g); }
-  parts.push(g);
+  parts.push(g); partMats.push(CUR);
   return g;
 }
 // Run fn(side) for the left (+1) frame and then the mirrored right (-1) frame.

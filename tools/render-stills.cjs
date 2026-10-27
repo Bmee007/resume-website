@@ -23,7 +23,7 @@ const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 50); cam.position.set(0, 0, 
 const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
 const gltf = await loader.loadAsync(url); const rootObj = gltf.scene;
 if (url.includes('canada')) { const pins = canadaPins(); const pg = mergeGeometries(pins.parts.map((g) => (g.index ? g.toNonIndexed() : g)), false); const pm = new THREE.Mesh(pg); rootObj.add(pm); } // city pins + route, as the site draws them
-rootObj.traverse((o) => { if (o.isMesh) o.material = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(0.64, 0.7, 0.77), roughness: 0.58, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.4, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1) }); });
+rootObj.traverse((o) => { if (o.isMesh) { const c0 = o.material && o.material.color ? o.material.color : { r: 0.8, g: 0.8, b: 0.8 }; const L = Math.min(1, Math.max(0.12, 0.2126 * c0.r + 0.7152 * c0.g + 0.0722 * c0.b)); const g = 0.1 + 0.7 * L; /* same part-colour mapping as the live loader */ o.material = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(g * 0.92, g, g * 1.1), roughness: 0.58, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.4, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1) }); } });
 const box = new THREE.Box3().setFromObject(rootObj); const size = new THREE.Vector3(); box.getSize(size); const c = new THREE.Vector3(); box.getCenter(c);
 const g = new THREE.Group(); g.add(rootObj); if (!url.includes('canada')) { rootObj.position.sub(c); g.scale.setScalar(2.8 / Math.max(size.x, size.y, size.z)); }
 g.scale.multiplyScalar(0.95); g.rotation.set(rx, ry, 0); scene.add(g); r.render(scene, cam); g.updateMatrixWorld(true);

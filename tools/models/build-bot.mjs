@@ -6,10 +6,15 @@
 // and the chest ring are real geometry that reads in a single clay material. Surfaces are meshed with an adaptive
 // restricted quadtree (refined where the surface bends or its normal turns), with analytic vertex normals.
 //
-// Pipeline (final GLB: ~119k tris, ~1.39 MB). The last two steps are NOT optional, see renormal.mjs / pack-glb.mjs:
+// Materials: 12 glTF materials (shell, glass, lens, joint, screen, bezel, vent, pad, port, three shadow bands), one mesh
+// each. The site turns each base colour's luminance into a per-part grey, so this is how the bot gets tonal parts.
+// Regions are carved by per-surface `tag` functions evaluated on the same charts as the displacement fields, and the
+// adaptive mesher splits cells on material borders so colour edges follow the features.
+//
+// Pipeline (final GLB: ~116k tris, ~1.34 MB). The last two steps are NOT optional, see renormal.mjs / pack-glb.mjs:
 //   node tools/models/build-bot.mjs /tmp/bot-raw.glb
-//   npx -y @gltf-transform/cli simplify --ratio 0.62 --error 0.0003 /tmp/bot-raw.glb /tmp/bot-s.glb
-//   node tools/models/renormal.mjs /tmp/bot-s.glb /tmp/bot-n.glb   # inward winding + one near-to-far-sorted mesh
+//   npx -y @gltf-transform/cli simplify --ratio 0.6 --error 0.0003 --lock-border true /tmp/bot-raw.glb /tmp/bot-s.glb
+//   node tools/models/renormal.mjs /tmp/bot-s.glb /tmp/bot-n.glb   # inward winding + near-to-far sort per material
 //   node tools/models/pack-glb.mjs /tmp/bot-n.glb public/models/bot.glb   # order-preserving meshopt, 14/10-bit
 // (pack-glb needs: npm i --no-save @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions meshoptimizer)
 //
@@ -24,7 +29,7 @@
 // 10 bit instead of the default 8-bit octahedral.
 // Debug: VERBOSE=1 prints per-part triangle counts; PART=head,neck exports a subset.
 import * as THREE from '/Users/borinakeo/resume-website/node_modules/three/build/three.module.js';
-import { mergeGeometries, mergeVertices } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeVertices } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
 import { GLTFExporter } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/exporters/GLTFExporter.js';
 import fs from 'node:fs';
 
@@ -56,6 +61,16 @@ const groove = (sd, w, depth) => { const t = Math.abs(sd) / (w / 2); return t >=
 // raised dome inside radius r (negative displacement = outward); sd is the signed distance to the circle
 const dome = (sd, r, h) => { if (sd >= 0) return 0; const t = (sd + r) / r; return -h * Math.sqrt(Math.max(0, 1 - t * t)); };
 
+// ---- materials ---------------------------------------------------------------
+// glTF base colours as grey luminance L (linear). The site's loader (src/scripts/models.js) maps L (clamped 0.12..1)
+// to a per-part grey 0.28 + 0.48 L, so L 1.0 -> 0.76 (bright shell) and L 0.1 -> 0.34 (near-black glass). The site's
+// clearcoat/rim light washes dark parts toward mid grey, so the dark and light ends are pushed to the clamp limits.
+const MAT = { SHELL: 0, GLASS: 1, LENS: 2, JOINT: 3, SCREEN: 4, BEZEL: 5, VENT: 6, PAD: 7, PORT: 8, SHADOW: 9, SHADOW2: 10, SHADOW3: 11 };
+const MAT_DEF = [
+  ['shell', 1.0], ['glass', 0.1], ['lens', 1.0], ['joint', 0.28], ['screen', 0.12],
+  ['bezel', 0.5], ['vent', 0.15], ['pad', 0.2], ['port', 0.12], ['shadow', 0.12], ['shadow-mid', 0.2], ['shadow-edge', 0.3],
+];
+
 // ---- mesh builders ----------------------------------------------------------
 // Adaptive parametric surface: a restricted quadtree over (u, v) in [0,1]^2 (v wraps around) that splits a cell
 // whenever the true surface deviates from the bilinear patch through its corners by more than `eps` mm, OR whenever
@@ -64,7 +79,7 @@ const dome = (sd, r, h) => { if (sd >= 0) return 0; const t = (sd + r) / r; retu
 // site's glossy clearcoat). Vertex normals are the analytic surface normals (central differences of the surface
 // function), not averages of the adaptive triangles around them. Hanging nodes are stitched crack-free with an
 // ear-clipped polygon. Returns an indexed BufferGeometry with outward winding and normals.
-function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, stencilMM = 0.7, maxAngle = 4 } = {}) {
+function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, stencilMM = 0.7, maxAngle = 4, tag = null, mat = MAT.SHELL } = {}) {
   const leaves = new Map(); const key = (l, i, j) => l + ',' + i + ',' + j;
   const cellsU = (l) => cols << l, cellsV = (l) => rows << l;
   const uv = (l, i, j) => [i / cellsU(l), j / cellsV(l)];
@@ -107,6 +122,10 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
       for (let k = 0; k < 3; k++) { const bl = (1 - s) * (1 - t) * c00[k] + s * (1 - t) * c10[k] + (1 - s) * t * c01[k] + s * t * c11[k]; err += (p[k] - bl) ** 2; }
       if (err > eps * eps) return true;
     }
+    if (tag) { // split where the material region boundary crosses the cell, so colour edges follow the feature
+      const t0 = tag(u0, v0);
+      for (let a = 0; a <= 4; a++) for (let b = 0; b <= 4; b++) if (tag(u0 + ((u1 - u0) * a) / 4, v0 + ((v1 - v0) * b) / 4) !== t0) return true;
+    }
     return normalsDeviate(u0, v0, u1, v1);
   };
   const split = (l, i, j) => { leaves.delete(key(l, i, j)); const out = []; for (const di of [0, 1]) for (const dj of [0, 1]) { const c = [l + 1, 2 * i + di, 2 * j + dj]; leaves.set(key(...c), c); out.push(c); } return out; };
@@ -133,7 +152,7 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
   if (process.env.VERBOSE) { const h = []; for (const [l] of leaves.values()) h[l] = (h[l] || 0) + 1; console.error('  leaves/level', JSON.stringify(h)); }
   // triangulate with doubled integer keys (cell centres need half steps)
   const NU = cellsU(maxLevel) * 2, NV = cellsV(maxLevel) * 2;
-  const verts = new Map(); const pos = []; const nrm = []; const idx = [];
+  const verts = new Map(); const pos = []; const nrm = []; const idx = []; const tags = [];
   const vtx = (I, J) => { J = ((J % NV) + NV) % NV; const k = I * NV + J; let id = verts.get(k); if (id === undefined) { id = pos.length / 3; const p = P(I / NU, J / NV); const n = N(I / NU, J / NV) || [0, 0, 0]; pos.push(p[0], p[1], p[2]); nrm.push(n[0], n[1], n[2]); verts.set(k, id); } return id; };
   for (const [l, i, j] of leaves.values()) {
     const step = 2 << (maxLevel - l); const I0 = i * step, J0 = j * step, I1 = I0 + step, J1 = J0 + step, Im = I0 + step / 2, Jm = J0 + step / 2;
@@ -144,15 +163,17 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
     ring.push([I1, J0]); if (finer(u1 + du, (v0 + v1) / 2)) ring.push([I1, Jm]);
     ring.push([I1, J1]); if (finer((u0 + u1) / 2, v1 + dv)) ring.push([Im, J1]);
     ring.push([I0, J1]); if (finer(u0 - du, (v0 + v1) / 2)) ring.push([I0, Jm]);
-    earClip(ring.map(([I, J]) => ({ I, J, id: vtx(I, J) })), pos, idx);
+    earClip(ring.map(([I, J]) => ({ I, J, id: vtx(I, J) })), pos, (a, b, c) => {
+      idx.push(a.id, b.id, c.id); tags.push(tag ? tag((a.I + b.I + c.I) / 3 / NU, (a.J + b.J + c.J) / 3 / NV) : mat);
+    });
   }
-  return finishSurface(pos, idx, nrm);
+  return finishSurface(pos, idx, nrm, tags);
 }
 
 // Triangulate a convex (in uv) cell ring that may carry collinear hanging nodes. Clips strictly convex corners only,
 // picking the best-shaped triangle first, so no zero-area slivers are produced (a corner fan makes
 // corner/midpoint/corner collinear triples, whose faces flip or collapse under quantisation and show as dark flecks).
-function earClip(ring, pos, idx) {
+function earClip(ring, pos, emit) {
   const quality = (a, b, c) => {
     const ax = pos[3 * a], ay = pos[3 * a + 1], az = pos[3 * a + 2], bx = pos[3 * b], by = pos[3 * b + 1], bz = pos[3 * b + 2], cx = pos[3 * c], cy = pos[3 * c + 1], cz = pos[3 * c + 2];
     const ux = bx - ax, uy = by - ay, uz = bz - az, vx = cx - ax, vy = cy - ay, vz = cz - az;
@@ -169,16 +190,16 @@ function earClip(ring, pos, idx) {
       const sc = quality(p.id, c.id, q.id); if (sc > bestQ) { bestQ = sc; best = k; }
     }
     if (best < 0) best = 0; // cannot happen for a convex ring; keeps the loop finite
-    const n2 = r.length; idx.push(r[(best + n2 - 1) % n2].id, r[best].id, r[(best + 1) % n2].id); r.splice(best, 1);
+    const n2 = r.length; emit(r[(best + n2 - 1) % n2], r[best], r[(best + 1) % n2]); r.splice(best, 1);
   }
-  idx.push(r[0].id, r[1].id, r[2].id);
+  emit(r[0], r[1], r[2]);
 }
 
 // Weld by position, drop degenerate faces, orient the shell outward (positive signed volume) and finish the normals:
 // analytic surface normals where available (flipped together with the winding), angle-weighted mesh normals at
 // poles. Consistent outward winding matters: the site's double-sided material flips the normal of every back face,
 // so any face wound against its neighbours renders as a dark fleck.
-function finishSurface(pos, idx, nrm) {
+function finishSurface(pos, idx, nrm, tags) {
   const map = new Map(); const remap = new Int32Array(pos.length / 3); const P = []; const Nn = [];
   for (let i = 0; i < pos.length; i += 3) {
     const k = `${Math.round(pos[i] * 1e3)},${Math.round(pos[i + 1] * 1e3)},${Math.round(pos[i + 2] * 1e3)}`; let id = map.get(k);
@@ -186,10 +207,10 @@ function finishSurface(pos, idx, nrm) {
     else if (Nn[3 * id] === 0 && Nn[3 * id + 1] === 0 && Nn[3 * id + 2] === 0) { Nn[3 * id] = nrm[i]; Nn[3 * id + 1] = nrm[i + 1]; Nn[3 * id + 2] = nrm[i + 2]; }
     remap[i / 3] = id;
   }
-  let keep = []; let vol = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+  let keep = []; const keepTags = []; let vol = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
   for (let t = 0; t < idx.length; t += 3) {
     const a = remap[idx[t]], b = remap[idx[t + 1]], c = remap[idx[t + 2]]; if (a === b || b === c || a === c) continue;
-    keep.push(a, b, c); A.fromArray(P, 3 * a); B.fromArray(P, 3 * b); C.fromArray(P, 3 * c); vol += A.dot(B.clone().cross(C));
+    keep.push(a, b, c); keepTags.push(tags[t / 3]); A.fromArray(P, 3 * a); B.fromArray(P, 3 * b); C.fromArray(P, 3 * c); vol += A.dot(B.clone().cross(C));
   }
   if (vol < 0) { for (let t = 0; t < keep.length; t += 3) { const x = keep[t + 1]; keep[t + 1] = keep[t + 2]; keep[t + 2] = x; } for (let i = 0; i < Nn.length; i++) Nn[i] = -Nn[i]; }
   const g = new THREE.BufferGeometry();
@@ -197,6 +218,7 @@ function finishSurface(pos, idx, nrm) {
   const mesh = angleWeightedNormals(P, keep); // fallback where the analytic normal is undefined (poles)
   for (let i = 0; i < Nn.length; i += 3) if (Nn[i] === 0 && Nn[i + 1] === 0 && Nn[i + 2] === 0) { Nn[i] = mesh[i]; Nn[i + 1] = mesh[i + 1]; Nn[i + 2] = mesh[i + 2]; }
   g.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3));
+  g.userData.tags = keepTags; // material id per triangle
   return g;
 }
 
@@ -232,7 +254,9 @@ function lathe(profile, cols, rows, disp = () => 0, opts = {}) {
     const rr = r - d * nr, yy = y - d * ny;
     return [rr * Math.sin(th), yy, rr * Math.cos(th)];
   };
-  return adaptiveSurface(evalP, { cols, rows, ...opts });
+  const { tag, ...rest } = opts; // tag(theta, y, r) -> material id, evaluated on the undisplaced surface
+  const tagAt = tag ? (u, v) => { const f = clamp(u, 0, 1) * NS; const i = Math.min(NS - 1, Math.floor(f)); const a = f - i; const p = pts[i], q = pts[i + 1]; return tag(v * TAU, p.y + (q.y - p.y) * a, Math.max(0, p.x + (q.x - p.x) * a)); } : null;
+  return adaptiveSurface(evalP, { cols, rows, ...rest, tag: tagAt });
 }
 
 // Ellipsoid (radii rx, ry, rz) with displacement along its true normal. disp(dir, p) where dir is the unit
@@ -246,7 +270,9 @@ function ellipsoid(rx, ry, rz, cols, rows, disp = () => 0, opts = {}) {
     const d = disp(dir, p);
     return [p[0] - d * n[0], p[1] - d * n[1], p[2] - d * n[2]];
   };
-  return adaptiveSurface(evalP, { cols, rows, ...opts });
+  const { tag, ...rest } = opts; // tag(dir, p) -> material id, evaluated on the undisplaced surface
+  const tagAt = tag ? (u, v) => { const phi = u * Math.PI, th = v * TAU; const dir = [Math.sin(phi) * Math.sin(th), Math.cos(phi), Math.sin(phi) * Math.cos(th)]; return tag(dir, [rx * dir[0], ry * dir[1], rz * dir[2]]); } : null;
+  return adaptiveSurface(evalP, { cols, rows, ...rest, tag: tagAt });
 }
 
 const place = (g, { pos = [0, 0, 0], rot = [0, 0, 0], quat = null, scale = [1, 1, 1] } = {}) => {
@@ -254,8 +280,9 @@ const place = (g, { pos = [0, 0, 0], rot = [0, 0, 0], quat = null, scale = [1, 1
   g.applyMatrix4(new THREE.Matrix4().compose(new THREE.Vector3(...pos), q, new THREE.Vector3(...scale))); return g;
 };
 
-const parts = { body: [], neck: [], head: [], armL: [], armR: [] };
-const add = (part, g, xf) => parts[part].push(xf ? place(g, xf) : g);
+// Every surface is registered with a default material (per-triangle tags from a surface's `tag` win).
+const geoms = [];
+const add = (part, g, xf, mat) => { if (xf) place(g, xf); if (mat !== undefined) g.userData.tags = new Array(g.index.count / 3).fill(mat); geoms.push({ part, g }); };
 
 // =============================================================================
 // LAYOUT (world y, mm). Drive ring on the floor, bell pelvis, waist gap, tapered torso with a shoulder line,
@@ -279,11 +306,26 @@ const HEAD_CENTRE = [0, NECK_BALL[1] + 44, 10];
 {
   const ring = lathe([[0, 0], [96, 0], [116, 1], [124, 4], [126, 9], [125, 14], [118, RING_H - 1], [100, RING_H], [0, RING_H]], 3, 8,
     (th, y) => groove(y - 9, 2.6, 1.0), { maxLevel: 5 });
-  add('body', ring);
+  add('body', ring, undefined, MAT.JOINT);
   for (const a of [0, 120, -120]) {
     const pod = ellipsoid(24, 11, 18, 2, 4, () => 0, { maxLevel: 4 });
-    add('body', pod, { pos: [Math.sin(a * DEG) * 110, 9, Math.cos(a * DEG) * 110], rot: [0, a * DEG, 0] });
+    add('body', pod, { pos: [Math.sin(a * DEG) * 110, 9, Math.cos(a * DEG) * 110], rot: [0, a * DEG, 0] }, MAT.JOINT);
   }
+  // Soft contact shadow: a flat, three-band dark ellipse (dark core, mid, light feathered edge) just below the foot
+  // pods. A single-sided sheet. renormal.mjs inverts every winding and negates every normal, so it is generated
+  // wound facing down with normals pointing down/away from the camera; after the flip it is front-facing from above
+  // with a normal tilted toward the camera (0, 0.45, 0.9). Pointing straight up would be lit like a plate, and a
+  // down-facing normal gets the full fresnel rim at the site's grazing view, turning it pale blue.
+  const SEG = 96, bands = [[0, 108, MAT.SHADOW], [108, 142, MAT.SHADOW2], [142, 176, MAT.SHADOW3]];
+  const ringPts = (r) => Array.from({ length: SEG }, (_, k) => { const a = (k / SEG) * TAU; return [Math.sin(a) * r, 0, Math.cos(a) * r * 0.82 + 6]; });
+  const sp = [], sn = [], si = [], st = []; const radii = [0, 108, 142, 176]; let base = [];
+  radii.forEach((r, ri) => { base.push(sp.length / 3); if (ri === 0) { sp.push(0, 0, 6); sn.push(0, -0.45, -0.9); } else for (const q of ringPts(r)) { sp.push(...q); sn.push(0, -0.45, -0.9); } });
+  for (let k = 0; k < SEG; k++) { const k1 = (k + 1) % SEG;
+    si.push(base[0], base[1] + k1, base[1] + k); st.push(bands[0][2]); // winding faces down (reversed by renormal.mjs)
+    for (let b2 = 1; b2 < 3; b2++) { const a0 = base[b2] + k, a1 = base[b2] + k1, c0 = base[b2 + 1] + k, c1 = base[b2 + 1] + k1; si.push(a0, c1, c0, a0, a1, c1); st.push(bands[b2][2], bands[b2][2]); }
+  }
+  const shadow = new THREE.BufferGeometry(); shadow.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3)); shadow.setAttribute('normal', new THREE.Float32BufferAttribute(sn, 3)); shadow.setIndex(si); shadow.userData.tags = st;
+  add('body', shadow, { pos: [0, -3.2, 0] });
 }
 const pelvisProfile = [[0, 0], [60, 0], [100, 0], [112, 1.5], [119, 6], [122, 16], [120, 36], [114, 60], [100, 82], [86, 100], [74, 112], [66, 118], [60, 122], [40, 124], [0, 124]];
 function pelvisDisp(th, y, r) {
@@ -301,9 +343,16 @@ function pelvisDisp(th, y, r) {
   for (let k = 0; k < 4; k++) { const sd = sdRR(back * r, y - (58 + k * 7.5), 20, 1.3, 1.3); d += recess(sd, 1.6, 0.7); }
   return d;
 }
-add('body', lathe(pelvisProfile, 4, 8, pelvisDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5 }), { pos: [0, PELVIS_Y0, 0] });
+function pelvisTag(th, y, r) {
+  const front = wrap(th), back = wrap(th - Math.PI);
+  if (sdRR(back * r, y - 40, 12, 6, 4) < 0 || sdCircle(back * r - 30, y - 42, 7.5) < 0) return MAT.PORT;      // charging port + power button
+  if (sdRR(back * r, y - 69, 24, 14, 3) < 0) return MAT.VENT;                                                  // rear vent field
+  for (const k of [-1, 1]) if (sdRR(front * r - k * 42, y - 24, 12, 3.5, 2) < 0) return MAT.VENT;               // front bumper sensor slots
+  return MAT.SHELL;
+}
+add('body', lathe(pelvisProfile, 4, 8, pelvisDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5, tag: pelvisTag }), { pos: [0, PELVIS_Y0, 0] });
 // waist joint ring, sitting in the gap between pelvis and torso
-add('body', lathe([[0, 0], [50, 0], [58, 1.5], [62, 5], [62, 20], [58, 23], [50, 24], [0, 24]], 2, 4, (th, y) => groove(y - 12, 2.6, 0.9), { maxLevel: 5 }), { pos: [0, WAIST_Y - 8, 0] });
+add('body', lathe([[0, 0], [50, 0], [58, 1.5], [62, 5], [62, 20], [58, 23], [50, 24], [0, 24]], 2, 4, (th, y) => groove(y - 12, 2.6, 0.9), { maxLevel: 5 }), { pos: [0, WAIST_Y - 8, 0] }, MAT.JOINT);
 
 // =============================================================================
 // TORSO: tapered shell with a shoulder line, chest tablet, display ring, grille slots, mic ports, seams
@@ -331,7 +380,17 @@ function torsoDisp(th, y, r) {
   for (const s of [sideL, sideR]) { const sd = sdCircle(s * r, y - SHOULDER_LY, 38); d += recess(sd, 3, 4); d += groove(sd + 1, 2.6, 1.2); }
   return d;
 }
-add('body', lathe(torsoProfile, 4, 8, torsoDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5 }), { pos: [0, TORSO_Y0, 0], scale: [1, 1, TORSO_ZSCALE] });
+function torsoTag(th, y, r) {
+  const front = wrap(th), back = wrap(th - Math.PI), sideL = wrap(th - Math.PI / 2), sideR = wrap(th + Math.PI / 2);
+  { const sd = sdRR(front * r, y - 92, 38, 28, 7); if (sd < -4) return MAT.SCREEN; if (sd < 0.5) return MAT.BEZEL; } // chest tablet: dark screen in a mid bezel
+  { const dx = front * r, dy = y - 152; const sd = sdCircle(dx, dy, 12);                                         // indicator ring: lit core, dark disc, grey rim
+    if (sdCircle(dx, dy, 5.5) < 0) return MAT.LENS; if (sd < 0) return MAT.SCREEN; if (sd < 2.6) return MAT.JOINT; }
+  for (const sgn of [-1, 1]) if (sdRR(wrap(th - sgn * 34 * DEG) * r, y - 53, 12, 15, 3) < 0) return MAT.VENT;     // speaker grille fields
+  if (sdRR(back * r, y - 100, 32, 22, 8) < 0) return MAT.VENT;                                                  // rear vent field
+  for (const s of [sideL, sideR]) if (sdCircle(s * r, y - 126, 4.5) < 0 || sdCircle(s * r - 10, y - 126, 4.5) < 0) return MAT.VENT; // side mic ports
+  return MAT.SHELL;
+}
+add('body', lathe(torsoProfile, 4, 8, torsoDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5, tag: torsoTag }), { pos: [0, TORSO_Y0, 0], scale: [1, 1, TORSO_ZSCALE] });
 
 // =============================================================================
 // NECK: collar, core column with three separated ring joints, ball joint
@@ -340,12 +399,12 @@ add('body', lathe(torsoProfile, 4, 8, torsoDisp, { maxLevel: 6, eps: 0.3, maxAng
   const collar = lathe([[0, 0], [40, 0], [50, 1], [54, 4], [52, 8], [46, 11], [44, 15], [38, 17], [0, 17]], 2, 4, (th, y) => groove(y - 9.5, 2.2, 0.6), { maxLevel: 5 });
   add('neck', collar, { pos: [0, NECK_Y0 + 4, 6] });
   const core = lathe([[0, 0], [20, 0], [23, 1], [23, 44], [20, 45], [0, 45]], 2, 4, () => 0, { maxLevel: 4 });
-  add('neck', core, { pos: [0, NECK_Y0 + 14, 6] });
+  add('neck', core, { pos: [0, NECK_Y0 + 14, 6] }, MAT.JOINT);
   for (let k = 0; k < 3; k++) {
     const ring = lathe([[0, 0], [24, 0], [29, 1], [31, 3], [31, 6], [29, 8], [24, 9], [0, 9]], 2, 4, () => 0, { maxLevel: 4 });
-    add('neck', ring, { pos: [0, NECK_Y0 + 18 + k * 12, 6] });
+    add('neck', ring, { pos: [0, NECK_Y0 + 18 + k * 12, 6] }, MAT.JOINT);
   }
-  add('neck', ellipsoid(27, 27, 27, 2, 4, () => 0, { maxLevel: 4 }), { pos: NECK_BALL });
+  add('neck', ellipsoid(27, 27, 27, 2, 4, () => 0, { maxLevel: 4 }), { pos: NECK_BALL }, MAT.JOINT);
 }
 
 // =============================================================================
@@ -385,8 +444,21 @@ function headDisp(dir, p) {
   { const dx = wrap(u - Math.PI) * R * Math.cos(v); d += groove(dx, 2.0, 0.9) * sstep(-45 * DEG, -35 * DEG, v) * (1 - sstep(-6 * DEG, -2 * DEG, v)); d += groove(dx, 2.0, 0.9) * sstep(20 * DEG, 24 * DEG, v) * (1 - sstep(44 * DEG, 50 * DEG, v)); }
   return d;
 }
+// Material regions of the head (same charts as headDisp): near-black glass visor with a mid bezel lip, bright eye lens
+// domes, grey ear discs and rear sensor.
+function headTag(dir) {
+  const u = Math.atan2(dir[0], dir[2]); const v = Math.asin(clamp(dir[1], -1, 1)); const R = 64;
+  const U0 = 56 * DEG, V0 = 37 * DEG, n = 2.7; const vv = v - (-4 * DEG);
+  const sdV = (Math.pow(Math.pow(Math.abs(u / U0), n) + Math.pow(Math.abs(vv / V0), n), 1 / n) - 1) * U0 * R;
+  for (const s of [-1, 1]) { const dx = wrap(u - s * 0.27) * R * Math.cos(v), dy = (v - 0.04) * R; if (sdCircle(dx, dy, 5.2) < 0 && sdV < 0) return MAT.LENS; }
+  if (sdV < 0) return sdV > -4 ? MAT.BEZEL : MAT.GLASS;
+  { const dx = u * R * Math.cos(v), dy = (v - 45 * DEG) * R; if (sdCircle(dx, dy, 3.6) < 0) return MAT.GLASS; }          // forehead camera
+  for (const s of [-1, 1]) { const dx = wrap(u - s * Math.PI / 2) * R * Math.cos(v), dy = v * R; if (sdCircle(dx, dy, 13) < 0) return MAT.JOINT; } // ear discs
+  { const dx = wrap(u - Math.PI) * R * Math.cos(v), dy = (v - 8 * DEG) * R; if (sdCircle(dx, dy, 3) < 0) return MAT.GLASS; if (sdCircle(dx, dy, 11) < 0) return MAT.JOINT; } // rear sensor
+  return MAT.SHELL;
+}
 {
-  const head = ellipsoid(HEAD_R[0], HEAD_R[1], HEAD_R[2], 4, 8, headDisp, { maxLevel: 6, eps: 0.28, maxAngle: 5 });
+  const head = ellipsoid(HEAD_R[0], HEAD_R[1], HEAD_R[2], 4, 8, headDisp, { maxLevel: 6, eps: 0.28, maxAngle: 5, tag: headTag });
   // attentive: pitched 6 degrees down toward the viewer, a touch of roll and yaw toward the three-quarter camera
   const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(6 * DEG, -6 * DEG, 5 * DEG, 'YXZ'));
   const off = new THREE.Vector3(HEAD_CENTRE[0] - NECK_BALL[0], HEAD_CENTRE[1] - NECK_BALL[1], HEAD_CENTRE[2] - NECK_BALL[2]).applyQuaternion(q);
@@ -405,16 +477,20 @@ function pin(r, len) {
 }
 function phalanx(L, r0, r1, pad) {
   return lathe([[0, 0], [r0 * 0.7, 0], [r0, 1.5], [r0, L * 0.45], [r1, L - 2], [r1 * 0.7, L], [0, L]], 2, 4,
-    pad ? (th, y) => 1.3 * Math.max(0, Math.cos(th)) ** 2 * sstep(3, 8, y) * (1 - sstep(L - 2.5, L, y)) : () => 0, LV);
+    pad ? (th, y) => 1.3 * Math.max(0, Math.cos(th)) ** 2 * sstep(3, 8, y) * (1 - sstep(L - 2.5, L, y)) : () => 0,
+    pad ? { ...LV, maxLevel: 4, tag: (th, y) => (Math.cos(th) > 0.3 && y > 3 && y < L - 2 ? MAT.PAD : MAT.SHELL) } : LV);
 }
 function buildHand(side) {
   const parts = []; // [geometry, matrix]
-  const put = (g, pos, quat = new THREE.Quaternion(), scale = [1, 1, 1]) => parts.push(place(g, { pos: pos.toArray ? pos.toArray() : pos, quat, scale }));
+  const put = (g, pos, quat = new THREE.Quaternion(), scale = [1, 1, 1], mat) => {
+    if (mat !== undefined) g.userData.tags = new Array(g.index.count / 3).fill(mat);
+    parts.push(place(g, { pos: pos.toArray ? pos.toArray() : pos, quat, scale }));
+  };
   // palm: flattened ellipsoid with a plate seam on both faces
   const palm = ellipsoid(23, 28, 8, 3, 4, (dir, p) => {
     if (Math.abs(dir[2]) < 0.35) return 0;
     const sd = sdRR(p[0], p[1] - 2, 15, 19, 6); return groove(sd, 2.2, 0.8) + recess(sd, 0.4, 1.5);
-  }, { maxLevel: 4 });
+  }, { maxLevel: 4, tag: (dir, p) => (Math.abs(dir[2]) > 0.35 && sdRR(p[0], p[1] - 2, 15, 19, 6) < 0 ? MAT.BEZEL : MAT.SHELL) }); // palm plate
   put(palm, [0, 0, 0]);
   // wrist cuff joining the forearm
   put(lathe([[0, 0], [12, 0], [15, 1.5], [15, 10], [13, 12], [0, 12]], 2, 4, (th, y) => groove(y - 6, 2, 0.6), LV), [0, -30, 0]);
@@ -424,11 +500,11 @@ function buildHand(side) {
     const L1 = 27 * len, L2 = 21 * len;
     const q1 = new THREE.Quaternion().setFromEuler(new THREE.Euler(22 * DEG, 0, -fan, 'ZXY'));
     const K = new THREE.Vector3(x, 25, 0);
-    put(pin(5.3, 11.8), K, q1);
+    put(pin(5.3, 11.8), K, q1, undefined, MAT.JOINT);
     put(phalanx(L1, 4.9, 4.5, false), K, q1);
     const q2 = q1.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(26 * DEG, 0, 0)));
     const P = K.clone().add(new THREE.Vector3(0, L1, 0).applyQuaternion(q1));
-    put(pin(4.7, 10.6), P, q2);
+    put(pin(4.7, 10.6), P, q2, undefined, MAT.JOINT);
     put(phalanx(L2, 4.4, 3.8, true), P, q2);
   }
   // thumb: two phalanges from the palm base, pointing outward and toward the palm
@@ -436,12 +512,12 @@ function buildHand(side) {
     const T = new THREE.Vector3(side * 20, 0, 3);
     const dir1 = new THREE.Vector3(side * 0.82, 0.5, 0.28).normalize();
     const q1 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir1);
-    put(ellipsoid(6.4, 6.4, 6.4, 2, 4, () => 0, LV), T);
+    put(ellipsoid(6.4, 6.4, 6.4, 2, 4, () => 0, LV), T, undefined, undefined, MAT.JOINT);
     put(phalanx(21, 5.4, 4.9, false), T, q1);
     const P = T.clone().add(dir1.clone().multiplyScalar(18));
     const dir2 = new THREE.Vector3(side * 0.55, 0.55, 0.63).normalize();
     const q2 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir2);
-    put(pin(5, 11.2), P, q1);
+    put(pin(5, 11.2), P, q1, undefined, MAT.JOINT);
     put(phalanx(17, 4.7, 4.1, true), P, q2);
   }
   return parts;
@@ -460,7 +536,7 @@ function buildArm(part, side, upperDir, foreDir, palmNormal) {
   const qU = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), ua);
   add(part, upper, { pos: S.clone().add(ua.clone().multiplyScalar(-26)).toArray(), quat: qU });
   const E = S.clone().add(ua.clone().multiplyScalar(LU - 30));
-  add(part, ellipsoid(18, 18, 18, 2, 4, () => 0, { maxLevel: 4 }), { pos: E.toArray() });
+  add(part, ellipsoid(18, 18, 18, 2, 4, () => 0, { maxLevel: 4 }), { pos: E.toArray() }, MAT.JOINT);
   // forearm frame: Y along the forearm, Z = palm normal projected perpendicular to it
   const Y = fa.clone(); const pn = new THREE.Vector3(...palmNormal);
   const Z = pn.sub(Y.clone().multiplyScalar(Y.dot(pn))).normalize();
@@ -486,14 +562,29 @@ buildArm('armL', +1, [0.1, -0.95, 0.26], [0.14, 0.22, 0.96], [0.5, 1, 0]);
 const scene = new THREE.Scene();
 let tris = 0;
 const ONLY = process.env.PART ? process.env.PART.split(',') : null; // debug: PART=head node build-bot.mjs out.glb
-for (const [name, list] of Object.entries(parts)) {
-  if (ONLY && !ONLY.includes(name)) continue;
-  const merged = mergeGeometries(list, false);
-  tris += merged.index.count / 3;
-  if (process.env.VERBOSE) console.error(name, merged.index.count / 3);
-  const mesh = new THREE.Mesh(merged, new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.5, metalness: 0 }));
-  mesh.name = name; scene.add(mesh);
+// One mesh per material: bucket every surface's triangles by tag (vertices on a material border are duplicated into
+// both buckets with identical positions and normals, so shading stays continuous).
+const buckets = MAT_DEF.map(() => ({ pos: [], nrm: [], idx: [] }));
+for (const { part, g } of geoms) {
+  if (ONLY && !ONLY.includes(part)) continue;
+  const P = g.attributes.position, N = g.attributes.normal, ix = g.index.array, tg = g.userData.tags;
+  const maps = new Map();
+  const vert = (m, i) => {
+    const bk = buckets[m]; let mp = maps.get(m); if (!mp) { mp = new Map(); maps.set(m, mp); }
+    let id = mp.get(i); if (id === undefined) { id = bk.pos.length / 3; mp.set(i, id); bk.pos.push(P.getX(i), P.getY(i), P.getZ(i)); bk.nrm.push(N.getX(i), N.getY(i), N.getZ(i)); }
+    return id;
+  };
+  for (let t = 0; t < ix.length; t += 3) { const m = tg[t / 3]; buckets[m].idx.push(vert(m, ix[t]), vert(m, ix[t + 1]), vert(m, ix[t + 2])); }
 }
+buckets.forEach((bk, m) => {
+  if (!bk.idx.length) return;
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(bk.pos, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(bk.nrm, 3)); geo.setIndex(bk.idx);
+  const [name, L] = MAT_DEF[m]; tris += bk.idx.length / 3;
+  if (process.env.VERBOSE) console.error(name, bk.idx.length / 3);
+  const material = new THREE.MeshStandardMaterial({ color: new THREE.Color().setRGB(L, L, L, THREE.LinearSRGBColorSpace), roughness: 0.5, metalness: 0 }); material.name = name;
+  const mesh = new THREE.Mesh(geo, material); mesh.name = name; scene.add(mesh);
+});
 const exporter = new GLTFExporter();
 const buf = await exporter.parseAsync(scene, { binary: true });
 fs.writeFileSync(OUT, Buffer.from(buf));

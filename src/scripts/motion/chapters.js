@@ -167,7 +167,14 @@ export function initChapters() {
     };
     // Drive from the ticker (not a scroll-bounded trigger, whose updates stop once scrolled past its end)
     let lastY = -1, lastH = -1;
-    gsap.ticker.add(() => { if (window.scrollY !== lastY || window.innerHeight !== lastH) { lastY = window.scrollY; lastH = window.innerHeight; update(); punchHoles(); } });
+    gsap.ticker.add(() => {
+      if (window.scrollY !== lastY || window.innerHeight !== lastH) {
+        const dy = lastY < 0 ? 0 : window.scrollY - lastY;
+        lastY = window.scrollY; lastH = window.innerHeight; update(); punchHoles();
+        // the object reacts to scroll speed: a quick scroll gives it a little spin that settles on its own
+        lattice.state.spinY += Math.max(-0.035, Math.min(0.035, dy * 0.00018));
+      }
+    });
     ScrollTrigger.addEventListener('refresh', () => { measureZones(); update(); punchHoles(); });
     measureZones(); update(); punchHoles();
     if (small) {

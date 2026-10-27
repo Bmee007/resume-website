@@ -7,8 +7,8 @@
 // 2. (Inward winding: three.js draws transparent DoubleSide materials in two passes, back faces first. Inward-wound
 //    closed shells put the visible near skin in the first pass, so the far wall and nested parts never show through.
 //    Use --outward to keep outward winding.)
-// 3. Merges everything into ONE mesh and sorts its triangles near-to-far from the camera of the chapter that shows
-//    the model. Why: src/scripts/scene3d.js draws the model with transparent + DoubleSide at the chapter's opacity
+// 3. Keeps one mesh per material (each material's base colour becomes a per-part grey on the site) and sorts each
+//    mesh's triangles near-to-far from the camera of the chapter that shows the model. Why: src/scripts/scene3d.js draws the model with transparent + DoubleSide at the chapter's opacity
 //    (0.6 for the Intelligence chapter) and depthWrite on, and loadModel() keeps the file's triangle order. Blending
 //    is order dependent: whenever a far wall, the inside of a shell or a part nested in another is drawn BEFORE the
 //    wall in front of it, it shows through as dark flecks and scratch-like seam ghosts. Near-first order lets the
@@ -71,41 +71,41 @@ gltf.scene.traverse((o) => {
     if (B.clone().sub(A).cross(C.clone().sub(A)).length() < 1e-9) { dropped++; continue; }
     keep.push(a, b, c); vol += A.dot(B.clone().cross(C));
   }
+  meshes.push({ pos: P, idx: keep, nrm: Nsrc, vol, name: o.name, material: o.material });
+});
+// Orientation is decided once for the whole model (a material's mesh is an open patch of a closed shell, so its own
+// signed volume means nothing). The generator winds everything outward; inward is the point of this pass.
+const totalVol = meshes.reduce((a, m) => a + m.vol, 0);
+const flip = inward ? totalVol > 0 : totalVol < 0;
+for (const m of meshes) {
+  if (flip) { flipped++; for (let t = 0; t < m.idx.length; t += 3) { const x = m.idx[t + 1]; m.idx[t + 1] = m.idx[t + 2]; m.idx[t + 2] = x; } }
   // Keep the generator's analytic normals when present (they follow the surface function, not the adaptive
   // triangulation); only fall back to angle-weighted mesh normals. The winding flip negates them too.
-  const flip = inward ? vol > 0 : vol < 0;
-  if (flip) { flipped++; for (let t = 0; t < keep.length; t += 3) { const x = keep[t + 1]; keep[t + 1] = keep[t + 2]; keep[t + 2] = x; } }
-  let nrm;
-  if (Nsrc) { nrm = Nsrc; if (flip) for (let i = 0; i < nrm.length; i++) nrm[i] = -nrm[i]; } else nrm = angleWeightedNormals(P, keep);
-  meshes.push({ pos: P, idx: keep, nrm });
-});
-
-// ---- 2. merge into one mesh and sort near-to-far ---------------------------------
-let nv = 0; for (const m of meshes) nv += m.pos.length / 3;
-const pos = new Float32Array(nv * 3), nrm = new Float32Array(nv * 3); const tris = []; let off = 0;
-for (const m of meshes) {
-  pos.set(m.pos, off * 3); nrm.set(m.nrm, off * 3);
-  for (let t = 0; t < m.idx.length; t += 3) tris.push([m.idx[t] + off, m.idx[t + 1] + off, m.idx[t + 2] + off]);
-  off += m.pos.length / 3;
+  if (m.nrm) { if (flip) for (let i = 0; i < m.nrm.length; i++) m.nrm[i] = -m.nrm[i]; } else m.nrm = angleWeightedNormals(m.pos, m.idx);
 }
+
+// ---- 2. sort each material's triangles near-to-far -----------------------------------
 // Camera in the model's own frame, replicating src/scripts/scene3d.js + models.js (loadModel centres the bbox and
 // scales the longest axis to 2.8; the group is placed at (cx, cy), scaled min(vw, vh)*0.3*scale, rotated XYZ(rx, ry)).
-const bb = new THREE.Box3(); for (let i = 0; i < pos.length; i += 3) bb.expandByPoint(new THREE.Vector3(pos[i], pos[i + 1], pos[i + 2]));
+const bb = new THREE.Box3(); for (const m of meshes) for (let i = 0; i < m.pos.length; i += 3) bb.expandByPoint(new THREE.Vector3(m.pos[i], m.pos[i + 1], m.pos[i + 2]));
 const size = bb.getSize(new THREE.Vector3()), centre = bb.getCenter(new THREE.Vector3()); const s = 2.8 / Math.max(size.x, size.y, size.z);
 const vh = 2 * Math.tan((32 * Math.PI) / 360) * 6.4, vw = vh * aspect;
 const groupPos = new THREE.Vector3((cx - 0.5) * vw, -(cy - 0.5) * vh, 0), groupScale = Math.min(vw, vh) * 0.3 * scale;
 const rot = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(rx, ry, 0, 'XYZ'));
 const eye = new THREE.Vector3(0, 0, 6.4).sub(groupPos).divideScalar(groupScale).applyMatrix4(rot.clone().invert()).divideScalar(s).add(centre);
-const dist = tris.map(([a, b, c]) => {
-  const x = (pos[3 * a] + pos[3 * b] + pos[3 * c]) / 3 - eye.x, y = (pos[3 * a + 1] + pos[3 * b + 1] + pos[3 * c + 1]) / 3 - eye.y, z = (pos[3 * a + 2] + pos[3 * b + 2] + pos[3 * c + 2]) / 3 - eye.z;
-  return x * x + y * y + z * z;
-});
-const order = dist.map((_, i) => i).sort((i, j) => dist[i] - dist[j]);
-const index = new Uint32Array(tris.length * 3); order.forEach((t, k) => { index.set(tris[t], 3 * k); });
-
-const g = new THREE.BufferGeometry();
-g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3)); g.setIndex(new THREE.BufferAttribute(index, 1));
-const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.5, metalness: 0 })); mesh.name = 'bot';
-const scene = new THREE.Scene(); scene.add(mesh);
+const scene = new THREE.Scene(); let total = 0;
+for (const m of meshes) {
+  const tri = []; for (let t = 0; t < m.idx.length; t += 3) tri.push([m.idx[t], m.idx[t + 1], m.idx[t + 2]]);
+  const dist = tri.map(([a, b, c]) => {
+    const x = (m.pos[3 * a] + m.pos[3 * b] + m.pos[3 * c]) / 3 - eye.x, y = (m.pos[3 * a + 1] + m.pos[3 * b + 1] + m.pos[3 * c + 1]) / 3 - eye.y, z = (m.pos[3 * a + 2] + m.pos[3 * b + 2] + m.pos[3 * c + 2]) / 3 - eye.z;
+    return x * x + y * y + z * z;
+  });
+  const order = dist.map((_, i) => i).sort((i, j) => dist[i] - dist[j]);
+  const index = new Uint32Array(tri.length * 3); order.forEach((t, k) => { index.set(tri[t], 3 * k); }); total += tri.length;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(m.pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(m.nrm, 3)); g.setIndex(new THREE.BufferAttribute(index, 1));
+  const mat = new THREE.MeshStandardMaterial({ color: m.material.color.clone(), roughness: 0.5, metalness: 0 }); mat.name = m.material.name;
+  const mesh = new THREE.Mesh(g, mat); mesh.name = m.name; scene.add(mesh);
+}
 fs.writeFileSync(out, Buffer.from(await new GLTFExporter().parseAsync(scene, { binary: true })));
-console.log(JSON.stringify({ tris: tris.length, bytes: fs.statSync(out).size, droppedDegenerate: dropped, windingFlipped: flipped, eyeModelMM: eye.toArray().map((v) => Math.round(v)), out }));
+console.log(JSON.stringify({ tris: total, meshes: meshes.length, bytes: fs.statSync(out).size, droppedDegenerate: dropped, windingFlipped: flipped, eyeModelMM: eye.toArray().map((v) => Math.round(v)), out }));

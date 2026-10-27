@@ -99,7 +99,21 @@ function creased(g, angle = 38 * DEG) {
 }
 const tessellate = (g, maxEdge = 1.2, iters = 8) => new TessellateModifier(maxEdge, iters).modify(g);
 
-const parts = { vial: [], cap: [], label: [], relief: [], pills: [] };
+// Parts become separate glTF materials; the site loader turns each material's baseColor luminance into a
+// grey for that part (grey = 0.28 + 0.48 * L), so the L values below ARE the model's tonal design.
+const PART_LUM = {
+  vial: 0.18,        // amber, translucent-looking dark
+  cap: 0.92,         // white child-resistant cap
+  label: 0.95,       // paper label
+  relief: 0.6,       // label text / barcode relief a touch darker than the paper
+  rx: 0.42,          // the Rx glyph itself, a little darker again so it stays the readable focal mark
+  capsuleCap: 0.9,   // capsule: bright half
+  capsuleBody: 0.55, // capsule: mid half
+  tablets: 0.9,      // scored white tablets
+  shadow: 0.12,      // contact-shadow core under the vial and pills
+  shadowSoft: 0.2,   // wider, lighter step of the contact shadow
+};
+const parts = Object.fromEntries(Object.keys(PART_LUM).map((k) => [k, []]));
 const add = (part, g, xf) => { g.deleteAttribute('uv'); parts[part].push(xf ? place(g, xf) : g); };
 
 // =============================================================================
@@ -210,7 +224,7 @@ const labelR = (y) => rw(y) + LAB_T; // outer paper surface
     g.deleteAttribute('uv'); g = tessellate(g, 1.0, 10);
     g.computeBoundingBox(); g.translate(RX_U, RX_V, -0.25 - g.boundingBox.min.z); // sink the back bevel into the paper
     g.computeBoundingBox(); g.translate(0, 0, RX_H - g.boundingBox.max.z); // top at RX_H
-    wrapOnBody(g, 0, labelR); add('relief', creased(g, 45 * DEG));
+    wrapOnBody(g, 0, labelR); add('rx', creased(g, 45 * DEG));
   }
 }
 
@@ -223,7 +237,8 @@ function capsuleGeo() {
     ...arc(0, rb, rb, -Math.PI / 2, 0, 10), pt(rb, yStep, { hard: true }), pt(rc, yStep + (rc - rb), { hard: true }), pt(rc, L - rc),
     ...arc(0, L - rc, rc, 0, Math.PI / 2, 10).slice(1),
   ];
-  return mergeGeometries(revolve(prof, { segs: 64 }), false);
+  const runs = revolve(prof, { segs: 64 }); // [body half, step ring, cap half]
+  return { body: mergeGeometries(runs.slice(0, 1), false), cap: mergeGeometries(runs.slice(1), false) };
 }
 function tabletGeo() {
   const prof = [pt(0, 0), pt(1.5, 0.05), pt(3.0, 0.3), pt(4.0, 0.7), pt(4.6, 1.05), pt(4.9, 1.3), pt(5.0, 1.55), pt(5.0, 2.05), pt(4.9, 2.3), pt(4.6, 2.55), pt(4.0, 2.9), pt(3.0, 3.3), pt(1.5, 3.55), pt(0, 3.6)];
@@ -234,10 +249,23 @@ function tabletGeo() {
   g.computeVertexNormals(); return g;
 }
 for (const [x, z, yaw] of [[25, 11, 20], [-25.5, 8, -55], [9, 27.5, 95]]) {
-  const g = capsuleGeo(); g.translate(0, -21.7 / 2, 0); g.rotateZ(Math.PI / 2); // lie along X, centred
-  add('pills', g, { pos: [x, 3.85, z], rot: [0, yaw * DEG, 0] });
+  const { body, cap } = capsuleGeo();
+  for (const [h, part] of [[body, 'capsuleBody'], [cap, 'capsuleCap']]) {
+    h.translate(0, -21.7 / 2, 0); h.rotateZ(Math.PI / 2); // lie along X, centred
+    add(part, h, { pos: [x, 3.85, z], rot: [0, yaw * DEG, 0] });
+  }
 }
-for (const [x, z, rot] of [[-14, 24, 30], [28, -8, -40]]) add('pills', tabletGeo(), { pos: [x, 0, z], rot: [0, rot * DEG, 0] });
+for (const [x, z, rot] of [[-14, 24, 30], [28, -8, -40]]) add('tablets', tabletGeo(), { pos: [x, 0, z], rot: [0, rot * DEG, 0] });
+
+// =============================================================================
+// CONTACT SHADOW: thin flat ellipses just under y = 0 (stepped light -> dark) so the vial and pills sit on
+// something. Radii are kept close to the pill spread so the vial still dominates the bounding box.
+// =============================================================================
+for (const [rx, rz, y0, part] of [[44, 40, -0.9, 'shadowSoft'], [38, 34.5, -0.5, 'shadow']]) {
+  const sh = new THREE.Shape(); sh.absellipse(0, 0, rx, rz, 0, TAU, false, 0);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: 0.45, bevelEnabled: false, curveSegments: 96 });
+  g.deleteAttribute('uv'); g.rotateX(Math.PI / 2); g.translate(0.5, y0 + 0.45, 8.5); add(part, g);
+}
 
 // =============================================================================
 // EXPORT
@@ -248,7 +276,9 @@ for (const [name, list] of Object.entries(parts)) {
   const merged = mergeGeometries(list, false);
   const g = mergeVertices(merged, 1e-4);
   tris += g.index.count / 3; report[name] = g.index.count / 3;
-  const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.55, metalness: 0 }));
+  const L = PART_LUM[name]; // linear grey: the loader reads the linear baseColor factor
+  const mat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0 }); mat.color.setRGB(L, L, L, THREE.LinearSRGBColorSpace); mat.name = name;
+  const mesh = new THREE.Mesh(g, mat);
   mesh.name = name; scene.add(mesh);
 }
 const box = new THREE.Box3().setFromObject(scene);

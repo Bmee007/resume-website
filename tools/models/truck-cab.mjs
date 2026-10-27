@@ -1,7 +1,7 @@
 // Cab + sleeper hull, skin panels, recessed doors, windshield, sun visor and the solid roof fairing.
 import {
   THREE, parts, V3, T, RX, RY, RZ, mul, D2R, add, box, rbox, cylX, cylY, cylZ, sphere, creased, loft, shapeFrom, plate, rrect,
-  roundPoly, offsetPoly, bothSides,
+  roundPoly, offsetPoly, bothSides, setMat,
 } from './truck-lib.mjs';
 
 // ---------- side-wall geometry ----------
@@ -49,6 +49,7 @@ function hullSection(z, o = {}) {
 }
 const SL = { yt: 3.22 }; // sleeper roof level
 function buildHull() {
+  setMat('cab');
   const secs = [
     hullSection(1.0, { ...SL, shr: 0.085 }), hullSection(1.015, { ...SL, shr: 0.05 }), hullSection(1.04, { ...SL, shr: 0.022 }),
     hullSection(1.08, { ...SL, shr: 0.006 }), hullSection(1.14, SL), hullSection(2.075, SL),
@@ -81,24 +82,28 @@ const GAP = 0.008;
 function sideBody() {
   const door = roundPoly(DOOR, 0.05, 4), doorHole = roundPoly(offsetPoly(DOOR, GAP), 0.058, 4);
   const win = roundPoly(WIN, 0.06, 4);
+  setMat('cab');
   sidePlate(CAB_SKIN, [doorHole], RECESS); // outer skin with the door opening
   sidePlate(door, [win], 0.02); // door panel, recessed 10 mm; the window is a 30 mm deep glass recess
-  sidePlate(roundPoly(offsetPoly(WIN, 0.03), 0.07, 4), [win], 0.027); // window seal frame
+  setMat('rubber'); sidePlate(roundPoly(offsetPoly(WIN, 0.03), 0.07, 4), [win], 0.027); // window seal frame
+  setMat('glass'); sidePlate(win, [], 0.022); // glass pane filling the window opening
+  setMat('chrome');
   // handle + lock
   add(new THREE.BoxGeometry(0.03, 0.04, 0.2), mul(onSkin(1.86, 2.46, 0.004), T(0, 0, 0)));
   add(new THREE.BoxGeometry(0.03, 0.06, 0.05), onSkin(1.86, 2.34, 0.002));
   add(new THREE.CylinderGeometry(0.014, 0.014, 0.012, 14), mul(onSkin(1.98, 2.5, -0.002), RZ(Math.PI / 2)));
   // sleeper: window and baggage bay
   const slWin = roundPoly(SL_WIN, 0.07, 4), bay = roundPoly(SL_BAY, 0.04, 3), bayHole = roundPoly(offsetPoly(SL_BAY, GAP), 0.048, 3);
-  sidePlate(SL_SKIN, [roundPoly(offsetPoly(SL_WIN, 0.0), 0.07, 4), bayHole], RECESS);
-  sidePlate(roundPoly(offsetPoly(SL_WIN, 0.03), 0.09, 4), [slWin], 0.038);
+  setMat('sleeper'); sidePlate(SL_SKIN, [roundPoly(offsetPoly(SL_WIN, 0.0), 0.07, 4), bayHole], RECESS);
   sidePlate(bay, [], 0.02);
-  add(new THREE.BoxGeometry(0.03, 0.035, 0.18), onSkin(1.92, 1.9, 0.004));
-  for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.012, 0.012, 0.3), onSkin(2.02 - i * 0.028, 1.55, 0.002)); // louvre slats
+  setMat('rubber'); sidePlate(roundPoly(offsetPoly(SL_WIN, 0.03), 0.09, 4), [slWin], 0.038);
+  setMat('glass'); sidePlate(slWin, [], 0.03);
+  setMat('chrome'); add(new THREE.BoxGeometry(0.03, 0.035, 0.18), onSkin(1.92, 1.9, 0.004));
+  setMat('dark'); for (let i = 0; i < 5; i++) add(new THREE.BoxGeometry(0.012, 0.012, 0.3), onSkin(2.02 - i * 0.028, 1.55, 0.002)); // louvre slats
   // mirror mount pads on the door front edge
-  for (const y of [1.98, 2.5]) add(new THREE.BoxGeometry(0.03, 0.12, 0.1), onSkin(y, y > 2.2 ? 3.04 : 3.2, 0.0));
+  setMat('chrome'); for (const y of [1.98, 2.5]) add(new THREE.BoxGeometry(0.03, 0.12, 0.1), onSkin(y, y > 2.2 ? 3.04 : 3.2, 0.0));
   // marker lamps on the cab side (amber, flush)
-  for (const [y, z] of [[2.86, 2.9]]) add(new THREE.SphereGeometry(0.03, 10, 6), mul(onSkin(y, z, 0.0), SC1(0.5, 1, 1)));
+  setMat('lamp'); for (const [y, z] of [[2.86, 2.9]]) add(new THREE.SphereGeometry(0.03, 10, 6), mul(onSkin(y, z, 0.0), SC1(0.5, 1, 1)));
 }
 const SC1 = (x, y, z) => new THREE.Matrix4().makeScale(x, y, z);
 
@@ -142,8 +147,20 @@ function frameRing(outerLoop, innerLoop, h) {
   strip(O1, I1, (i) => surfFrame(...outerLoop[i]).n);
   strip(I1, I0, (i) => cen.clone().sub(I0[i]));
 }
+// Glass pane: nested loops shrinking toward the centre, 4 mm proud of the cab surface and under the 16 mm frame.
+function windshieldGlass(hw, t0, t1, cx, ct) {
+  const base = loopXT(hw, t0, t1, cx, ct, 8), mx = 0, mt = (t0 + t1) / 2;
+  const layer = (k) => base.map(([x, t]) => [mx + (x - mx) * k, mt + (t - mt) * k]);
+  const ks = [1, 0.8, 0.6, 0.4, 0.2, 0.04];
+  for (let i = 0; i < ks.length - 1; i++) {
+    const A = onSurf(layer(ks[i]), 0.004), B = onSurf(layer(ks[i + 1]), 0.004);
+    strip(A, B, (j) => surfFrame(...layer(ks[i])[j]).n);
+  }
+}
 function buildWindshield() {
   const t0 = 0.05, t1 = 0.86, hw = 0.88;
+  setMat('glass'); windshieldGlass(hw - 0.045, t0 + 0.04, t1 - 0.04, 0.085, 0.09);
+  setMat('rubber');
   frameRing(loopXT(hw, t0, t1, 0.1, 0.1), loopXT(hw - 0.045, t0 + 0.04, t1 - 0.04, 0.085, 0.09), 0.016);
   frameRing(loopXT(0.03, t0 + 0.04, t1 - 0.04, 0.0, 0.0, 6), loopXT(0.012, t0 + 0.04, t1 - 0.04, 0.0, 0.0, 6), 0.02); // centre divider
   // wipers: pivot near the bottom edge, resting at an angle
@@ -158,12 +175,13 @@ function buildWindshield() {
 
 // ---------- sun visor ----------
 function buildVisor() {
+  setMat('cab');
   const pts = [[-1.1, 2.95]];
   for (let i = 0; i <= 12; i++) { const x = -1.1 + (2.2 * i) / 12; pts.push([x, 3.3 + 0.055 * (1 - (x / 1.1) ** 2) - 0.1 * Math.pow(Math.abs(x) / 1.1, 6)]); }
   pts.push([1.1, 2.95]);
   plate(pts, 0.06, 3.06, 0.008);
   for (const s of [1, -1]) { box(0.03, 0.05, 0.28, s * 1.0, 3.015, 3.12); box(0.03, 0.05, 0.28, s * 0.45, 3.035, 3.12); }
-  for (let i = -2; i <= 2; i++) rbox(0.09, 0.03, 0.05, 0.012, i * 0.24, 3.085, 3.27 + 0.05 * (1 - (i * 0.24 / 1.1) ** 2)); // marker lamps
+  setMat('lamp'); for (let i = -2; i <= 2; i++) rbox(0.09, 0.03, 0.05, 0.012, i * 0.24, 3.085, 3.27 + 0.05 * (1 - (i * 0.24 / 1.1) ** 2)); // marker lamps
 }
 
 // ---------- roof fairing: solid wedge, full-width cheeks dropping to the roof ----------
@@ -177,6 +195,7 @@ function fairSection(z, shr = 0) {
   return ring.map(([x, y]) => V3(x, y, z));
 }
 function buildFairing() {
+  setMat('sleeper');
   const zs = [];
   const rear = [[1.0, 0.05], [1.015, 0.025], [1.04, 0.01], [1.08, 0.003]];
   const nose = [[2.7, 0.1], [2.705, 0.055], [2.713, 0.03], [2.724, 0.014], [2.74, 0.005]];

@@ -48,7 +48,23 @@ const geomFrom = (pos, idx) => {
 // Mirror a geometry in X (flips winding so faces stay outward).
 const mirrorX = (g) => { g.scale(-1, 1, 1); const ix = g.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } g.computeVertexNormals(); return g; };
 
-const parts = { pages: [], cover: [], ribbon: [], pen: [] };
+// Parts become separate glTF materials; the site loader turns each material's baseColor luminance into a
+// grey for that part (grey = 0.28 + 0.48 * L), so the L values below ARE the model's tonal design.
+const PART_LUM = {
+  pagesEdge: 0.88,  // fore-edge / head / tail sheets: warm white
+  pagesTop: 0.95,   // exposed top sheets: brightest
+  rules: 0.70,      // ruled lines + entry bars: a touch darker than the paper
+  cover: 0.16,      // leather boards and joint cloth
+  inlay: 0.25,      // spine inlay + raised bands
+  ribbon: 0.32,     // red-brown satin
+  pen: 0.10,        // near-black resin barrel
+  penTrim: 0.90,    // cap band, clip, ball, saddle ring: bright metal
+  nib: 0.85,        // gold / steel nib
+  shadow: 0.12,     // contact-shadow core under the book (loader floor)
+  shadowSoft: 0.19, // middle step of the contact shadow
+  shadowFar: 0.30,  // outer, lightest step of the contact shadow
+};
+const parts = Object.fromEntries(Object.keys(PART_LUM).map((k) => [k, []]));
 const add = (part, g, xf) => parts[part].push(clean(xf ? place(g, xf) : g));
 
 // =============================================================================
@@ -252,7 +268,13 @@ function buildBlock(side) {
     }
     g.computeVertexNormals();
   }
-  return side === -1 ? g : mirrorX(g);
+  // split the closed loft into the visible top sheet and the edge walls (+ hidden underside), same vertices/normals
+  const wallTris = LAYERS * RN * 2, topTris = NZ * NX * 2;
+  const sub = (a, b) => { const h = new THREE.BufferGeometry(); for (const [n, at] of Object.entries(g.attributes)) h.setAttribute(n, at); h.setIndex(Array.from(g.index.array.slice(a * 3, b * 3))); return h; };
+  const edge = sub(0, wallTris), under = sub(wallTris + topTris, g.index.count / 3);
+  const top = sub(wallTris, wallTris + topTris);
+  const fin = (h) => (side === -1 ? h : mirrorX(h));
+  return { edge: fin(mergeGeometries([edge, under], false)), top: fin(top) };
 }
 // Exposed top-surface height of a block (for resting the ribbon and pen): x in world (either side).
 function topY(x, z) {
@@ -260,9 +282,8 @@ function topY(x, z) {
   return surfY(Math.max(xl, -PAGE_W), z, side);
 }
 
-add('pages', buildBlock(-1));
-add('pages', buildBlock(1));
-for (const side of [-1, 1]) for (const g of buildRelief(side)) add('pages', g);
+for (const side of [-1, 1]) { const b = buildBlock(side); add('pagesEdge', b.edge); add('pagesTop', b.top); }
+for (const side of [-1, 1]) for (const g of buildRelief(side)) add('rules', g);
 
 // =============================================================================
 // COVER: two boards, flat spine inlay, joint cloth, raised bands underneath
@@ -277,11 +298,11 @@ for (const side of [-1, 1]) for (const g of buildRelief(side)) add('pages', g);
   }
   // spine inlay: flat strip between the joints, slightly thinner than the boards
   const inlayW = 2 * (SPINE_W / 2 + 2);
-  add('cover', new RoundedBoxGeometry(inlayW, INLAY_T, boardL, 2, 0.5), { pos: [0, INLAY_T / 2, 0] });
+  add('inlay', new RoundedBoxGeometry(inlayW, INLAY_T, boardL, 2, 0.5), { pos: [0, INLAY_T / 2, 0] });
   // joint cloth bridging the groove (thin, slightly sunk)
   for (const s of [-1, 1]) add('cover', new THREE.BoxGeometry(JOINT + 0.6, 0.7, boardL - 0.2), { pos: [s * (inlayW / 2 + JOINT / 2), 0.35, 0] });
   // raised bands across the spine (underside, like a hubbed leather spine)
-  for (const zb of [-80, -40, 0, 40, 80]) add('cover', new RoundedBoxGeometry(inlayW - 1, 1.0, 4.2, 2, 0.45), { pos: [0, -0.4, zb] });
+  for (const zb of [-80, -40, 0, 40, 80]) add('inlay', new RoundedBoxGeometry(inlayW - 1, 1.0, 4.2, 2, 0.45), { pos: [0, -0.4, zb] });
   // blind-tooled border line around the board (shallow raised rule 1.2 mm inside the edge, visible on the squares? no: on the outside = underside)
   for (const s of [-1, 1]) {
     const rule = (w, d, x, z) => add('cover', new THREE.BoxGeometry(w, 0.25, d), { pos: [x, -0.1, z] });
@@ -374,7 +395,7 @@ let ribbonGeo = null;
 // Local axis +Y from nib tip (y = 0) to cap finial (y = L).
 // =============================================================================
 {
-  const penParts = [];
+  const penParts = []; const trimParts = []; const nibParts = [];
   // profile (r, y): feed/section/barrel/cap
   const prof = [
     [0, 10.5], [2.6, 11], [3.4, 13], [4.3, 17], [5.0, 21.5], [5.3, 23], // feed cone emerging under the nib
@@ -415,7 +436,7 @@ let ribbonGeo = null;
     nib.translate(5.0, 0.6, 0); // nib rides on top (+x side) of the feed cone, tail hidden in the section
     nib.rotateZ(-7 * DEG);      // tilt the nib down toward the feed at the tip
     nib.translate(1.1, 0, 0);
-    penParts.push(nib);
+    nibParts.push(nib);
   }
   // clip: tapered bar standing off the cap, attached by a saddle at the finial end, ball at the tip
   {
@@ -424,13 +445,16 @@ let ribbonGeo = null;
     clip.translate(7.45 + 1.7 + 0.65, (y0 + y1) / 2, 0);
     // taper the clip width toward the tip
     { const p = clip.attributes.position; for (let i = 0; i < p.count; i++) { const t = (p.getY(i) - y0) / clipLen; p.setZ(i, p.getZ(i) * lerp(0.72, 1.05, t)); p.setX(i, p.getX(i) - 0.5 * (1 - t) * 0.0); } }
-    penParts.push(clip);
-    const ball = new THREE.SphereGeometry(1.35, 18, 12); ball.translate(7.45 + 1.3, y0 + 0.4, 0); penParts.push(ball);
-    const saddle = new RoundedBoxGeometry(2.6, 6, 4.4, 2, 0.6); saddle.translate(7.0 + 0.7, y1 - 1.5, 0); penParts.push(saddle);
-    const saddleRing = new THREE.TorusGeometry(6.95, 0.55, 10, 48); saddleRing.rotateX(Math.PI / 2); saddleRing.translate(0, y1 + 1.6, 0); penParts.push(saddleRing);
+    trimParts.push(clip);
+    const ball = new THREE.SphereGeometry(1.35, 18, 12); ball.translate(7.45 + 1.3, y0 + 0.4, 0); trimParts.push(ball);
+    const saddle = new RoundedBoxGeometry(2.6, 6, 4.4, 2, 0.6); saddle.translate(7.0 + 0.7, y1 - 1.5, 0); trimParts.push(saddle);
+    const saddleRing = new THREE.TorusGeometry(6.95, 0.55, 10, 48); saddleRing.rotateX(Math.PI / 2); saddleRing.translate(0, y1 + 1.6, 0); trimParts.push(saddleRing);
   }
   // barrel/section thread line + cap band engraving line (very fine raised rings)
-  for (const [y, r] of [[39.0, 6.25], [121.6, 7.5]]) { const t = new THREE.TorusGeometry(r, 0.22, 8, 56); t.rotateX(Math.PI / 2); t.translate(0, y, 0); penParts.push(t); }
+  for (const [y, r, bright] of [[39.0, 6.25, false], [121.6, 7.5, true]]) { const t = new THREE.TorusGeometry(r, 0.22, 8, 56); t.rotateX(Math.PI / 2); t.translate(0, y, 0); (bright ? trimParts : penParts).push(t); }
+  // bright metal cap band: a thin lathed sleeve lying 0.08 mm proud of the barrel's cap-band section
+  { const bandProf = [[7.43, 121.5], [7.83, 122.2], [7.83, 125.4], [7.53, 126.2]];
+    trimParts.push(new THREE.LatheGeometry(bandProf.map(([r, y]) => new THREE.Vector2(r, y)), 56)); }
 
   // Placement: lying diagonally across the gutter, nib toward front-right (+x,+z); rests on the gutter shoulders.
   const theta = 36 * DEG; const yMid = 82;
@@ -450,6 +474,8 @@ let ribbonGeo = null;
     .multiply(new THREE.Matrix4().makeBasis(xw, dir, zw))
     .multiply(new THREE.Matrix4().makeRotationY(28 * DEG));
   for (const g of penParts) add('pen', g.applyMatrix4(m));
+  for (const g of trimParts) add('penTrim', g.applyMatrix4(m));
+  for (const g of nibParts) add('nib', g.applyMatrix4(m));
   if (process.env.LEDGER_DEBUG) { // ribbon vs pen clearance (negative = intersecting)
     let worst = 1e9; const p = ribbonGeo.attributes.position; const v = new THREE.Vector3();
     for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i).sub(origin); const ly = v.dot(dir); if (ly < 0 || ly > 169) continue;
@@ -457,6 +483,22 @@ let ribbonGeo = null;
       worst = Math.min(worst, rad - r); }
     console.error('ribbon-pen min clearance mm:', worst.toFixed(2));
   }
+}
+
+// =============================================================================
+// CONTACT SHADOW: two thin flat rounded slabs just under the cover, a lighter wide step and a darker core,
+// so the book sits on something. Kept close to the board outline so the book still dominates the bbox.
+// =============================================================================
+{
+  const rr = (w, d, r) => { const sh = new THREE.Shape(); const x = -w / 2, z = -d / 2;
+    sh.moveTo(x + r, z); sh.lineTo(x + w - r, z); sh.absarc(x + w - r, z + r, r, -Math.PI / 2, 0, false); sh.lineTo(x + w, z + d - r); sh.absarc(x + w - r, z + d - r, r, 0, Math.PI / 2, false);
+    sh.lineTo(x + r, z + d); sh.absarc(x + r, z + d - r, r, Math.PI / 2, Math.PI, false); sh.lineTo(x, z + r); sh.absarc(x + r, z + r, r, Math.PI, Math.PI * 1.5, false); return sh; };
+  const bw = 2 * (PAGE_W + SQUARE), bd = PAGE_H + 2 * SQUARE;
+  const slab = (w, d, r, y0, t, part, dz) => { const g = new THREE.ExtrudeGeometry(rr(w, d, r), { depth: t, bevelEnabled: false, curveSegments: 24 }); g.deleteAttribute('uv'); g.rotateX(Math.PI / 2); g.translate(0, y0 + t, dz); add(part, g); };
+  // three stepped slabs (wide/light -> core/dark), biased toward the viewer (+z) where the floor shows
+  slab(bw + 20, bd + 40, 34, -3.1, 0.5, 'shadowFar', 14);
+  slab(bw + 12, bd + 24, 26, -2.6, 0.5, 'shadowSoft', 8);
+  slab(bw + 5, bd + 10, 14, -2.1, 0.5, 'shadow', 3);
 }
 
 // =============================================================================
@@ -468,7 +510,9 @@ for (const [name, list] of Object.entries(parts)) {
   const merged = mergeGeometries(list, false);
   const g = mergeVertices(merged, 1e-4);
   tris += g.index.count / 3;
-  const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.55, metalness: 0 }));
+  const L = PART_LUM[name]; // linear grey: the loader reads the linear baseColor factor
+  const mat = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0 }); mat.color.setRGB(L, L, L, THREE.LinearSRGBColorSpace); mat.name = name;
+  const mesh = new THREE.Mesh(g, mat);
   mesh.name = name; scene.add(mesh);
 }
 const exporter = new GLTFExporter();

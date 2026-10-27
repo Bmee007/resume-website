@@ -3,6 +3,7 @@
 // and clears in step. Reduced motion: no veil.
 import { gsap, reduced } from './core.js';
 import { getFog } from './backdrop.js';
+import { initMist } from './mist.js';
 
 export function initVeil() {
   const veil = document.querySelector('.fog-veil');
@@ -11,6 +12,7 @@ export function initVeil() {
   const section = veil.closest('section');
   const fog = getFog();
   const boost = (p) => fog?.setDensityBoost?.((1 - p) * 0.9);
+  const mist = initMist(veil, section);
   // the mist banks part: left and right blobs slide out, the lower one sinks, while the whole veil thins
   const parts = [['.veil-a', '-42vw', '-6vh'], ['.veil-b', '42vw', '-4vh'], ['.veil-c', '0vw', '30vh']];
   parts.forEach(([sel, vx, vy]) => {
@@ -20,11 +22,11 @@ export function initVeil() {
   // the headline sharpens out of the haze: the veil's backdrop blur drops to zero as it thins
   gsap.fromTo(veil, { '--vb': '22px' }, { '--vb': '0px', ease: 'power1.in', scrollTrigger: { trigger: section, start: 'top 88%', end: 'top 25%', scrub: 0.5 } });
   gsap.fromTo(veil, { opacity: 1 }, {
-    opacity: 0, ease: 'power2.in',
+    opacity: 0, ease: 'power4.in',                         // holds near full until late: the mist canvas does the visible clearing
     scrollTrigger: {
       trigger: section, start: 'top 88%', end: 'top 12%', scrub: 0.5,
-      onUpdate: (st) => boost(st.progress),
-      onLeaveBack: () => boost(1),
+      onUpdate: (st) => { boost(st.progress); mist?.setProgress(st.progress); },
+      onLeaveBack: () => { boost(1); mist?.setProgress(0); },
     },
   });
 }

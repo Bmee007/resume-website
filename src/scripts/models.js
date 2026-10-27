@@ -278,8 +278,9 @@ export async function loadModel(name) {
     const n = g.attributes.position.count;
     // material colour → per-vertex grey (luminance), so one mono material lights everything
     const c = (o.material && o.material.color) ? o.material.color : new THREE.Color(0.8, 0.8, 0.8);
-    const lum = Math.min(1, Math.max(0.35, 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b));
-    const col = new Float32Array(n * 3).fill(0.4 + 0.36 * lum);
+    // Each part's real-world colour survives as a grey: near-black rubber/glass read dark, chrome/paper read bright (grey 0.18 → 0.80)
+    const lum = Math.min(1, Math.max(0.12, 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b));
+    const col = new Float32Array(n * 3).fill(0.1 + 0.7 * lum);
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     g.setAttribute('aShade', new THREE.BufferAttribute(new Float32Array(n).fill(lum), 1));
     if (!g.attributes.normal) g.computeVertexNormals();

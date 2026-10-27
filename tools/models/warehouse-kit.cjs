@@ -6,10 +6,17 @@ const fs = require('fs');
 const path = require('path');
 const THREE = require(path.resolve(__dirname, '../../node_modules/three/build/three.cjs'));
 
-/** linear luminance per material group (loader maps lum -> grey 0.4 + 0.36 * clamp(lum, 0.35, 1)) */
+/** glTF base-colour luminance per material group. The site loader maps it to a per-part grey
+ *  (grey = 0.28 + 0.48 * clamp(lum, 0.12, 1)), so these values ARE the tonal design of the piece. */
 const MATERIALS = {
-  wall: 0.95, roof: 0.46, ground: 0.35, court: 0.36, concrete: 0.9, dark: 0.35,
-  trailer: 1.0, metal: 0.72, green: 0.55, container: 0.6, bed: 0.42,
+  asphalt: 0.12, concrete: 0.62, plinth: 0.2, bed: 0.24,
+  wall: 1.0, roof: 0.15, coping: 1.0, rtu: 0.85, glass: 0.12, pipe: 0.5,
+  door: 0.4, slat: 0.62, seal: 0.12, stripe: 1.0,
+  trailer: 1.0, under: 0.12, tire: 0.12, tractor: 0.45,
+  cont1: 0.25, cont2: 0.5, cont3: 0.8,
+  canopy: 0.3, trunk: 0.12, pole: 0.12, fence: 0.4,
+  pallet: 0.4, wrap: 1.0, band: 0.5,
+  car1: 0.15, car2: 0.3, car3: 0.5, car4: 0.75, car5: 0.22, car6: 0.4,
 };
 
 function createKit() {
@@ -135,7 +142,8 @@ function createKit() {
       const a0 = accessors.push({ bufferView: bp, componentType: 5126, count: nv, type: 'VEC3', min, max }) - 1;
       const a1 = accessors.push({ bufferView: bn, componentType: 5126, count: nv, type: 'VEC3' }) - 1;
       const a2 = accessors.push({ bufferView: bi, componentType: 5125, count: ni, type: 'SCALAR' }) - 1;
-      const lum = MATERIALS[name] ?? 0.8;
+      if (!(name in MATERIALS)) throw new Error('unknown material group: ' + name);
+      const lum = MATERIALS[name];
       materials.push({ name, pbrMetallicRoughness: { baseColorFactor: [lum, lum, lum, 1], metallicFactor: 0, roughnessFactor: 0.6 } });
       primitives.push({ attributes: { POSITION: a0, NORMAL: a1 }, indices: a2, material: mi, mode: 4 });
       tris += ni / 3; verts += nv;

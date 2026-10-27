@@ -17,9 +17,10 @@ await MeshoptEncoder.ready; await MeshoptDecoder.ready;
 const io = new NodeIO().registerExtensions([EXTMeshoptCompression, KHRMeshQuantization]).registerDependencies({ 'meshopt.encoder': MeshoptEncoder, 'meshopt.decoder': MeshoptDecoder });
 const doc = await io.read(inp);
 // 14-bit positions over the mesh bounds (~0.03 mm here) and 10-bit normals (~0.1 deg, stored as int16) keep the
-// glossy clearcoat highlights clean. `gltf-transform meshopt`'s default 'high' level stores normals as 8-bit octahedral (~0.5 deg
+// glossy clearcoat highlights clean. One shared 'scene' grid so vertices on the border between two material meshes
+// quantise to the identical position (no hairline cracks). `gltf-transform meshopt`'s default 'high' level stores normals as 8-bit octahedral (~0.5 deg
 // steps), which bands and speckles smooth, shiny surfaces.
-await doc.transform(quantize({ quantizePosition: Number(posBits), quantizeNormal: Number(nrmBits) }));
+await doc.transform(quantize({ quantizePosition: Number(posBits), quantizeNormal: Number(nrmBits), quantizationVolume: 'scene' }));
 doc.createExtension(EXTMeshoptCompression).setRequired(true).setEncoderOptions({ method: EXTMeshoptCompression.EncoderMethod.QUANTIZE });
 await io.write(out, doc);
 console.log(JSON.stringify({ out }));

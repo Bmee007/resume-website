@@ -31,11 +31,11 @@ gl_FragColor.rgb += uGlow * 0.25;`;
 function makeMaterial(shadeAttr) {
   const mat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color(0.82, 0.86, 0.9), roughness: 0.42, metalness: 0.03,
-    clearcoat: 0.45, clearcoatRoughness: 0.25, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
+    clearcoat: 0.3, clearcoatRoughness: 0.3, sheen: 0.12, sheenColor: new THREE.Color(0.9, 0.95, 1.0),
     transparent: true, side: THREE.DoubleSide, vertexColors: !!shadeAttr,
   });
   mat.userData.uniforms = { uProgress: { value: 1 }, uGlow: { value: 0 }, uRim: { value: new THREE.Vector3(0.22, 0.28, 0.36) } };
-  mat.envMapIntensity = 1.8;
+  mat.envMapIntensity = 1.45; // lower than before so dark parts can stay dark and light parts keep their separation
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, mat.userData.uniforms);
     shader.vertexShader = shader.vertexShader

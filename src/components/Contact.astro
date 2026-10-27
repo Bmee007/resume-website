@@ -9,7 +9,7 @@ import Icon from "./Icon.astro";
 >
   <span class="chapter-mark" aria-hidden="true">07</span>
   <!-- The fog: dense on arrival, cleared by scrolling (motion/veil.js) -->
-  <div class="fog-veil" aria-hidden="true"><span class="veil-layer veil-a"></span><span class="veil-layer veil-b"></span><span class="veil-layer veil-c"></span></div>
+  <div class="fog-veil" aria-hidden="true"><span class="veil-layer veil-a"></span><span class="veil-layer veil-b"></span><span class="veil-layer veil-c"></span><span class="veil-hint t-mono"><span class="hint-fine">Move your cursor to clear the fog</span><span class="hint-coarse">Scroll to clear the fog</span></span></div>
 
   <div class="wrap grid-12">
     <div class="contact-left">
@@ -68,12 +68,18 @@ import Icon from "./Icon.astro";
 
 <style>
   .contact { position: relative; padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
-  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(var(--vb, 18px)); -webkit-backdrop-filter: blur(var(--vb, 18px)); will-change: opacity; -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 26vh); mask-image: linear-gradient(to bottom, transparent 0, black 26vh); }
+  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(var(--vb, 18px)); -webkit-backdrop-filter: blur(var(--vb, 18px)); will-change: opacity; -webkit-mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent calc(var(--mr, 0px) * 0.5), black var(--mr, 0px)), linear-gradient(to bottom, transparent 0, black 26vh); mask-image: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), transparent calc(var(--mr, 0px) * 0.5), black var(--mr, 0px)), linear-gradient(to bottom, transparent 0, black 26vh); -webkit-mask-composite: source-in; mask-composite: intersect; }
   .veil-layer { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; filter: blur(60px); background: radial-gradient(closest-side, color-mix(in oklch, white 86%, var(--bg)) 0%, transparent 72%); animation: veil-drift 22s var(--ease-in-out) infinite alternate; translate: var(--vx, 0) var(--vy, 0); }
   .veil-a { left: -25vmax; top: -30vmax; }
   .veil-b { right: -30vmax; top: 10vmax; animation-duration: 27s; animation-delay: -9s; background: radial-gradient(closest-side, color-mix(in oklch, var(--storm) 28%, white) 0%, transparent 72%); }
   .veil-c { left: 20vmax; bottom: -45vmax; animation-duration: 31s; animation-delay: -17s; }
   @keyframes veil-drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(12vmax, -8vmax, 0) scale(1.18); } }
+  :global(.mist-canvas) { position: absolute; inset: 0; width: 100%; height: 100%; display: block; } /* created at runtime: scoped CSS would not reach it */
+  .fog-veil.has-mist { background: transparent; }
+  .fog-veil.has-mist .veil-layer { display: none; }
+  .veil-hint { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); z-index: 2; color: color-mix(in oklch, var(--ink) 55%, white); letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.68rem; white-space: nowrap; transition: opacity 0.4s; }
+  .hint-coarse { display: none; }
+  @media (pointer: coarse) { .hint-fine { display: none; } .hint-coarse { display: inline; } }
   @media (prefers-reduced-motion: reduce) { .fog-veil { display: none; } }
   @media (min-width: 900px) { .contact { padding-top: 7rem; } }
   section#contact { padding-top: clamp(6rem, 13vh, 8rem); } /* no model above the form: don't reserve the object zone */

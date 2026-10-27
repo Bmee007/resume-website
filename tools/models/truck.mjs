@@ -3,7 +3,7 @@
 // Entry point: `node truck.mjs out.glb`. Parts live in truck-lib / truck-cab / truck-details / truck-trailer.
 import fs from 'node:fs';
 import {
-  THREE, LoftGeometry, mergeGeometries, mergeVertices, parts, V3, V2, T, RX, RY, RZ, mul, add, box, rbox, cylX, cylY, cylZ, sphere,
+  THREE, LoftGeometry, mergeGeometries, mergeVertices, parts, partMats, setMat, V3, V2, T, RX, RY, RZ, mul, add, box, rbox, cylX, cylY, cylZ, sphere,
   tube, creased, rrect, loft, shapeFrom, ringGeom, plate, TY, ST, D1, D2, T1, T2, XO, XI, XS,
 } from './truck-lib.mjs';
 import { buildCab } from './truck-cab.mjs';
@@ -26,7 +26,7 @@ function tyreGeom(seg = 56) {
 const TYRE = tyreGeom(), TYRE_LO = tyreGeom(36); // inner duals are mostly hidden: cheaper tyre
 // rim: dish = +1 (face dished outward, steer), -1 (dished inward, outer dual), 0 (plain inner dual)
 function rimGeom(dish) {
-  const gs = [];
+  const gs = []; const drums = [];
   const discX = dish > 0 ? 0.07 : dish < 0 ? -0.075 : 0;
   const coneStartX = dish > 0 ? -0.01 : dish < 0 ? 0.085 : 0.0;
   const prof = [[0.255, -0.11], [0.29, -0.115], [0.29, -0.1], [0.265, -0.1], [0.265, 0.1], [0.29, 0.1], [0.29, 0.115], [0.26, 0.11], [0.26, coneStartX], [0.235, discX]];
@@ -51,7 +51,7 @@ function rimGeom(dish) {
   gs.push(disc);
   if (dish !== 0) {
     // back of disc (so hand holes are not see-through to nothing), brake drum
-    const drum = new THREE.CylinderGeometry(0.2, 0.2, 0.2, 32); drum.applyMatrix4(mul(T(discX - 0.115, 0, 0), RZ(Math.PI / 2))); gs.push(drum);
+    const drum = new THREE.CylinderGeometry(0.2, 0.2, 0.2, 32); drum.applyMatrix4(mul(T(discX - 0.115, 0, 0), RZ(Math.PI / 2))); drums.push(drum);
     // hub + lug nuts
     const hubC = new THREE.CylinderGeometry(0.113, 0.113, 0.05, 32); hubC.applyMatrix4(mul(T(discX + 0.02, 0, 0), RZ(Math.PI / 2))); gs.push(hubC);
     if (dish > 0) { const cap = new THREE.SphereGeometry(0.1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2); cap.scale(0.6, 1, 1); cap.applyMatrix4(mul(T(discX + 0.045, 0, 0), RZ(-Math.PI / 2))); gs.push(cap); }
@@ -64,13 +64,16 @@ function rimGeom(dish) {
     const hubC = new THREE.CylinderGeometry(0.113, 0.113, 0.04, 24); hubC.applyMatrix4(mul(T(discX, 0, 0), RZ(Math.PI / 2))); gs.push(hubC);
   }
   for (const g of gs) { if (g.attributes.uv) g.deleteAttribute('uv'); if (!g.attributes.normal) g.computeVertexNormals(); }
-  return mergeGeometries(gs.map((g) => (g.index ? g.toNonIndexed() : g)));
+  for (const g of drums) { if (g.attributes.uv) g.deleteAttribute('uv'); }
+  const flat = (a) => mergeGeometries(a.map((g) => (g.index ? g.toNonIndexed() : g)));
+  return { rim: flat(gs), drum: drums.length ? flat(drums) : null };
 }
 const RIM_OUT = rimGeom(1), RIM_IN = rimGeom(-1), RIM_PLAIN = rimGeom(0);
 function wheel(x, y, z, rim, tyre = TYRE) {
   const m = x >= 0 ? T(x, y, z) : mul(T(x, y, z), RY(Math.PI));
-  add(tyre.clone(), m);
-  add(rim.clone(), m);
+  setMat('rubber'); add(tyre.clone(), m);
+  setMat('chrome'); add(rim.rim.clone(), m);
+  if (rim.drum) { setMat('dark'); add(rim.drum.clone(), m); }
 }
 // steer
 wheel(XS, TY, ST, RIM_OUT); wheel(-XS, TY, ST, RIM_OUT);
@@ -80,6 +83,7 @@ for (const z of [D1, D2, T1, T2]) {
 }
 
 // ---------- tractor frame & drivetrain ----------
+setMat('dark');
 for (const s of [1, -1]) box(0.09, 0.28, 8.3, s * 0.43, 0.86, 1.45); // rails z -2.7 .. 5.6
 for (const z of [5.3, 3.6, 2.2, 0.9, -0.1, -1.1, -2.6]) box(0.86, 0.22, 0.08, 0, 0.86, z);
 box(0.9, 0.3, 0.1, 0, 0.86, -2.68); // rear crossmember
@@ -103,6 +107,7 @@ for (const z of [D1, D2]) {
 cylX(0.055, 1.9, 0, TY - 0.03, ST);
 for (const s of [1, -1]) box(0.08, 0.12, 1.5, s * 0.5, 0.62, ST); // leaf springs
 // drive fenders (half fenders) + mudflaps
+setMat('cab');
 for (const s of [1, -1]) for (const z of [D1, D2]) {
   const pts = []; const r0 = 0.57, r1 = 0.61, a0 = 0.35, a1 = Math.PI - 0.35, n = 20;
   // profile in (z,y): sweep an arc; build as loft of thin rectangles
@@ -113,15 +118,17 @@ for (const s of [1, -1]) for (const z of [D1, D2]) {
     secs.push([V3(cx - w0 / 2, TY + r0 * cy, z + r0 * cz), V3(cx + w0 / 2, TY + r0 * cy, z + r0 * cz), V3(cx + w0 / 2, TY + r1 * cy, z + r1 * cz), V3(cx - w0 / 2, TY + r1 * cy, z + r1 * cz)]);
   }
   loft(secs, { capStart: true, capEnd: true }, 40);
-  box(0.05, 0.3, 0.05, s * 0.92, TY + 0.6 + 0.15, z); // bracket
+  setMat('dark'); box(0.05, 0.3, 0.05, s * 0.92, TY + 0.6 + 0.15, z); setMat('cab'); // bracket
 }
-for (const s of [1, -1]) { box(0.6, 0.6, 0.02, s * 0.92, 0.56, D2 - 0.72); box(0.62, 0.05, 0.06, s * 0.92, 0.88, D2 - 0.7); box(0.05, 0.05, 0.4, s * 0.6, 0.9, D2 - 0.5); }
+for (const s of [1, -1]) { setMat('rubber'); box(0.6, 0.6, 0.02, s * 0.92, 0.56, D2 - 0.72); setMat('dark'); box(0.62, 0.05, 0.06, s * 0.92, 0.88, D2 - 0.7); box(0.05, 0.05, 0.4, s * 0.6, 0.9, D2 - 0.5); }
 // fifth wheel
+setMat('chrome');
 plate([[-0.46, 0.45], [0.46, 0.45], [0.46, -0.3], [0.3, -0.45], [0.17, -0.45], [0.055, -0.12], [-0.055, -0.12], [-0.17, -0.45], [-0.3, -0.45], [-0.46, -0.3]].map(([x, z]) => [x, z - 0.78]), 0.045, 1.245, 0.01);
 for (const s of [1, -1]) box(0.1, 0.19, 0.5, s * 0.36, 1.11, -0.78);
 box(1.0, 0.03, 0.7, 0, 1.03, -0.78);
 
 // ---------- hood ----------
+setMat('cab');
 // Two-tier section: wide fender shoulders + narrower hood crown. CCW from bottom-right.
 function hoodSec(z, yb, yf, yc, wf, wc, rf, rc, rb = 0.06, n = 6) {
   const arc = (cx, cy, r, a0) => { const o = []; for (let i = 0; i <= n; i++) { const a = a0 + (i / n) * (Math.PI / 2); o.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); } return o; };
@@ -153,19 +160,20 @@ loft(hoodSecs, { capStart: false, capEnd: false }, 30);
   const grille = rrect(0, 1.2, 1.76, 1.3, 0.08, 0.08);
   const face = new THREE.ShapeGeometry(shapeFrom(outer, [grille]), 4); add(face, T(0, 0, 5.72));
   // grille recess back plate, bars, bezel
-  box(1.3, 0.56, 0.02, 0, 1.48, 5.615);
+  setMat('dark'); box(1.3, 0.56, 0.02, 0, 1.48, 5.615); setMat('chrome');
   for (let i = 0; i < 7; i++) box(1.26, 0.03, 0.05, 0, 1.24 + i * 0.08, 5.67);
   box(0.035, 0.54, 0.05, 0, 1.48, 5.675);
   add(ringGeom(1.36, 0.62, 0.1, 0.03, 0.03), T(0, 1.48, 5.72));
   // headlights: bezel + recessed lens
   for (const s of [1, -1]) {
     add(ringGeom(0.42, 0.2, 0.05, 0.022, 0.025), T(s * 0.74, 1.08, 5.72));
-    rbox(0.37, 0.15, 0.03, 0.01, s * 0.74, 1.08, 5.715);
+    setMat('lamp'); rbox(0.37, 0.15, 0.03, 0.01, s * 0.74, 1.08, 5.715); setMat('chrome');
   }
   // hood badge / emblem
   rbox(0.14, 0.1, 0.02, 0.01, 0, 1.82, 5.725);
 }
 // bumper (top-view shape), two-piece with lower air dam
+setMat('chrome');
 {
   const bump = (zf, xi, zb, w) => {
     const pts = [];
@@ -179,10 +187,11 @@ loft(hoodSecs, { capStart: false, capEnd: false }, 30);
   plate(bump(5.92, 0.85, 5.3, 1.25), 0.5, 0.96, 0.03);
   plate(bump(5.86, 0.8, 5.35, 1.2), 0.12, 0.45, 0.012);
   for (const s of [1, -1]) { add(ringGeom(0.22, 0.14, 0.03, 0.02, 0.02), T(s * 0.95, 0.7, 5.84)); } // fog lights (approx on curve)
-  box(0.3, 0.16, 0.02, 0, 0.62, 5.93); // licence plate
-  for (const s of [1, -1]) box(0.08, 0.06, 0.1, s * 0.35, 0.38, 5.82); // tow hooks
+  setMat('white'); box(0.3, 0.16, 0.02, 0, 0.62, 5.93); // licence plate
+  setMat('dark'); for (const s of [1, -1]) box(0.08, 0.06, 0.1, s * 0.35, 0.38, 5.82); // tow hooks
 }
 // steer fender arches
+setMat('cab');
 for (const s of [1, -1]) {
   const r0 = 0.56, r1 = 0.65, a0 = -0.15, a1 = Math.PI + 0.15, n = 22, w0 = 0.5, cx = s * 0.98;
   const secs = [];
@@ -204,36 +213,76 @@ if (process.env.TRUCK_DEBUG) console.log('after details', triSoFar());
 buildTrailer();
 if (process.env.TRUCK_DEBUG) console.log('after trailer', triSoFar());
 
-// ---------- merge, weld, export ----------
-let merged = mergeGeometries(parts, false);
-merged = mergeVertices(merged, 1e-4);
-const pos = merged.attributes.position, nor = merged.attributes.normal;
-merged.computeBoundingBox();
-const bb = merged.boundingBox;
-const triCount = merged.index.count / 3;
-console.log('tris', triCount, 'verts', pos.count, 'bbox', bb.min.toArray().map((v) => +v.toFixed(2)), bb.max.toArray().map((v) => +v.toFixed(2)));
+// ---------- ground contact shadow ----------
+// Thin dark flat superellipse just under the tyres (the loader keeps only one grey per material), so the truck sits on the page.
+setMat('shadow');
+{
+  const cz = -5.45, hl = 10.5, hw = 2.0, N = 120, e = 5, pts = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a);
+    pts.push([hw * Math.sign(c) * Math.abs(c) ** (2 / e), hl * Math.sign(s) * Math.abs(s) ** (2 / e)]);
+  }
+  const g = new THREE.ShapeGeometry(shapeFrom(pts), 1); // XY plane facing +Z; (x, y) -> (x, 0, -y) facing +Y
+  add(g, mul(T(0, -0.004, cz), RX(-Math.PI / 2)));
+}
 
-function writeGLB(geom, file) {
-  const p = new Float32Array(geom.attributes.position.array);
-  const n = new Float32Array(geom.attributes.normal.array);
-  const idx = new Uint32Array(geom.index.array);
+// ---------- merge per material, weld, export ----------
+// Luminance (linear baseColor) per material: the site loader maps it to a grey (0.28 + 0.48 * clamp(L, 0.12, 1)).
+const MATS = {
+  rubber: 0.05, // tyres, mud flaps, window seals, hoses
+  dark: 0.06, // frame, axles, drivetrain, brake drums, landing gear, trailer underside
+  chrome: 0.9, // rims, bumper, grille, mirrors, stacks, straps, fifth wheel
+  alu: 0.72, // fuel tanks, step treads
+  glass: 0.1, // windshield, side windows, mirror glass
+  cab: 0.48, // cab paint, hood, fenders
+  sleeper: 0.42, // sleeper skin, roof fairing
+  white: 0.9, // 53' van body, doors
+  trim: 0.3, // roof seams, skirts, rails, hinges, impact guard
+  lamp: 0.5, // lenses
+  shadow: 0.24, // ground contact shadow
+};
+// Object-space normal that roughly faces the site camera in the truck chapters (yaw ~0.5, tilt ~0.3): n = Ry^-1 Rx^-1 (0,0,1).
+const SHADOW_N = (process.env.SHADOW_N || '-0.46,0.3,0.84').split(',').map(Number);
+const groups = new Map();
+parts.forEach((g, i) => { const m = partMats[i]; if (!MATS[m]) throw new Error('unknown material ' + m); (groups.get(m) || groups.set(m, []).get(m)).push(g); });
+const prims = [];
+let triCount = 0;
+const bb = new THREE.Box3();
+for (const name of Object.keys(MATS)) {
+  const list = groups.get(name); if (!list) continue;
+  const geom = mergeVertices(mergeGeometries(list, false), 1e-4);
+  if (name === 'shadow') { // camera-facing normals: at grazing incidence an up-facing disc is washed out by sheen / fresnel / clearcoat
+    const na = geom.attributes.normal; for (let i = 0; i < na.count; i++) na.setXYZ(i, ...SHADOW_N);
+  }
+  geom.computeBoundingBox(); bb.union(geom.boundingBox);
+  triCount += geom.index.count / 3;
+  prims.push({ name, geom });
+  console.log(name.padEnd(8), 'tris', geom.index.count / 3, 'L', MATS[name]);
+}
+console.log('tris', triCount, 'bbox', bb.min.toArray().map((v) => +v.toFixed(2)), bb.max.toArray().map((v) => +v.toFixed(2)));
+
+function writeGLB(prims, file) {
   const pad4 = (n) => (n + 3) & ~3;
-  const bufs = [p, n, idx]; const views = []; let off = 0;
-  for (const b of bufs) { views.push({ buffer: 0, byteOffset: off, byteLength: b.byteLength }); off += pad4(b.byteLength); }
-  views[0].target = 34962; views[1].target = 34962; views[2].target = 34963;
+  const chunks = []; const views = []; const accessors = []; let off = 0;
+  const push = (arr, target) => { views.push({ buffer: 0, byteOffset: off, byteLength: arr.byteLength, target }); chunks.push([arr, off]); off += pad4(arr.byteLength); return views.length - 1; };
+  const primitives = []; const materials = [];
+  prims.forEach(({ name, geom }, mi) => {
+    const p = new Float32Array(geom.attributes.position.array), n = new Float32Array(geom.attributes.normal.array), idx = new Uint32Array(geom.index.array);
+    geom.computeBoundingBox();
+    const a0 = accessors.length;
+    accessors.push({ bufferView: push(p, 34962), componentType: 5126, count: p.length / 3, type: 'VEC3', min: geom.boundingBox.min.toArray(), max: geom.boundingBox.max.toArray() });
+    accessors.push({ bufferView: push(n, 34962), componentType: 5126, count: n.length / 3, type: 'VEC3' });
+    accessors.push({ bufferView: push(idx, 34963), componentType: 5125, count: idx.length, type: 'SCALAR' });
+    const L = MATS[name];
+    materials.push({ name, pbrMetallicRoughness: { baseColorFactor: [L, L, L, 1], metallicFactor: 0, roughnessFactor: 0.6 } });
+    primitives.push({ attributes: { POSITION: a0, NORMAL: a0 + 1 }, indices: a0 + 2, material: mi, mode: 4 });
+  });
   const bin = Buffer.alloc(off);
-  for (let i = 0; i < bufs.length; i++) Buffer.from(bufs[i].buffer, bufs[i].byteOffset, bufs[i].byteLength).copy(bin, views[i].byteOffset);
+  for (const [arr, o] of chunks) Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength).copy(bin, o);
   const json = {
     asset: { version: '2.0', generator: 'resume-website procedural truck builder' },
     scene: 0, scenes: [{ nodes: [0] }], nodes: [{ mesh: 0, name: 'truck' }],
-    meshes: [{ name: 'truck', primitives: [{ attributes: { POSITION: 0, NORMAL: 1 }, indices: 2, material: 0, mode: 4 }] }],
-    materials: [{ name: 'clay', pbrMetallicRoughness: { baseColorFactor: [0.78, 0.8, 0.82, 1], metallicFactor: 0, roughnessFactor: 0.6 } }],
-    accessors: [
-      { bufferView: 0, componentType: 5126, count: p.length / 3, type: 'VEC3', min: bb.min.toArray(), max: bb.max.toArray() },
-      { bufferView: 1, componentType: 5126, count: n.length / 3, type: 'VEC3' },
-      { bufferView: 2, componentType: 5125, count: idx.length, type: 'SCALAR' },
-    ],
-    bufferViews: views, buffers: [{ byteLength: bin.length }],
+    meshes: [{ name: 'truck', primitives }], materials, accessors, bufferViews: views, buffers: [{ byteLength: bin.length }],
   };
   let js = Buffer.from(JSON.stringify(json)); const jsPad = pad4(js.length); js = Buffer.concat([js, Buffer.alloc(jsPad - js.length, 0x20)]);
   const header = Buffer.alloc(12); header.write('glTF', 0); header.writeUInt32LE(2, 4); header.writeUInt32LE(12 + 8 + js.length + 8 + bin.length, 8);
@@ -242,4 +291,4 @@ function writeGLB(geom, file) {
   fs.writeFileSync(file, Buffer.concat([header, ch1, js, ch2, bin]));
   console.log('wrote', file, fs.statSync(file).size, 'bytes');
 }
-writeGLB(merged, OUT);
+writeGLB(prims, OUT);
