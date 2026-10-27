@@ -104,7 +104,8 @@ const chapters = [
     text-transform: uppercase;
   }
   .brand-mark { font-weight: 500; color: var(--ink); }
-  .brand-name { color: var(--ink-3); }
+  .brand-name { color: var(--ink-3); white-space: nowrap; }
+  @media (max-width: 520px) { .brand-name { display: none; } }
 
   .desktop-nav { display: none; gap: 2rem; }
   @media (min-width: 900px) { .desktop-nav { display: flex; } #hamburger { display: none; } }
@@ -182,7 +183,7 @@ const chapters = [
   }
   @media (min-width: 900px) { #rail { display: flex; } }
   #rail { transition: opacity 0.4s var(--ease-out); }
-  body.work-pinned #rail { opacity: 0; pointer-events: none; }
+  body.work-pinned #rail, body.work-near #rail { opacity: 0; pointer-events: none; }
   .rail-num { color: var(--ink); font-size: 0.6875rem; }
   .rail-track { width: 1px; height: 7rem; background: var(--line); position: relative; overflow: hidden; }
   .rail-fill { position: absolute; inset: 0; background: var(--ink); transform: scaleY(0); transform-origin: top; }

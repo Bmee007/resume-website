@@ -41,8 +41,8 @@ const spec = [
 <section
   id="experience" class="chapter record"
   data-scene="clearing" data-tone="light" data-chapter="05" data-label="Record"
-  data-lattice="ledger" data-lattice-cx="0.84" data-lattice-cy="0.28" data-lattice-scale="0.38" data-lattice-opacity="0.55" data-lattice-rx="0.72" data-lattice-ry="-0.35"
-  data-lattice-then="pills" data-lattice-then-at="#skills" data-lattice-then-cx="0.9" data-lattice-then-cy="0.25" data-lattice-then-scale="0.28" data-lattice-then-rx="0.1" data-lattice-then-ry="-0.5"
+  data-lattice="ledger" data-lattice-cx="0.81" data-lattice-cy="0.3" data-lattice-scale="0.5" data-lattice-opacity="0.55" data-lattice-rx="0.72" data-lattice-ry="-0.35"
+  data-lattice-then="pills" data-lattice-then-at="#skills" data-lattice-then-cx="0.91" data-lattice-then-cy="0.36" data-lattice-then-scale="0.3" data-lattice-then-rx="0.1" data-lattice-then-ry="-0.5"
 >
   <span class="chapter-mark" aria-hidden="true">05</span>
 
@@ -158,7 +158,7 @@ const spec = [
     border-top: 1px solid var(--line-2);
   }
   @media (min-width: 700px) { .spec-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (min-width: 1100px) { .spec-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (min-width: 1100px) { .spec-grid { grid-template-columns: repeat(4, 1fr); padding-right: clamp(0px, 13vw, 200px); } } /* gutter for the pill bottle */
   .spec-col {
     display: grid; align-content: start; gap: 0.75rem;
     padding: 1.75rem 1.5rem 2rem 0;

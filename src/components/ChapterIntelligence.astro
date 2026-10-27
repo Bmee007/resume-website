@@ -6,7 +6,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
 <section
   id="ask" class="chapter intel"
   data-scene="summit" data-tone="light" data-chapter="03" data-label="Intelligence"
-  data-lattice="bot" data-lattice-cx="0.89" data-lattice-cy="0.3" data-lattice-scale="0.4" data-lattice-opacity="0.6" data-lattice-rx="0.12" data-lattice-ry="-0.4"
+  data-lattice="bot" data-lattice-cx="0.87" data-lattice-cy="0.32" data-lattice-scale="0.5" data-lattice-opacity="0.6" data-lattice-rx="0.12" data-lattice-ry="-0.4"
 >
   <span class="chapter-mark" aria-hidden="true">03</span>
 
@@ -57,6 +57,16 @@ import ChartHundred from "./charts/ChartHundred.astro";
             </button>
           </div>
           <div id="ask-status" class="t-mono ask-status" aria-live="polite" aria-atomic="true"></div>
+          <div class="ask-more">
+            <p class="ask-more-label t-mono">Also ask</p>
+            <ul class="ask-more-list">
+              <li><button type="button" class="ask-more-btn" data-prompt="How have you integrated AI into ERP, WMS, and TMS systems?"><span class="t-mono">01</span><span class="ask-more-q">How I integrated AI into ERP, WMS and TMS</span><span class="ask-more-go" aria-hidden="true">→</span></button></li>
+              <li><button type="button" class="ask-more-btn" data-prompt="How do you build AI agents with harnesses and workflows?"><span class="t-mono">02</span><span class="ask-more-q">How I build agents with harnesses and workflows</span><span class="ask-more-go" aria-hidden="true">→</span></button></li>
+              <li><button type="button" class="ask-more-btn" data-prompt="How do you handle hallucinations in production LLMs?"><span class="t-mono">03</span><span class="ask-more-q">How I handle hallucinations in production</span><span class="ask-more-go" aria-hidden="true">→</span></button></li>
+              <li><button type="button" class="ask-more-btn" data-prompt="Tell me about your LLM memory research."><span class="t-mono">04</span><span class="ask-more-q">My LLM memory research</span><span class="ask-more-go" aria-hidden="true">→</span></button></li>
+              <li><button type="button" class="ask-more-btn" data-prompt="How do you measure ROI on AI projects?"><span class="t-mono">05</span><span class="ask-more-q">How I measure ROI on AI projects</span><span class="ask-more-go" aria-hidden="true">→</span></button></li>
+            </ul>
+          </div>
         </div>
 
         <!-- Readout: one ledger, rows re-order/expand via FLIP -->
@@ -176,6 +186,22 @@ import ChartHundred from "./charts/ChartHundred.astro";
   .ask-send:disabled { opacity: 0.25; }
   .ask-send:not(:disabled):hover { transform: translateX(3px); }
   .ask-status { min-height: 1rem; color: var(--ink-3); }
+  .ask-more { margin-top: 1.75rem; }
+  .ask-more-label { color: var(--ink-3); margin: 0 0 0.5rem; }
+  .ask-more-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-2); }
+  .ask-more-btn {
+    width: 100%; display: grid; grid-template-columns: 2rem 1fr auto; align-items: center; gap: 0.75rem; text-align: left;
+    padding: 0.85rem 0; background: none; border: 0; border-bottom: 1px solid var(--line-2); color: var(--ink-2); cursor: pointer;
+    font: inherit; transition: background 0.3s var(--ease-out), color 0.3s;
+  }
+  .ask-more-btn .t-mono { color: var(--accent); }
+  .ask-more-q { font-size: 0.98rem; color: var(--ink); }
+  .ask-more-go { color: var(--ink-3); transition: transform 0.3s var(--ease-out), color 0.3s; }
+  .ask-more-btn:hover, .ask-more-btn:focus-visible { background: var(--surface); }
+  .ask-more-btn:hover .ask-more-go, .ask-more-btn:focus-visible .ask-more-go { transform: translateX(4px); color: var(--ink); }
+  .ask-more-btn.is-asked .ask-more-q { color: var(--ink-3); }
+  .ask-more-btn.is-asked .ask-more-go::before { content: '✓ '; }
+  @media (pointer: coarse) { .ask-more-btn { min-height: 44px; } }
 
   /* Readout ledger */
   .readout { display: grid; align-content: start; padding-block: 1rem; }

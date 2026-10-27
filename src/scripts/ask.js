@@ -161,14 +161,41 @@ export function initAsk() {
   let current = null;
 
   input?.addEventListener('input', () => { if (send) send.disabled = !input.value.trim(); });
-  document.querySelectorAll('.ask-chip').forEach((chip) => chip.addEventListener('click', () => {
+  let touched = false;
+  document.querySelectorAll('.ask-chip, .ask-more-btn').forEach((chip) => chip.addEventListener('click', () => {
     const p = chip.dataset.prompt; if (!p) return;
+    touched = true; chip.classList.add('is-asked');
     if (input) input.value = p; if (send) send.disabled = false; ask(p);
   }));
+  input?.addEventListener('focus', () => { touched = true; });
   send?.addEventListener('click', () => { const p = input?.value.trim(); if (p) ask(p); });
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { const p = input.value.trim(); if (p) { e.preventDefault(); ask(p); } }
   });
+
+  // First time the console is mostly on screen and nobody has touched it: type one question and show its saved answer
+  // (never the live model, so a page view costs nothing). Reduced motion: the answer just appears.
+  const consoleEl = document.querySelector('#ask .console');
+  if (consoleEl && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      setTimeout(() => { if (!touched) demo(); }, 1100);
+    }, { threshold: 0.55 });
+    io.observe(consoleEl);
+  }
+  async function demo() {
+    const prompt = 'What results have you driven at Kohl & Frisch?'; const canned = CANNED[prompt]; if (!canned || !input) return;
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion) for (let i = 1; i <= prompt.length; i++) { if (touched) return; input.value = prompt.slice(0, i); await new Promise((r) => setTimeout(r, 22)); }
+    if (touched) { return; }
+    input.value = prompt; if (send) send.disabled = false;
+    if (promptEl) fadeSwap(promptEl, () => { promptEl.textContent = prompt; });
+    focusRow(canned.card);
+    fadeSwap(document.getElementById('ai-response-text'), () => { document.getElementById('ai-response-text').textContent = canned.text; });
+    if (status) status.textContent = 'SAMPLE ANSWER · ASK YOUR OWN ABOVE';
+    document.querySelector('.ask-chip[data-prompt="' + prompt.replace(/"/g, '\\"') + '"]')?.classList.add('is-asked');
+  }
 
   async function ask(prompt) {
     if (current) { current.abort(); current = null; }

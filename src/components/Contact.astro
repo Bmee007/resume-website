@@ -68,14 +68,16 @@ import Icon from "./Icon.astro";
 
 <style>
   .contact { position: relative; padding-block: clamp(8rem, 16vw, 14rem) 2rem; min-height: 100svh; display: grid; align-content: space-between; }
-  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); will-change: opacity; }
-  .veil-layer { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; filter: blur(60px); background: radial-gradient(closest-side, color-mix(in oklch, white 70%, var(--bg)) 0%, transparent 72%); animation: veil-drift 22s var(--ease-in-out) infinite alternate; }
+  .fog-veil { position: absolute; inset: 0; z-index: 6; pointer-events: none; overflow: hidden; background: color-mix(in oklch, var(--bg) 88%, white); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); will-change: opacity; -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 26vh); mask-image: linear-gradient(to bottom, transparent 0, black 26vh); }
+  .veil-layer { position: absolute; width: 90vmax; height: 90vmax; border-radius: 50%; filter: blur(60px); background: radial-gradient(closest-side, color-mix(in oklch, white 86%, var(--bg)) 0%, transparent 72%); animation: veil-drift 22s var(--ease-in-out) infinite alternate; translate: var(--vx, 0) var(--vy, 0); }
   .veil-a { left: -25vmax; top: -30vmax; }
   .veil-b { right: -30vmax; top: 10vmax; animation-duration: 27s; animation-delay: -9s; background: radial-gradient(closest-side, color-mix(in oklch, var(--storm) 28%, white) 0%, transparent 72%); }
   .veil-c { left: 20vmax; bottom: -45vmax; animation-duration: 31s; animation-delay: -17s; }
   @keyframes veil-drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(12vmax, -8vmax, 0) scale(1.18); } }
   @media (prefers-reduced-motion: reduce) { .fog-veil { display: none; } }
   @media (min-width: 900px) { .contact { padding-top: 7rem; } }
+  section#contact { padding-top: clamp(6rem, 13vh, 8rem); } /* no model above the form: don't reserve the object zone */
+  @media (min-width: 900px) { section#contact { padding-top: 7rem; } }
   .contact-left { grid-column: 1 / -1; display: grid; gap: 1.5rem; align-content: start; }
   .contact-heading { font-size: clamp(2.6rem, 7vw, 7rem); max-width: 10ch; }
   .contact-social { display: flex; gap: 2.5rem; flex-wrap: wrap; margin-top: 1rem; }
@@ -86,6 +88,7 @@ import Icon from "./Icon.astro";
   .contact-success .t-statement { font-size: 1.5rem; }
 
   .site-footer {
+    align-items: center;
     margin-top: clamp(5rem, 10vw, 8rem);
     padding-top: 1.5rem;
     border-top: 1px solid var(--line);

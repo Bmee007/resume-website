@@ -31,6 +31,8 @@ export function initWork() {
           },
         },
       });
+      // The rail is hidden a little before and after the pin too, so it never overprints a card at the track edge
+      ScrollTrigger.create({ trigger: section, start: 'top 92%', end: 'bottom 8%', onToggle: (self) => document.body.classList.toggle('work-near', self.isActive) });
       // Panels parallax slightly against the track for depth
       track.querySelectorAll('.case-panel .case-num').forEach((el) => {
         gsap.fromTo(el, { xPercent: 30 }, { xPercent: -30, ease: 'none', scrollTrigger: { containerAnimation: tween, trigger: el, start: 'left right', end: 'right left', scrub: true } });

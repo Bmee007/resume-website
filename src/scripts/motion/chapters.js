@@ -82,7 +82,7 @@ export function initChapters() {
       // entry line: the chapter's top must have risen past the object's top edge (in viewport heights)
       // entry line in viewport heights; data-lattice-enter overrides the derived one (e.g. to wait for a heading to pass)
       const e0 = off ? 0.25 : d.latticeEnter !== undefined ? Math.max(0.05, Math.min(0.95, parseFloat(d.latticeEnter))) : Math.max(0.12, Math.min(0.95, next.cy - next.scale * 0.33));
-      const e1 = Math.max(0, e0 - 0.2);
+      const e1 = Math.max(0, e0 - (!off && next.opacity < 0.7 ? 0.1 : 0.2)); // ghosts finish assembling sooner, so they are formed when the headline lands
       // data-lattice-then-at="<selector>": the second model assembles as that element rises into view
       const thenAt = then && d.latticeThenAt ? s.querySelector(d.latticeThenAt) : null;
       // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
