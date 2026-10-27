@@ -204,6 +204,18 @@ const add = (part, g, xf, crease = 0) => {
   if (PERIPH.parts.has(part)) { g.translate(0, 0, -PERIPH.cz); g.scale(PERIPH.scale, PERIPH.scale, PERIPH.scale); g.translate(0, 0, PERIPH.cz); }
   parts[part].push(finish(g, crease));
 };
+// Bend the front-facing vertex normals of a surface toward 'down' (by tiltDeg) so it shades darker than the flat bright clay
+// around it. The site's clay material is lit by one key + a bright environment, so per-mesh vertex shade alone barely shows;
+// authored normals survive the loader, which makes the recessed glass read as a dark CRT-style panel behind bright raised text.
+function bendFrontNormals(g, tiltDeg) {
+  const n = g.attributes.normal; const t = tiltDeg * DEG; const bx = 0, by = -Math.sin(t), bz = Math.cos(t);
+  for (let i = 0; i < n.count; i++) {
+    const nz = n.getZ(i); if (nz < 0.5) continue; const f = nz > 0.9 ? 1 : (nz - 0.5) / 0.4;
+    const x = n.getX(i) * (1 - f) + bx * f, y = n.getY(i) * (1 - f) + by * f, z = nz * (1 - f) + bz * f; const l = Math.hypot(x, y, z) || 1;
+    n.setXYZ(i, x / l, y / l, z / l);
+  }
+  return g;
+}
 const CIRCLE = (r, n = 40) => Array.from({ length: n }, (_, i) => [r * Math.cos((i / n) * 2 * Math.PI), r * Math.sin((i / n) * 2 * Math.PI)]);
 
 // =============================================================================
@@ -222,6 +234,7 @@ const HOLE_W = SCREEN_W + 2 * GAP, HOLE_H = SCREEN_H + 2 * GAP;
 const PANEL_W = HOLE_W + 2 * BEZEL, PANEL_H = HOLE_H + BEZEL + CHIN;
 const HOLE_CY = (CHIN - BEZEL) / 2;            // screen centre sits above the panel centre
 const GLASS_FRONT = -3.2;                      // glass recessed 3.2 mm behind the bezel face
+const GLASS_TILT = 90, CARD_TILT = 42;         // normal bend (deg, downward) for the dark glass / mid-grey card
 const TEXT_H = 1.2;                            // raised character height
 const BULGE_D = 40, BULGE_CY = -12;            // rear housing swell: depth behind the 5 mm edge, vertical centre
 const PLATEAU_Z = -(EDGE + BULGE_D);
@@ -243,7 +256,7 @@ const monitor = [], screenParts = { screen: [], screentext: [], screencard: [] }
   const logoRing = new THREE.TorusGeometry(2.0, 0.35, 8, 28); logoRing.translate(0, logoY, -0.95); monitor.push([logoRing, 0]);
 
   // recessed glass (dark shade) with the 5250 screen in raised block text
-  const glass = rbox(SCREEN_W, SCREEN_H, 8, 1.2, 3); glass.translate(0, HOLE_CY, GLASS_FRONT - 4); screenParts.screen.push([glass, 0]);
+  const glass = rbox(SCREEN_W, SCREEN_H, 8, 1.2, 3); glass.translate(0, HOLE_CY, GLASS_FRONT - 4); bendFrontNormals(glass, GLASS_TILT); screenParts.screen.push([glass, 0]);
   const COLS = 80, ROWS = 24;
   const mx = 7, my = 6;                                      // margin inside the glass
   const TW = SCREEN_W - 2 * mx, TH = SCREEN_H - 2 * my;
@@ -273,21 +286,18 @@ const monitor = [], screenParts = { screen: [], screentext: [], screencard: [] }
   L[22] = ' F23=SET INITIAL MENU';
   L[23] = ' (C) COPYRIGHT IBM CORP. 1980, 1999.';
   const HILITE_ROW = 8, HILITE_C0 = 4, HILITE_C1 = 24;     // highlighted menu row (wider raised bar)
-  const barBox = (c0, c1, r, h, zBase, shadeList) => {
-    const b = new THREE.BoxGeometry((c1 - c0) * cellW, cellH * 0.94, h); b.translate(cx0((c0 + c1) / 2), cy0(r + 0.5), zBase + h / 2); shadeList.push([b, 0]);
-  };
-  // text layers: normal text, then text sitting on top of reverse-video bars
+    // text layers: normal text, then text sitting on top of reverse-video bars
   const bodyLines = L.map((s, r) => (r === 0 || r === HILITE_ROW ? '' : s));
   const t1 = rasterText(bodyLines, COLS, ROWS);
   screenParts.screentext.push([gridRelief(t1.lit, t1.W, t1.H, px, py, ox, oy, GLASS_FRONT, TEXT_H), 1]);
-  // header bar (full width, raised) + its text lifted on top
-  barBox(0, COLS, 0, TEXT_H, GLASS_FRONT, screenParts.screentext);
-  const hdrOnly = L.map((s, r) => (r === 0 ? s : '')); const t2 = rasterText(hdrOnly, COLS, ROWS);
-  screenParts.screentext.push([gridRelief(t2.lit, t2.W, t2.H, px, py, ox, oy, GLASS_FRONT + TEXT_H, 0.9), 1]);
-  // highlighted menu row
-  barBox(HILITE_C0, HILITE_C1, HILITE_ROW, TEXT_H, GLASS_FRONT, screenParts.screentext);
-  const hiOnly = L.map((s, r) => (r === HILITE_ROW ? s : '')); const t3 = rasterText(hiOnly, COLS, ROWS);
-  screenParts.screentext.push([gridRelief(t3.lit, t3.W, t3.H, px, py, ox, oy, GLASS_FRONT + TEXT_H, 0.9), 1]);
+  // reverse-video bars (header + highlighted menu row): a raised bar with the characters cut out of it
+  const reverseBar = (c0, c1, r) => {
+    const rt = rasterText([L[r].slice(c0, c1)], c1 - c0, 1); const inv = new Uint8Array(rt.lit.length);
+    for (let i = 0; i < inv.length; i++) inv[i] = rt.lit[i] ? 0 : 1;
+    screenParts.screentext.push([gridRelief(inv, rt.W, rt.H, px, py, cx0(c0), cy0(r), GLASS_FRONT, TEXT_H), 1]);
+  };
+  reverseBar(0, COLS, 0);
+  reverseBar(HILITE_C0, HILITE_C1, HILITE_ROW);
   // blinking-cursor block after "===> "
   { const b = new THREE.BoxGeometry(cellW * 0.85, cellH * 0.9, 2.4); b.translate(cx0(6.5), cy0(19.5), GLASS_FRONT + 1.2); screenParts.screentext.push([b, 0]); }
   // F-key footer separator rule
@@ -295,8 +305,8 @@ const monitor = [], screenParts = { screen: [], screentext: [], screencard: [] }
 
   // modern "D365" card in the right-hand corner: mid-grey slab + bright tile grid
   {
-    const CW = 236, CH = 168, ccx = SCREEN_W / 2 - 18 - CW / 2, ccy = HOLE_CY - SCREEN_H / 2 + 16 + CH / 2 + 24;
-    const slab = rbox(CW, CH, 3.0, 1.4, 3); slab.translate(ccx, ccy, GLASS_FRONT + 1.5); screenParts.screencard.push([slab, 0]);
+    const CW = 236, CH = 168, ccx = SCREEN_W / 2 - 18 - CW / 2, ccy = HOLE_CY - SCREEN_H / 2 + CH / 2 + 62;
+    const slab = rbox(CW, CH, 3.0, 1.4, 3); slab.translate(ccx, ccy, GLASS_FRONT + 1.5); bendFrontNormals(slab, CARD_TILT); screenParts.screencard.push([slab, 0]);
     const zc = GLASS_FRONT + 3.0; const R = (w, h, dz, x, y, r = 1.0) => { const b = rbox(w, h, dz, Math.min(r, dz / 2 - 0.01, w / 2 - 0.01), 2); b.translate(ccx + x, ccy + y, zc + dz / 2 - 0.05); screenParts.screentext.push([b, 0]); };
     R(CW - 12, 14, 1.6, 0, CH / 2 - 14, 1);                       // title bar
     for (let i = 0; i < 3; i++) R(5, 5, 1.2, -CW / 2 + 16 + i * 9, CH / 2 - 14, 2);   // window dots on the title bar (little squares)

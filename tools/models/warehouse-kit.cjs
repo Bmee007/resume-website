@@ -8,8 +8,8 @@ const THREE = require(path.resolve(__dirname, '../../node_modules/three/build/th
 
 /** linear luminance per material group (loader maps lum -> grey 0.4 + 0.36 * clamp(lum, 0.35, 1)) */
 const MATERIALS = {
-  wall: 0.9, roof: 0.62, ground: 0.36, court: 0.55, concrete: 0.86, dark: 0.35,
-  trailer: 0.98, metal: 0.7, green: 0.5, container: 0.6, bed: 0.45,
+  wall: 0.95, roof: 0.46, ground: 0.35, court: 0.36, concrete: 0.9, dark: 0.35,
+  trailer: 1.0, metal: 0.72, green: 0.55, container: 0.6, bed: 0.42,
 };
 
 function createKit() {

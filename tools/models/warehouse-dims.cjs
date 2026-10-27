@@ -9,9 +9,9 @@ const DOOR_W = 3.4, DOOR_H = 3.8, DOOR_N = 14, DOOR_PITCH = 5.2, DOOR_X0 = -27.2
 const DOOR_X = Array.from({ length: DOOR_N }, (_, k) => DOOR_X0 + DOOR_PITCH * k);
 const OFF = { x0: -52, x1: -34, z0: 0, h: 8.8, p: 9.5, lobbyZ: 8.5 }; // recessed office wing in the front-west notch
 const CAN = { x0: -30, x1: 43.6, d: 3.2, y: 6.5 };     // dock canopy
-const PLINTH = { x0: -60, x1: 60, z0: -36, z1: 62, th: 1.0, bevel: 0.6 };
-const COURT = { x0: -25, x1: 45, z1: 59.5 };           // truck court (concrete) inside the security fence
-const YARD = { x0: 47.5, x1: 59, z0: -33, z1: 58 };    // fenced container / pallet yard, east of the building
+const PLINTH = { x0: -60, x1: 60, z0: -34, z1: 54, th: 1.0, bevel: 0.6 };
+const COURT = { x0: -32, x1: 45, z1: 51.5 };           // truck court (concrete) inside the security fence
+const YARD = { x0: 47.5, x1: 59, z0: -31.5, z1: 50 };    // fenced container / pallet yard, east of the building
 
 /** roof surface height at depth z (sloping from the ridge to both long walls) */
 function roofY(z) {
