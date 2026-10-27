@@ -128,11 +128,12 @@ const spec = [
   .is-featured .entry-year { color: var(--ink); }
   .timeline-entry:hover .entry-year { color: var(--accent); }
   .entry-body { display: grid; gap: 1.25rem; }
+  @media (min-width: 1100px) { .entry-body { max-width: min(42rem, 100%); } }   /* keeps the right side clear for the ledger beside the roles */
   .entry-head { display: grid; gap: 0.4rem; }
   .entry-title { margin: 0; font-weight: 400; font-size: clamp(1.15rem, 1.6vw, 1.45rem); color: var(--ink); letter-spacing: 0.01em; }
   .entry-meta { color: var(--ink-3); }
   .entry-bullets { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.5rem; max-width: 46rem; }
-  .entry-bullets li { color: var(--ink-2); line-height: 1.65; font-size: 0.95rem; }
+  .entry-bullets li { color: var(--ink-2); line-height: 1.65; font-size: 1.02rem; }
   .entry-bullets li :global(em) { font-style: normal; color: var(--ink); font-weight: 500; }
 
   @media (min-width: 900px) {

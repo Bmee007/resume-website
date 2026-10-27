@@ -144,7 +144,7 @@ export function createScene(canvas, labelLayer) {
     intro: 1, // loader multiplier on scale, so the intro never fights a chapter's own scale
     userY: 0, userX: 0, spinY: 0, spinX: 0, // drag rotation + inertia
   };
-  const smooth = { tiltX: 0, tiltY: 0, twist: 0, tint: [1, 1, 1], look: new THREE.Vector3(0, 0, 1), lw: 0 };
+  const smooth = { tiltX: 0, tiltY: 0, twist: 0, tint: [1, 1, 1], look: new THREE.Vector3(0, 0, 1), lw: 0, avoid: 1 };
   let w = 1, h = 1;
 
   function resize() {
@@ -190,6 +190,8 @@ export function createScene(canvas, labelLayer) {
     const dragMix = Math.min(1, (Math.abs(state.userX) + Math.abs(state.userY)) * 1.6 + (Math.abs(state.spinX) + Math.abs(state.spinY)) * 25);   // dragging takes over, then it eases back
     const wantW = hasCursor ? cfg.w * (1 - dragMix) * Math.max(0, Math.min(1, state.opacity * 2)) : 0;
     smooth.lw += (wantW - smooth.lw) * 0.08;
+    smooth.avoid += ((state.avoidTarget ?? 1) - smooth.avoid) * 0.1;
+    state.avoidNow = smooth.avoid;      // fades while copy scrolls under the object (set by the chapter director)
     if (hasCursor) {
       const tx = (state.mx / w - 0.5) * vw, ty = -(state.my / h - 0.5) * vh;
       const d = new THREE.Vector3(tx - group.position.x, (ty - group.position.y) * ((ty - group.position.y) > 0 ? 0.22 : 0.5), 3.2);   // full left/right turn; looking up is limited most so the ground shadow plate never swings into view
@@ -218,7 +220,7 @@ export function createScene(canvas, labelLayer) {
       u.uGlow.value = state.glow;
       u.uRim.value.set(mixv(0.62, 0.38), mixv(0.78, 0.48), mixv(0.98, 0.6));
       mesh.material.clearcoat = mixv(0.9, 0.3); mesh.material.clearcoatRoughness = mixv(0.12, 0.3);
-      mesh.material.opacity = state.opacity;
+      mesh.material.opacity = state.opacity * smooth.avoid;
       const base = [mixv(0.085, 0.78), mixv(0.125, 0.84), mixv(0.215, 0.92)];   // light chapters: deep ink-blue glossy ceramic against the pale fog; dark chapters: pale pearl
       mesh.material.color.setRGB(base[0] * smooth.tint[0], base[1] * smooth.tint[1], base[2] * smooth.tint[2]); // a quiet per-chapter hue on the clay
     }

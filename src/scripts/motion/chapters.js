@@ -123,6 +123,27 @@ export function initChapters() {
       st.cx = 0.5; st.cy = best.cy / vh; st.scale = best.z.scale; st.rotX = best.z.rx; st.rotY = best.z.ry;
       st.opacity = vis > 0.001 ? 0.92 : 0;
     };
+    // Text avoidance (desktop): supporting objects fade out while readable copy scrolls under them, and fade back once it has passed.
+    // Copy rectangles are cached in document coordinates (re-measured on refresh), so this costs a handful of comparisons per scroll.
+    // Measure the actual lines of text (not the boxes around them): every non-empty text node's line rectangles, plus charts and figures.
+    const measureText = () => chapters.forEach((ch) => {
+      if (small || !ch.ghost) return;
+      const out = []; const y0 = window.scrollY; const rg = document.createRange();
+      const walker = document.createTreeWalker(ch.el, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.textContent.trim() && !n.parentElement.closest('script, style, [aria-hidden="true"]') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT) });
+      let n; while ((n = walker.nextNode())) { rg.selectNodeContents(n); for (const r of rg.getClientRects()) { if (r.width > 8 && r.height > 6) out.push({ l: r.left, r: r.right, t: r.top + y0, b: r.bottom + y0 }); } }
+      ch.el.querySelectorAll('figure, .fig').forEach((e) => { const r = e.getBoundingClientRect(); if (r.width > 40 && r.height > 20) out.push({ l: r.left, r: r.right, t: r.top + y0, b: r.bottom + y0 }); });
+      ch.texts = out;
+    });
+    const avoidTarget = (ch, st) => {
+      if (small || !ch.ghost || !ch.texts.length || st.opacity < 0.02) return 1;
+      const w = window.innerWidth, h = window.innerHeight, y0 = window.scrollY;
+      const R = Math.min(w, h) * 0.3 * st.scale * 0.62, cx = st.cx * w, cy = st.cy * h;     // the visible body of the object, a little inside its bounds
+      for (const t of ch.texts) {
+        const nx = Math.max(t.l, Math.min(cx, t.r)), ny = Math.max(t.t - y0, Math.min(cy, t.b - y0));
+        if ((nx - cx) ** 2 + (ny - cy) ** 2 < R * R) return 0.1;
+      }
+      return 1;
+    };
     const update = () => {
       if (small) { phoneUpdate(); return; }
       const vh = window.innerHeight;
@@ -161,6 +182,7 @@ export function initChapters() {
         st.tint = next.tint;
       }
       st.rotY += turn;
+      st.avoidTarget = avoidTarget(owner, st);
     };
     // The dark chapters' scrim has a soft hole around the story object (see global.css); keep it on the object
     const darkSecs = sections.filter((s) => s.dataset.tone === 'dark');
@@ -186,8 +208,10 @@ export function initChapters() {
         lattice.state.twist = Math.max(-0.32, Math.min(0.32, (lattice.state.twist || 0) + dy * 0.0009));
       }
     });
-    ScrollTrigger.addEventListener('refresh', () => { measureZones(); update(); punchHoles(); });
-    measureZones(); update(); punchHoles();
+    ScrollTrigger.addEventListener('refresh', () => { measureZones(); measureText(); update(); punchHoles(); });
+    measureZones(); measureText(); update(); punchHoles();
+    // lazy images and font swaps move copy after load; re-measure once things settle
+    window.addEventListener('load', () => setTimeout(() => { measureText(); update(); }, 600), { once: true });
     if (small) {
       const line = document.getElementById('progress-line');
       if (line) gsap.fromTo(line, { scaleX: 0 }, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.3 } });

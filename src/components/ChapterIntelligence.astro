@@ -33,10 +33,17 @@ import ChartHundred from "./charts/ChartHundred.astro";
       />
     </div>
 
+    <!-- What this is -->
+    <div class="illumi-intro" data-reveal>
+      <p class="illumi-eyebrow t-mono"><span class="illumi-spark" aria-hidden="true"></span>Interactive · try it yourself</p>
+      <h3 class="illumi-title t-display">Don't take my word for it. <em>Ask my AI agent.</em></h3>
+      <p class="illumi-desc t-body">Illumi is an AI agent I built. It answers questions about my experience, projects and results, drawing only on my documented work. Pick a prompt or type your own question below.</p>
+    </div>
+
     <!-- Console -->
     <div class="console" data-reveal>
       <div class="console-head">
-        <span class="t-mono"><strong>Ask Illumi</strong> · my agent answers for me</span>
+        <span class="console-title"><span class="illumi-orb" aria-hidden="true"></span><span class="console-name"><strong>Ask Illumi</strong><span class="console-sub t-mono">AI agent · answers about Borina's work</span></span></span>
         <span id="ask-health" class="t-mono console-status" data-state="checking"><span class="live-dot" aria-hidden="true"></span><span id="ask-health-text">Checking</span></span>
       </div>
 
@@ -137,17 +144,47 @@ import ChartHundred from "./charts/ChartHundred.astro";
   @media (min-width: 900px) { .intel-heading { grid-column: 1 / 9; } .intel-copy { grid-column: 1 / 7; } .intel-fig { grid-column: 7 / 13; margin-top: 0; align-self: end; } }
 
   /* Console */
+  /* The explainer above the console: what Illumi is and what to do */
+  .illumi-intro { grid-column: 1 / -1; margin-top: clamp(3.5rem, 7vw, 6rem); display: grid; gap: 0.9rem; max-width: 46rem; }
+  .illumi-eyebrow { display: inline-flex; align-items: center; gap: 0.6rem; margin: 0; color: var(--accent); letter-spacing: 0.16em; text-transform: uppercase; }
+  .illumi-spark { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 60%, transparent); animation: illumi-ping 2.2s var(--ease-out) infinite; }
+  @keyframes illumi-ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 55%, transparent); } 80%, 100% { box-shadow: 0 0 0 12px transparent; } }
+  .illumi-title { margin: 0; font-size: clamp(1.9rem, 4vw, 3.4rem); line-height: 1.08; }
+  .illumi-title em { font-style: normal; color: var(--accent); }
+  .illumi-desc { margin: 0; max-width: 40rem; }
+
+  /* The console as its own object: an elevated card with an accent edge, so it reads as the interactive part of the page */
   .console {
     grid-column: 1 / -1;
-    margin-top: 3rem;
-    border-top: 1px solid var(--line-2);
-    border-bottom: 1px solid var(--line-2);
+    margin-top: 1.75rem;
+    position: relative;
+    padding: 0 clamp(1rem, 2.4vw, 2rem) 0.5rem;
+    border-radius: 18px;
+    background: linear-gradient(180deg, color-mix(in oklch, var(--surface) 92%, white), color-mix(in oklch, var(--surface) 70%, transparent));
+    border: 1px solid color-mix(in oklch, var(--accent) 38%, var(--line-2));
+    box-shadow: 0 1px 0 color-mix(in oklch, white 70%, transparent) inset, 0 28px 70px -30px color-mix(in oklch, var(--accent) 45%, transparent), 0 8px 24px -12px color-mix(in oklch, var(--storm) 30%, transparent);
+  }
+  .console::before {                                         /* a thin accent line across the top edge */
+    content: ''; position: absolute; left: 1.5rem; right: 1.5rem; top: -1px; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
   }
   .console-head {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1rem 0;
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    padding: 1.15rem 0;
     border-bottom: 1px solid var(--line);
   }
+  .console-title { display: inline-flex; align-items: center; gap: 0.9rem; min-width: 0; }
+  .console-name { display: grid; gap: 0.2rem; }
+  .console-name strong { font-size: 1.05rem; font-weight: 500; letter-spacing: 0.04em; color: var(--ink); text-transform: uppercase; }
+  .console-sub { color: var(--ink-3); }
+  .illumi-orb {                                              /* Illumi's avatar: a small glowing orb */
+    flex: none; width: 34px; height: 34px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0, color-mix(in oklch, var(--accent) 55%, white) 28%, var(--accent) 62%, color-mix(in oklch, var(--accent) 60%, var(--storm)) 100%);
+    box-shadow: 0 0 0 4px color-mix(in oklch, var(--accent) 16%, transparent), 0 6px 18px -4px color-mix(in oklch, var(--accent) 70%, transparent);
+    animation: illumi-breathe 3.6s var(--ease-in-out) infinite;
+  }
+  @keyframes illumi-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+  @media (prefers-reduced-motion: reduce) { .illumi-orb, .illumi-spark { animation: none; } }
   .console-status { display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
   @media (max-width: 899px) { .console-head { flex-direction: column; align-items: flex-start; gap: 0.5rem; } }
   .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: live 1.8s var(--ease-in-out) infinite; }
