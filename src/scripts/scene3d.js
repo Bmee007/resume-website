@@ -140,8 +140,10 @@ export function createScene(canvas, labelLayer) {
     if (state.blend) { si = state.blend.a; sj = state.blend.b; f = Math.max(0, Math.min(1, state.blend.t)); if (si === sj) f = 0; }
     else { const m = Math.max(0, Math.min(STATES.length - 1, state.morph)); si = Math.floor(m); sj = Math.min(STATES.length - 1, si + 1); f = m - si; }
     const ease = f * f * (3 - 2 * f);
-    const isDark = state.ink[0] > 128;
-    renderer.toneMappingExposure += ((isDark ? 0.92 : 0.74) - renderer.toneMappingExposure) * 0.08;   // a deeper exposure on light chapters so part colours separate
+    // 0 on light chapters, 1 on dark ones: follows the ink's own eased flip, so colour, rim and gloss blend instead of snapping
+    const dk = Math.max(0, Math.min(1, (state.ink[0] - 36) / (226 - 36)));
+    const mixv = (a, b) => a + (b - a) * dk;
+    renderer.toneMappingExposure = mixv(0.95, 0.92);
 
     state.twist = (state.twist || 0) * 0.9;                       // scroll twist decays quickly; smooth follows it
     smooth.twist += ((state.twist || 0) - smooth.twist) * 0.2;
@@ -170,9 +172,10 @@ export function createScene(canvas, labelLayer) {
       if (mesh.userData.pre) mesh.userData.pre.visible = mesh.visible;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
-      u.uRim.value.set(...(isDark ? [0.38, 0.48, 0.6] : [0.2, 0.26, 0.34]));
+      u.uRim.value.set(mixv(0.42, 0.38), mixv(0.56, 0.48), mixv(0.74, 0.6));
+      mesh.material.clearcoat = mixv(0.7, 0.3); mesh.material.clearcoatRoughness = mixv(0.18, 0.3);
       mesh.material.opacity = state.opacity;
-      const base = isDark ? [0.78, 0.84, 0.92] : [0.5, 0.56, 0.65];
+      const base = [mixv(0.2, 0.78), mixv(0.27, 0.84), mixv(0.38, 0.92)];   // light chapters: deep ink-blue glossy ceramic against the pale fog; dark chapters: pale pearl
       mesh.material.color.setRGB(base[0] * smooth.tint[0], base[1] * smooth.tint[1], base[2] * smooth.tint[2]); // a quiet per-chapter hue on the clay
     }
     renderer.render(scene, camera);

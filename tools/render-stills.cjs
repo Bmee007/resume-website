@@ -13,17 +13,17 @@ import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { canadaPins } from '/src/scripts/models.js';
-const q = new URLSearchParams(location.search); const url = q.get('model'); const rx = +q.get('rx'); const ry = +q.get('ry'); const S = 1000;
+const q = new URLSearchParams(location.search); const url = q.get('model'); const name = url.split('/').pop().replace('.glb', ''); const DARK_CHAPTER = ['computer']; const rx = +q.get('rx'); const ry = +q.get('ry'); const S = 1000;
 const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true }); r.setSize(S, S); r.setClearColor(0x000000, 0);
 r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = 0.92; document.body.appendChild(r.domElement);
 const scene = new THREE.Scene(); scene.environment = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
 const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(2.5, 4, 3); scene.add(key);
-const rim = new THREE.DirectionalLight(0xcfe2f3, 0.5); rim.position.set(-3, 1, -2); scene.add(rim); scene.add(new THREE.HemisphereLight(0xe3eaf2, 0x55606e, 0.5));
+const rim = new THREE.DirectionalLight(0xcfe2f3, 0.95); rim.position.set(-3, 1, -2); scene.add(rim); scene.add(new THREE.HemisphereLight(0xe3eaf2, 0x55606e, 0.5));
 const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 50); cam.position.set(0, 0, 6.4);
 const loader = new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder);
 const gltf = await loader.loadAsync(url); const rootObj = gltf.scene;
 if (url.includes('canada')) { const pins = canadaPins(); const pg = mergeGeometries(pins.parts.map((g) => (g.index ? g.toNonIndexed() : g)), false); const pm = new THREE.Mesh(pg); rootObj.add(pm); } // city pins + route, as the site draws them
-rootObj.traverse((o) => { if (o.isMesh) { const c0 = o.material && o.material.color ? o.material.color : { r: 0.8, g: 0.8, b: 0.8 }; const L = Math.min(1, Math.max(0.12, 0.2126 * c0.r + 0.7152 * c0.g + 0.0722 * c0.b)); const g = 0.1 + 0.7 * L; /* same part-colour mapping as the live loader */ o.material = new THREE.MeshPhysicalMaterial({ color: new THREE.Color(g * 0.92, g, g * 1.1), roughness: 0.58, metalness: 0, clearcoat: 0.18, clearcoatRoughness: 0.4, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1) }); } });
+rootObj.traverse((o) => { if (o.isMesh) { const c0 = o.material && o.material.color ? o.material.color : { r: 0.8, g: 0.8, b: 0.8 }; const L = Math.min(1, Math.max(0.12, 0.2126 * c0.r + 0.7152 * c0.g + 0.0722 * c0.b)); const g = 0.1 + 0.7 * L; /* same part-colour mapping as the live loader */ const pearl = DARK_CHAPTER.includes(name); o.material = new THREE.MeshPhysicalMaterial({ color: pearl ? new THREE.Color(g * 0.92, g, g * 1.1) : new THREE.Color(g * 0.2, g * 0.27, g * 0.38), roughness: 0.5, metalness: 0, clearcoat: pearl ? 0.2 : 0.7, clearcoatRoughness: pearl ? 0.4 : 0.18, sheen: 0.2, sheenColor: new THREE.Color(0.9, 0.95, 1) }); } });
 const box = new THREE.Box3().setFromObject(rootObj); const size = new THREE.Vector3(); box.getSize(size); const c = new THREE.Vector3(); box.getCenter(c);
 const g = new THREE.Group(); g.add(rootObj); if (!url.includes('canada')) { rootObj.position.sub(c); g.scale.setScalar(2.8 / Math.max(size.x, size.y, size.z)); }
 g.scale.multiplyScalar(0.95); g.rotation.set(rx, ry, 0); scene.add(g); r.render(scene, cam); g.updateMatrixWorld(true);

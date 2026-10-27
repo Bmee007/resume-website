@@ -190,3 +190,13 @@ test("VEIL-01 — the contact mist is thick on arrival and clears when wiped (or
   await page.waitForTimeout(1800);
   expect(await opacity()).toBeLessThan(0.1);
 });
+
+test("ZONE-01 — the pill bottle has a phone spacer in Skills; desktop hides it", async ({ page }) => {
+  await openHome(page);
+  const zone = page.locator("#skills .obj-zone");
+  await expect(zone).toHaveCount(1);
+  await expect(zone).toHaveAttribute("data-zone-model", "pills");
+  const small = (await page.viewportSize())!.width < 900;
+  if (small) await expect(zone).toBeVisible({ timeout: 2_000 }).catch(async () => { await jumpTo(page, "#skills"); await expect(zone).toBeVisible(); });
+  else await expect(zone).toBeHidden();
+});
