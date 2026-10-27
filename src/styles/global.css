@@ -61,7 +61,7 @@
 
 /* Dark chapters invert the ink and carry a storm tint so text contrast is real, not fog-dependent */
 section[data-tone="dark"] {
-  background: oklch(0.2 0.03 245 / 0.86); /* dark enough for AA contrast on the mono labels; the object is lifted instead (scene3d dark clay) */
+  background: oklch(0.18 0.03 245 / 0.70); /* the 3D canvas sits under this scrim, so it stays light enough for the object to read; text is lifted instead */
   /* feather the top and bottom edges so the storm tint rolls in like weather, not a band */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, black 18vh, black calc(100% - 18vh), transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, black 18vh, black calc(100% - 18vh), transparent 100%);
@@ -70,8 +70,8 @@ section[data-tone="dark"] {
 [data-tone="dark"] {
   --bg:     var(--storm);
   --ink:    oklch(0.930 0.008 240);
-  --ink-2:  oklch(0.760 0.014 245);
-  --ink-3:  oklch(0.780 0.018 245);
+  --ink-2:  oklch(0.860 0.012 245);
+  --ink-3:  oklch(0.850 0.016 245);
   --line:   color-mix(in oklch, var(--ink) 18%, transparent);
   --line-2: color-mix(in oklch, var(--ink) 36%, transparent);
   --accent: var(--ice);
@@ -186,7 +186,7 @@ body::after {
   background: var(--line-2);
 }
 .telemetry .ch { color: var(--accent); }
-section[data-tone="dark"] .telemetry .ch, [data-tone="dark"] .telemetry .ch { color: oklch(0.80 0.07 245); } /* the accent needs lifting on the storm tint to pass contrast */
+section[data-tone="dark"] .telemetry .ch, [data-tone="dark"] .telemetry .ch { color: oklch(0.86 0.08 245); } /* the accent needs lifting on the storm tint to pass contrast */
 
 /* Big ghost chapter number (hairline stroke, like a survey marker) */
 .chapter-mark {

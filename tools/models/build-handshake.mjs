@@ -146,6 +146,7 @@ const THETA = 32 * DEG;
 const c = Math.cos(THETA), s = Math.sin(THETA);
 const HUMAN = { f: new THREE.Vector3(c, s, 0), a: new THREE.Vector3(-s, c, 0), back: new THREE.Vector3(0, 0, 1), centre: new THREE.Vector3(-0.42, -0.02, 0.19), pronate: -12 * DEG };
 const ROBOT = { f: new THREE.Vector3(-c, s, 0), a: new THREE.Vector3(s, c, 0), back: new THREE.Vector3(0, 0, -1), centre: new THREE.Vector3(0.42, -0.02, -0.19), pronate: 10 * DEG };
+const ROBOT_FIT = [-0.43, 0.04, -0.34, 4.2, -10.0];
 const frameMatrix = (F) => {
   const tw = new THREE.Quaternion().setFromAxisAngle(F.f, F.pronate);
   const a = F.a.clone().applyQuaternion(tw), b = F.back.clone().applyQuaternion(tw);
@@ -200,6 +201,43 @@ function clampToPlane(g, o, n) {
   const p = g.attributes.position; const v = new THREE.Vector3();
   for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const t = v.clone().sub(o).dot(n); if (t < 0) { v.addScaledVector(n, -t); p.setXYZ(i, v.x, v.y, v.z); } }
   return g;
+}
+
+/** Close the planar boundary loop of an open sleeve: flat cap (fan) + a rolled hem tube swept along the loop. */
+function sleeveEnd(g, o, axis, hemR) {
+  const pos = g.attributes.position; const idx = g.index.array; const cnt = new Map(); const key = (a, b) => (a < b ? a * 1e6 + b : b * 1e6 + a);
+  for (let i = 0; i < idx.length; i += 3) for (let e = 0; e < 3; e++) { const k = key(idx[i + e], idx[i + (e + 1) % 3]); cnt.set(k, (cnt.get(k) || 0) + 1); }
+  const onPlane = (i) => Math.abs(new THREE.Vector3().fromBufferAttribute(pos, i).sub(o).dot(axis)) < 1e-4;
+  const adj = new Map();
+  for (const [k, n] of cnt) if (n === 1) { const a = Math.floor(k / 1e6), b = k - a * 1e6; if (!onPlane(a) || !onPlane(b)) continue; if (!adj.has(a)) adj.set(a, []); if (!adj.has(b)) adj.set(b, []); adj.get(a).push(b); adj.get(b).push(a); }
+  // walk the longest loop
+  let best = [];
+  const seen = new Set();
+  for (const start of adj.keys()) {
+    if (seen.has(start)) continue; const loop = [start]; seen.add(start); let prev = -1, cur = start;
+    for (;;) { const nxt = adj.get(cur).find((v) => v !== prev && !seen.has(v)); if (nxt === undefined) break; loop.push(nxt); seen.add(nxt); prev = cur; cur = nxt; }
+    if (loop.length > best.length) best = loop;
+  }
+  const P = best.map((i) => new THREE.Vector3().fromBufferAttribute(pos, i)); const n = P.length;
+  const c = P.reduce((t, p) => t.add(p), new THREE.Vector3()).multiplyScalar(1 / n);
+  // cap: fan from the centroid, normal toward -axis (outward at the proximal end), nudged 0.01 into the sleeve
+  const vp = [...P.map((p) => p.toArray()).flat(), ...c.clone().addScaledVector(axis, 0.0).toArray()]; const vi = [];
+  const faceDir = (a, b, cc) => b.clone().sub(a).cross(cc.clone().sub(a)).dot(axis);
+  for (let i = 0; i < n; i++) { const a = P[i], b = P[(i + 1) % n]; if (faceDir(a, b, c) > 0) vi.push(i, n, (i + 1) % n); else vi.push(i, (i + 1) % n, n); }
+  const cap = new THREE.BufferGeometry(); cap.setAttribute('position', new THREE.Float32BufferAttribute(vp, 3)); cap.setIndex(vi);
+  // hem: tube of radius hemR swept along the loop, centred slightly inside the rim, bulging proximally
+  const SEG = 10; const tp = []; const ti = [];
+  for (let i = 0; i < n; i++) {
+    const t = P[(i + 1) % n].clone().sub(P[(i + n - 1) % n]).normalize();
+    const out = P[i].clone().sub(c); out.addScaledVector(axis, -out.dot(axis)).normalize(); // radial, in plane
+    const ctr = P[i].clone().addScaledVector(out, -hemR * 0.6).addScaledVector(axis, -hemR * 0.15);
+    for (let k = 0; k < SEG; k++) { const an = (k / SEG) * Math.PI * 2; const q = ctr.clone().addScaledVector(out, Math.cos(an) * hemR).addScaledVector(axis, Math.sin(an) * hemR); tp.push(q.x, q.y, q.z); }
+    void t;
+  }
+  for (let i = 0; i < n; i++) for (let k = 0; k < SEG; k++) { const a = i * SEG + k, b = i * SEG + (k + 1) % SEG, cc = ((i + 1) % n) * SEG + k, d = ((i + 1) % n) * SEG + (k + 1) % SEG; ti.push(a, cc, b, b, cc, d); }
+  const hem = new THREE.BufferGeometry(); hem.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3)); hem.setIndex(ti);
+  outward(hem);
+  const merged = mergeGeometries([cap, hem], false); return merged;
 }
 
 function buildHumanHand() {
@@ -259,8 +297,8 @@ function buildHumanHand() {
     for (let i = 0; i < sp0.count; i++) {
       vtx.fromBufferAttribute(sp0, i); const d = vtx.clone().sub(h); const ax = d.dot(t); if (Math.abs(ax) > cr.sigma * 3) continue;
       const rad = d.clone().addScaledVector(t, -ax).length(); if (rad > 0.3) continue;
-      nv.fromBufferAttribute(nrm, i); if (nv.dot(pd) * cr.side < 0.35) continue;
-      const w = Math.exp(-((ax / cr.sigma) ** 2)); vtx.addScaledVector(nv, -cr.depth * w); sp0.setXYZ(i, vtx.x, vtx.y, vtx.z);
+      nv.fromBufferAttribute(nrm, i); const facing = THREE.MathUtils.smoothstep(nv.dot(pd) * cr.side, 0.1, 0.55); if (facing <= 0) continue;
+      const w = Math.exp(-((ax / cr.sigma) ** 2)) * facing; vtx.addScaledVector(nv, -cr.depth * w); sp0.setXYZ(i, vtx.x, vtx.y, vtx.z);
     }
   }
   const nails = [];
@@ -271,27 +309,20 @@ function buildHumanHand() {
     // sit on the skin: march from outside inward along -dorsal to find the surface
     const c0 = h.clone().addScaledVector(L, 0.58); const surf = surfaceAlong(skinG, c0.clone().addScaledVector(dorsal, 0.3), dorsal.clone().negate());
     const c = surf ?? c0.clone().addScaledVector(dorsal, 0.075);
-    const plate = new THREE.CapsuleGeometry(w / 2, len - w, 4, 14); plate.rotateX(Math.PI / 2); plate.scale(1, 0.16, 1); plate.deleteAttribute('uv'); plate.deleteAttribute('normal');
-    const x = t.clone().cross(dorsal).normalize(); const basis = new THREE.Matrix4().makeBasis(x, dorsal, t).setPosition(c.addScaledVector(dorsal, -0.004));
+    const plate = new THREE.CapsuleGeometry(w / 2, len - w, 4, 14); plate.rotateX(Math.PI / 2); plate.scale(1, 0.3, 1); plate.deleteAttribute('uv'); plate.deleteAttribute('normal');
+    const x = t.clone().cross(dorsal).normalize(); const basis = new THREE.Matrix4().makeBasis(x, dorsal, t).setPosition(c.addScaledVector(dorsal, -0.002));
     plate.applyMatrix4(basis); nails.push(plate);
   }
   skinG.computeVertexNormals();
-  // ---- cuff: hollow rolled hem + the opening, lathed around the forearm axis at the cut plane ----
-  const cutLocal = cutAt.clone(); const axisW = axis.clone();
-  let rSum = 0, rN = 0; const sp = sleeveG.attributes.position;
-  for (let i = 0; i < sp.count; i++) { const d = new THREE.Vector3().fromBufferAttribute(sp, i).sub(cutLocal); const t = d.dot(axisW); if (t < 0.12) { rSum += d.sub(axisW.clone().multiplyScalar(t)).length(); rN++; } }
-  const R = rSum / Math.max(1, rN) + 0.015;
-  const prof = [[0, 0.5], [R - 0.11, 0.5], [R - 0.11, 0.03], [R - 0.095, -0.015], [R - 0.07, -0.045], [R - 0.04, -0.045], [R - 0.015, -0.02], [R - 0.005, 0.02], [R, 0.1], [R, 0.35], [R - 0.06, 0.46]];
-  const cuff = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 72);
-  cuff.rotateX(Math.PI / 2); // lathe axis Y -> Z; then align +Z with -axis (the ring extends proximally)
-  cuff.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), axisW.clone().negate()));
-  cuff.translate(cutLocal.x, cutLocal.y, cutLocal.z); cuff.deleteAttribute('uv'); cuff.deleteAttribute('normal');
+  // ---- cuff: close the sleeve's cut loop with a flat cap and sweep a rolled hem along the loop ----
+  const cuff = sleeveEnd(sleeveG, cutAt, axis, 0.05);
   const pieces = [skinG, sleeveG, cuff, ...nails].map((g) => { g.deleteAttribute('uv'); g.deleteAttribute('normal'); g.applyMatrix4(M); return g.index ? g : mergeVertices(g, 1e-6); });
-  for (const pc of [pieces[2], ...pieces.slice(3)]) outward(pc); // closed parts: cuff + nails
+  for (const pc of pieces.slice(3)) outward(pc); // closed parts: nails
+  if (process.env.DBG_CUFF) globalThis.__dbgCuff = pieces[2].clone();
   const g = mergeGeometries(pieces, false); g.computeVertexNormals();
   const tip = (n) => posed.tailPos(n).applyMatrix4(M);
   const fmt = (v) => v.toArray().map((x) => x.toFixed(2)).join(',');
-  console.log('human: cuff R', R.toFixed(2), 'tris', g.index.count / 3, 'index tip', fmt(tip('finger2-3.R')), 'pinky tip', fmt(tip('finger5-3.R')), 'thumb tip', fmt(tip('finger1-3.R')));
+  console.log('human: tris', g.index.count / 3, 'index tip', fmt(tip('finger2-3.R')), 'pinky tip', fmt(tip('finger5-3.R')), 'thumb tip', fmt(tip('finger1-3.R')));
   return g;
 }
 
@@ -402,15 +433,23 @@ function buildRobotHand() {
   }
   let g = mergeGeometries(parts.map((p) => { p.deleteAttribute('uv'); p.deleteAttribute('normal'); return outward(mergeVertices(p, 1e-5)); }), false);
   g = mergeVertices(g, 1e-5); g.computeVertexNormals();
-  g.applyMatrix4(frameMatrix(ROBOT)); g.computeVertexNormals();
+  g.applyMatrix4(frameMatrix(ROBOT));
+  // rigid fit against the human hand (found by a penetration + contact search, see README): translate (dm) and
+  // rotate (deg, about Y then Z) around the robot's nominal palm centre
+  const [fx, fy, fz, fry, frz] = ROBOT_FIT; const pv = ROBOT.centre;
+  g.applyMatrix4(new THREE.Matrix4().makeTranslation(fx, fy, fz).multiply(new THREE.Matrix4().makeTranslation(pv.x, pv.y, pv.z))
+    .multiply(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(0, fry * DEG, frz * DEG))).multiply(new THREE.Matrix4().makeTranslation(-pv.x, -pv.y, -pv.z)));
+  g.computeVertexNormals();
   return g;
 }
 
 // =============================================================================
 const scene = new THREE.Scene(); let tris = 0;
 const mat = new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.55, metalness: 0 });
-const addMesh = (name, g) => { tris += g.index.count / 3; const m = new THREE.Mesh(g, mat); m.name = name; scene.add(m); };
+const SCENE_ROLL = new THREE.Matrix4().makeRotationZ(5 * DEG); // balance the V: both forearms ~37 degrees below horizontal
+const addMesh = (name, g) => { g.applyMatrix4(SCENE_ROLL); g.computeVertexNormals(); tris += g.index.count / 3; const m = new THREE.Mesh(g, mat); m.name = name; scene.add(m); };
 if (ONLY !== '--robot-only') addMesh('human', buildHumanHand());
+if (globalThis.__dbgCuff) addMesh('robot', globalThis.__dbgCuff);
 if (ONLY !== '--human-only') addMesh('robot', buildRobotHand());
 const buf = await new GLTFExporter().parseAsync(scene, { binary: true });
 const tmp = OUT.replace(/\.glb$/, '.raw.glb'); fs.writeFileSync(tmp, Buffer.from(buf));
