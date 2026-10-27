@@ -77,7 +77,7 @@ export function initMist(veil, section, { onShown } = {}) {
     // the arrival clock starts when the section has fully scrolled in; wiping enough, or waiting, lifts the rest
     if (S.scroll > 0.97) S.arrived += dt;
     const wipeClear = smoothstep(1600, 4200, S.wiped);                      // cursor travel (px) that clears it for good
-    const idleClear = smoothstep(fine ? 7 : 1.2, fine ? 11 : 3.2, S.arrived);   // no wiping: it lifts on its own
+    const idleClear = smoothstep(fine ? 6 : 0.6, fine ? 9.5 : 1.6, S.arrived);   // no wiping: it lifts on its own
     S.settle = Math.max(S.settle, wipeClear, idleClear);
     const prog = Math.min(1, S.scroll * ARRIVE + (1 - ARRIVE) * S.settle);   // what the shader sees
     const shown = prog;

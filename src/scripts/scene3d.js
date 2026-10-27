@@ -172,10 +172,10 @@ export function createScene(canvas, labelLayer) {
       if (mesh.userData.pre) mesh.userData.pre.visible = mesh.visible;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
-      u.uRim.value.set(mixv(0.42, 0.38), mixv(0.56, 0.48), mixv(0.74, 0.6));
-      mesh.material.clearcoat = mixv(0.7, 0.3); mesh.material.clearcoatRoughness = mixv(0.18, 0.3);
+      u.uRim.value.set(mixv(0.62, 0.38), mixv(0.78, 0.48), mixv(0.98, 0.6));
+      mesh.material.clearcoat = mixv(0.9, 0.3); mesh.material.clearcoatRoughness = mixv(0.12, 0.3);
       mesh.material.opacity = state.opacity;
-      const base = [mixv(0.2, 0.78), mixv(0.27, 0.84), mixv(0.38, 0.92)];   // light chapters: deep ink-blue glossy ceramic against the pale fog; dark chapters: pale pearl
+      const base = [mixv(0.085, 0.78), mixv(0.125, 0.84), mixv(0.215, 0.92)];   // light chapters: deep ink-blue glossy ceramic against the pale fog; dark chapters: pale pearl
       mesh.material.color.setRGB(base[0] * smooth.tint[0], base[1] * smooth.tint[1], base[2] * smooth.tint[2]); // a quiet per-chapter hue on the clay
     }
     renderer.render(scene, camera);
