@@ -93,7 +93,8 @@ export function initChapters() {
       const thenAt = then && d.latticeThenAt ? s.querySelector(d.latticeThenAt) : null;
       // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
       const exitAt = d.latticeExit !== undefined ? parseFloat(d.latticeExit) : null;
-      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, gap: d.latticeGap !== undefined, ghost: !off && next.opacity < 0.7 });
+      const spin = d.latticeSpin !== undefined ? parseFloat(d.latticeSpin) : 0.55;   // radians the object turns across its chapter
+      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, spin, gap: d.latticeGap !== undefined, ghost: !off && next.opacity < 0.7 });
       prev = then || next;
     });
     // Phones: each object lives in its own zone (a chapter's top padding, or a [data-zone-model] spacer) and scrolls with it.
@@ -128,7 +129,7 @@ export function initChapters() {
       let owner = chapters[0];
       for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
       const r = owner.el.getBoundingClientRect(); const top = r.top / vh, bottom = r.bottom / vh;
-      const { next, then, thenAt, e0, e1, exitAt, ghost, gap } = owner;
+      const { next, then, thenAt, e0, e1, exitAt, ghost, gap, spin } = owner;
       const tIn = smooth((e0 - top) / (e0 - e1));
       const tThen = !then ? 0
         : thenAt ? smooth((0.85 - thenAt.getBoundingClientRect().top / vh) / 0.45)        // keyed element: 85vh → 40vh
@@ -138,6 +139,7 @@ export function initChapters() {
         : ((ghost && !then) || small) ? smooth((-top - (small ? 0.1 : 0.2)) / 0.3)       // single-model ghosts (and phones) leave once the heading has passed
         : smooth((0.6 - bottom) / 0.35);                                                  // hero-size objects leave with the chapter's last content
       const st = lattice.state;
+      const turn = spin * Math.max(0, Math.min(1, (0.15 - top) / Math.max(0.5, bottom - top - 0.4)));   // scroll-scrubbed turn through the chapter
       if (then && gap && tThen > 0) {                       // gap mode: the second object assembles in place (no morph through the first)
         st.blend = { a: then.morph, b: then.morph, t: 0 }; st.assemble = tThen;
         st.cx = then.cx; st.cy = then.cy; st.scale = then.scale; st.rotX = then.rotX; st.rotY = then.rotY;
@@ -158,6 +160,7 @@ export function initChapters() {
         st.opacity = next.opacity * tIn * (1 - tOut);
         st.tint = next.tint;
       }
+      st.rotY += turn;
     };
     // The dark chapters' scrim has a soft hole around the story object (see global.css); keep it on the object
     const darkSecs = sections.filter((s) => s.dataset.tone === 'dark');
