@@ -1,8 +1,10 @@
-// Builds public/models/computer.glb: thin-bezel monitor on a stand, TKL keyboard, ergonomic mouse.
+// Builds public/models/computer.glb: modern thin-bezel 27" monitor (rear housing bulge, ring-hinged neck with
+// cable channel, plinth foot), slim aluminium low-profile keyboard with sculpted keycaps, ergonomic mouse.
 // Pure generated geometry (three.js in Node). Units: millimetres. Y up, screen faces +Z.
+// Then: npx -y @gltf-transform/cli meshopt raw.glb public/models/computer.glb
 import * as THREE from '/Users/borinakeo/resume-website/node_modules/three/build/three.module.js';
 import { RoundedBoxGeometry } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { mergeGeometries, mergeVertices } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries, mergeVertices, toCreasedNormals } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
 import { GLTFExporter } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/exporters/GLTFExporter.js';
 import fs from 'node:fs';
 
@@ -16,43 +18,37 @@ globalThis.FileReader = class {
 
 // ---- helpers ----------------------------------------------------------------
 const DEG = Math.PI / 180;
-const clean = (g) => { g.deleteAttribute('uv'); if (!g.index) g = mergeVertices(g, 1e-4); else g = mergeVertices(g, 1e-4); return g; };
+// Drop uv; optionally rebuild normals with a crease angle (hard edges where faces meet sharply); re-index.
+const finish = (g, creaseDeg = 0) => {
+  g.deleteAttribute('uv');
+  if (creaseDeg) { g.deleteAttribute('normal'); g = mergeVertices(g, 1e-4); g = toCreasedNormals(g, creaseDeg * DEG); }
+  return mergeVertices(g, 1e-4);
+};
 const place = (g, { pos = [0, 0, 0], rot = [0, 0, 0], scale = [1, 1, 1] } = {}) => {
   const m = new THREE.Matrix4().compose(new THREE.Vector3(...pos), new THREE.Quaternion().setFromEuler(new THREE.Euler(...rot)), new THREE.Vector3(...scale));
   g.applyMatrix4(m); return g;
 };
 const rbox = (w, h, d, r, seg = 4) => new RoundedBoxGeometry(w, h, d, seg, r);
 
-// Rounded-rect perimeter sampled with N points (CCW in the XZ plane, centred).
-function roundedRect(w, h, r, N) {
-  r = Math.min(r, w / 2 - 1e-6, h / 2 - 1e-6);
-  const pts = [];
-  const straight = 2 * (w - 2 * r) + 2 * (h - 2 * r); const arcs = 2 * Math.PI * r; const total = straight + arcs;
-  // Walk perimeter at equal arc-length steps starting at (+w/2, 0) going CCW.
-  const segs = [];
-  const c = [[w / 2 - r, h / 2 - r], [-w / 2 + r, h / 2 - r], [-w / 2 + r, -h / 2 + r], [w / 2 - r, -h / 2 + r]];
-  // sequence: right edge up, arc TR, top edge left, arc TL, left edge down, arc BL, bottom edge right, arc BR
-  segs.push({ type: 'line', a: [w / 2, -h / 2 + r], b: [w / 2, h / 2 - r] });
-  segs.push({ type: 'arc', c: c[0], a0: 0, a1: Math.PI / 2 });
-  segs.push({ type: 'line', a: [w / 2 - r, h / 2], b: [-w / 2 + r, h / 2] });
-  segs.push({ type: 'arc', c: c[1], a0: Math.PI / 2, a1: Math.PI });
-  segs.push({ type: 'line', a: [-w / 2, h / 2 - r], b: [-w / 2, -h / 2 + r] });
-  segs.push({ type: 'arc', c: c[2], a0: Math.PI, a1: 1.5 * Math.PI });
-  segs.push({ type: 'line', a: [-w / 2 + r, -h / 2], b: [w / 2 - r, -h / 2] });
-  segs.push({ type: 'arc', c: c[3], a0: 1.5 * Math.PI, a1: 2 * Math.PI });
-  const lens = segs.map((s) => s.type === 'line' ? Math.hypot(s.b[0] - s.a[0], s.b[1] - s.a[1]) : r * (s.a1 - s.a0));
-  for (let i = 0; i < N; i++) {
-    let d = (i / N) * total; let k = 0;
-    while (k < segs.length - 1 && d > lens[k]) { d -= lens[k]; k++; }
-    const s = segs[k]; const t = lens[k] > 0 ? d / lens[k] : 0;
-    if (s.type === 'line') pts.push([s.a[0] + (s.b[0] - s.a[0]) * t, s.a[1] + (s.b[1] - s.a[1]) * t]);
-    else { const a = s.a0 + (s.a1 - s.a0) * t; pts.push([s.c[0] + r * Math.cos(a), s.c[1] + r * Math.sin(a)]); }
+// Rounded-rect outline with a FIXED topology (cs points per corner arc, ex/ey interior points per straight edge),
+// so rings of different size/radius correspond point-for-point (CCW, centred). Returns [[x,y],...].
+function rrectS(w, h, r, cs = 6, ex = 2, ey = 2) {
+  r = Math.max(0.4, Math.min(r, w / 2 - 1e-3, h / 2 - 1e-3));
+  const corners = [[w / 2 - r, h / 2 - r, 0], [-w / 2 + r, h / 2 - r, Math.PI / 2], [-w / 2 + r, -h / 2 + r, Math.PI], [w / 2 - r, -h / 2 + r, 1.5 * Math.PI]];
+  const edges = [ex, ey, ex, ey]; const pts = [];
+  for (let c = 0; c < 4; c++) {
+    const [cx, cy, a0] = corners[c];
+    for (let j = 0; j <= cs; j++) { const a = a0 + (j / cs) * Math.PI / 2; pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]); }
+    const a1 = a0 + Math.PI / 2; const p0 = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+    const [nx, ny, na] = corners[(c + 1) % 4]; const p1 = [nx + r * Math.cos(na), ny + r * Math.sin(na)];
+    for (let j = 1; j <= edges[c]; j++) { const t = j / (edges[c] + 1); pts.push([p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t]); }
   }
   return pts;
 }
+const offs = (pts, dx, dy) => pts.map(([x, y]) => [x + dx, y + dy]);
 
-// Loft a list of rings (each: array of [x,z]) placed at heights ys[] into a closed side surface (indexed).
-// Optional caps: 'top' (concentric dish) and 'bottom' (flat fan).
+// Loft rings (each [[x,z],...], same count) at heights ys[] (ascending) into a surface. capTop: concentric dished
+// cap (rings shrink toward the centre); capBottom: flat fan. Side walls face outward; caps wound consistently.
 function loft(rings, ys, { capTop = null, capBottom = false } = {}) {
   const N = rings[0].length; const pos = []; const idx = [];
   for (let k = 0; k < rings.length; k++) for (let i = 0; i < N; i++) pos.push(rings[k][i][0], ys[k], rings[k][i][1]);
@@ -61,18 +57,17 @@ function loft(rings, ys, { capTop = null, capBottom = false } = {}) {
     idx.push(a, c, b, b, c, d);
   }
   if (capTop) {
-    // concentric rings shrinking toward centre; dish lowers the centre (parabolic)
     const { dish = 0, steps = 3 } = capTop; const top = rings[rings.length - 1]; const yTop = ys[ys.length - 1];
     let prevStart = (rings.length - 1) * N;
     for (let s = 1; s <= steps; s++) {
       const f = 1 - s / steps; const start = pos.length / 3;
       if (f > 1e-6) {
         for (let i = 0; i < N; i++) pos.push(top[i][0] * f, yTop - dish * (1 - f * f), top[i][1] * f);
-        for (let i = 0; i < N; i++) { const a = prevStart + i, b = prevStart + (i + 1) % N, c = start + i, d = start + (i + 1) % N; idx.push(a, b, c, b, d, c); }
+        for (let i = 0; i < N; i++) { const a = prevStart + i, b = prevStart + (i + 1) % N, c = start + i, d = start + (i + 1) % N; idx.push(a, c, b, b, c, d); }
         prevStart = start;
       } else {
         pos.push(0, yTop - dish, 0);
-        for (let i = 0; i < N; i++) idx.push(prevStart + i, prevStart + (i + 1) % N, start);
+        for (let i = 0; i < N; i++) idx.push(prevStart + i, start, prevStart + (i + 1) % N);
       }
     }
   }
@@ -84,6 +79,20 @@ function loft(rings, ys, { capTop = null, capBottom = false } = {}) {
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
   return g;
 }
+// Make a lathe point out outward: flips triangles when the signed volume is negative (closed profiles only).
+function orient(g) {
+  const p = g.attributes.position; const ix = g.index; let v = 0;
+  const n = ix ? ix.count : p.count;
+  for (let t = 0; t < n; t += 3) {
+    const a = ix ? ix.getX(t) : t, b = ix ? ix.getX(t + 1) : t + 1, c = ix ? ix.getX(t + 2) : t + 2;
+    const ax = p.getX(a), ay = p.getY(a), az = p.getZ(a), bx = p.getX(b), by = p.getY(b), bz = p.getZ(b), cx = p.getX(c), cy = p.getY(c), cz = p.getZ(c);
+    v += ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx);
+  }
+  if (v < 0 && ix) { for (let t = 0; t < n; t += 3) { const b = ix.getX(t + 1), c = ix.getX(t + 2); ix.setX(t + 1, c); ix.setX(t + 2, b); } g.computeVertexNormals(); }
+  return g;
+}
+const lathe = (prof, seg = 48) => orient(new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), seg));
+const smoothstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 // Smooth interpolation through control points [(t, v)...] (monotone cubic).
 function spline(ctrl) {
@@ -99,167 +108,187 @@ function spline(ctrl) {
   };
 }
 
-const parts = { monitor: [], stand: [], keyboard: [], mouse: [] };
-const add = (part, g, xf) => parts[part].push(clean(xf ? place(g, xf) : g));
+const parts = { monitor: [], screen: [], stand: [], keyboard: [], keycaps: [], mouse: [] };
+// The site loader reduces each mesh's material colour to a grey (linear luminance, clamped 0.35-1) that drives the vertex
+// colour, so per-part shades are the only way to separate parts there: bright clay everywhere, glass and the aluminium
+// case a step darker so the screen, caps and board read as different surfaces.
+const SHADE = { monitor: 1.0, screen: 0.8, stand: 1.0, keyboard: 0.66, keycaps: 1.0, mouse: 1.0 };
+// add(part, geometry, transform, creaseDegrees): crease > 0 gives hard edges on flat/chamfered parts.
+const add = (part, g, xf, crease = 0) => parts[part].push(finish(xf ? place(g, xf) : g, crease));
+const CIRCLE = (r, n = 40) => Array.from({ length: n }, (_, i) => [r * Math.cos((i / n) * 2 * Math.PI), r * Math.sin((i / n) * 2 * Math.PI)]);
 
 // =============================================================================
-// MONITOR (27" 16:9). Panel front face at z = 0 before tilt; centred on x = 0.
+// LAYOUT (world, mm). Base centre z = 10; hinge axis behind the panel; keyboard in front.
 // =============================================================================
-const SCREEN_W = 598, SCREEN_H = 336; // active area
-const BEZEL = 7, CHIN = 20, PANEL_D = 9;
-const PANEL_W = SCREEN_W + 2 * BEZEL, PANEL_H = SCREEN_H + BEZEL + CHIN;
-const panelBottom = 108; // height of panel bottom edge above the desk
-const PANEL_CY = panelBottom + PANEL_H / 2;
-const monitorGroup = []; // geometries built in panel-local space (front face at z = 0, centre y = 0), then tilted/placed
+const HUB_Z = 10, HINGE_Y = 270, HINGE_Z = -6, PLINTH_TOP = 10;
 
-function bezelFrame() {
-  const shape = new THREE.Shape();
-  const ro = 5, ow = PANEL_W, oh = PANEL_H;
-  shape.moveTo(-ow / 2 + ro, -oh / 2); shape.lineTo(ow / 2 - ro, -oh / 2); shape.quadraticCurveTo(ow / 2, -oh / 2, ow / 2, -oh / 2 + ro);
-  shape.lineTo(ow / 2, oh / 2 - ro); shape.quadraticCurveTo(ow / 2, oh / 2, ow / 2 - ro, oh / 2);
-  shape.lineTo(-ow / 2 + ro, oh / 2); shape.quadraticCurveTo(-ow / 2, oh / 2, -ow / 2, oh / 2 - ro);
-  shape.lineTo(-ow / 2, -oh / 2 + ro); shape.quadraticCurveTo(-ow / 2, -oh / 2, -ow / 2 + ro, -oh / 2);
-  const hole = new THREE.Path(); const iy = (CHIN - BEZEL) / 2; // screen centre is above panel centre by iy
-  const iw = SCREEN_W, ih = SCREEN_H, ri = 1.5;
-  hole.moveTo(-iw / 2 + ri, iy - ih / 2); hole.lineTo(iw / 2 - ri, iy - ih / 2); hole.quadraticCurveTo(iw / 2, iy - ih / 2, iw / 2, iy - ih / 2 + ri);
-  hole.lineTo(iw / 2, iy + ih / 2 - ri); hole.quadraticCurveTo(iw / 2, iy + ih / 2, iw / 2 - ri, iy + ih / 2);
-  hole.lineTo(-iw / 2 + ri, iy + ih / 2); hole.quadraticCurveTo(-iw / 2, iy + ih / 2, -iw / 2, iy + ih / 2 - ri);
-  hole.lineTo(-iw / 2, iy - ih / 2 + ri); hole.quadraticCurveTo(-iw / 2, iy - ih / 2, -iw / 2 + ri, iy - ih / 2);
-  shape.holes.push(hole);
-  const g = new THREE.ExtrudeGeometry(shape, { depth: PANEL_D, bevelEnabled: true, bevelThickness: 1.2, bevelSize: 1.2, bevelSegments: 3, curveSegments: 6 });
-  // extrude goes +z from 0..depth; we want front face at z=0 and body behind (−z)
-  g.translate(0, 0, -PANEL_D - 1.2);
-  return g;
-}
-monitorGroup.push(bezelFrame());
-// Screen slab, front face recessed 1.6 mm behind the bezel front
+// =============================================================================
+// MONITOR (27" 16:9, thin bezel). Built in panel-local space: front glass plane at z = 0, panel centre at origin,
+// then moved so the hinge barrel (local b) lands on the world hinge point, tilted back 4 deg about it.
+// =============================================================================
+const SCREEN_W = 598, SCREEN_H = 336, GAP = 1.0, BEZEL = 2.0, CHIN = 16, EDGE = 5;
+const HOLE_W = SCREEN_W + 2 * GAP, HOLE_H = SCREEN_H + 2 * GAP;
+const PANEL_W = HOLE_W + 2 * BEZEL, PANEL_H = HOLE_H + BEZEL + CHIN; // 604 x 356
+const HOLE_CY = (CHIN - BEZEL) / 2;            // screen centre sits 7 mm above the panel centre
+const GLASS_FRONT = -0.4;                      // glass recessed 0.4 mm behind the bezel face
+const BULGE_D = 40, BULGE_CY = -12;            // rear housing swell: depth behind the 5 mm edge, vertical centre
+const PLATEAU_Z = -(EDGE + BULGE_D);           // back of the housing, -43
+const BARREL_LOCAL = [0, BULGE_CY - 0, PLATEAU_Z - 13];
+const monitor = [], screenParts = [];
 {
-  const iy = (CHIN - BEZEL) / 2; const slab = new THREE.BoxGeometry(SCREEN_W + 2, SCREEN_H + 2, 6);
-  slab.translate(0, iy, -1.6 - 3);
-  monitorGroup.push(slab);
-  // Very low-relief ERP bar chart: baseline + 7 rising bars + 3 faint grid lines. 0.5 mm relief.
-  const relief = 0.5, zf = -1.6 + relief / 2;
-  const chartW = 380, chartH = 190, cx = 0, cy = iy - 20;
-  const base = new THREE.BoxGeometry(chartW, 2.5, relief); base.translate(cx, cy - chartH / 2, zf); monitorGroup.push(base);
-  const bars = 7, bw = 30, gap = (chartW - 40 - bars * bw) / (bars - 1);
-  const heights = [0.22, 0.33, 0.30, 0.46, 0.58, 0.72, 0.92];
-  for (let i = 0; i < bars; i++) {
-    const h = chartH * heights[i]; const b = new THREE.BoxGeometry(bw, h, relief);
-    b.translate(cx - chartW / 2 + 20 + bw / 2 + i * (bw + gap), cy - chartH / 2 + 2.5 + h / 2, zf); monitorGroup.push(b);
+  // front bezel frame: extruded rounded rect with the screen hole and a small logo-dimple hole in the chin
+  const outer = rrectS(PANEL_W, PANEL_H, 5, 8, 6, 6);
+  const hole = rrectS(HOLE_W, HOLE_H, 1.4, 5, 6, 6); const holeP = offs(hole, 0, HOLE_CY);
+  const shape = new THREE.Shape(outer.map(([x, y]) => new THREE.Vector2(x, y)));
+  shape.holes.push(new THREE.Path(holeP.map(([x, y]) => new THREE.Vector2(x, y))));
+  const logoY = -PANEL_H / 2 + CHIN / 2;
+  shape.holes.push(new THREE.Path(offs(CIRCLE(4.8, 36), 0, logoY).map(([x, y]) => new THREE.Vector2(x, y))));
+  const bevT = 0.8, depth = EDGE - 2 * bevT;
+  const frame = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: bevT, bevelSize: 0.8, bevelSegments: 2, curveSegments: 1, steps: 1 });
+  frame.translate(0, 0, -(depth + bevT));
+  monitor.push([frame, 38]);
+  // logo dimple floor, 1 mm below the bezel face
+  const disc = new THREE.CylinderGeometry(5.2, 5.2, 3, 32); disc.rotateX(Math.PI / 2); disc.translate(0, logoY, -1.0 - 1.5); monitor.push([disc, 0]);
+  const logoRing = new THREE.TorusGeometry(2.0, 0.35, 8, 28); logoRing.translate(0, logoY, -0.95); monitor.push([logoRing, 0]);
+  // glass: a rounded slab filling the hole, front face recessed; thin glass gap reads as a screen edge
+  const glass = rbox(SCREEN_W, SCREEN_H, 8, 1.2, 3); glass.translate(0, HOLE_CY, GLASS_FRONT - 4); screenParts.push([glass, 0]);
+  // very low-relief ERP bar chart on the screen (0.35 mm), header strip, grid lines
+  const relief = 0.35, zf = GLASS_FRONT + relief / 2; const chartW = 380, chartH = 190, cx = 0, cy = HOLE_CY - 20;
+  const bx = (w, h, z, x, y, d = relief) => { const b = new THREE.BoxGeometry(w, h, d); b.translate(x, y, z); screenParts.push([b, 0]); };
+  bx(chartW, 2.5, zf, cx, cy - chartH / 2);
+  const bars = 7, bw = 30, gp = (chartW - 40 - bars * bw) / (bars - 1); const heights = [0.22, 0.33, 0.30, 0.46, 0.58, 0.72, 0.92];
+  for (let i = 0; i < bars; i++) { const h = chartH * heights[i]; bx(bw, h, zf, cx - chartW / 2 + 20 + bw / 2 + i * (bw + gp), cy - chartH / 2 + 2.5 + h / 2); }
+  for (let k = 1; k <= 3; k++) bx(chartW, 1.2, GLASS_FRONT + relief * 0.3, cx, cy - chartH / 2 + (chartH * k) / 4, relief * 0.6);
+  bx(SCREEN_W - 40, 14, zf, 0, HOLE_CY + SCREEN_H / 2 - 24);
+
+  // rear housing: smoothstep swell from the 5 mm panel edge into a ~38 mm deep central plateau (about a third wide)
+  const RHO_MIN = 0.38, K = 16; const rings = []; const ys = [];
+  for (let k = 0; k <= K; k++) {
+    const rho = RHO_MIN + (1 - RHO_MIN) * (k / K);          // plateau -> edge
+    const tt = (1 - rho) / (1 - RHO_MIN); const depthBehind = EDGE + BULGE_D * (1 - Math.pow(1 - tt, 2.2));  // quick shoulder, flat plateau
+    const w = (PANEL_W - 3) * rho, h = (PANEL_H - 3) * rho; const r = 3 + Math.pow(tt, 0.75) * 62;
+    const cyk = BULGE_CY * (1 - rho) / (1 - RHO_MIN);   // centre drifts down toward the plateau
+    const ring = rrectS(w, h, r, 10, 30, 18);
+    rings.push(ring.map(([x, y]) => [x, -(y + cyk)])); ys.push(-depthBehind + (k === K ? 1.0 : 0));
   }
-  for (let k = 1; k <= 3; k++) { const l = new THREE.BoxGeometry(chartW, 1.2, relief * 0.6); l.translate(cx, cy - chartH / 2 + (chartH * k) / 4, -1.6 + relief * 0.3); monitorGroup.push(l); }
-  // header strip (ERP title bar) and a small side nav block
-  const hdr = new THREE.BoxGeometry(SCREEN_W - 40, 14, relief); hdr.translate(0, iy + SCREEN_H / 2 - 24, zf); monitorGroup.push(hdr);
-}
-// Rear housing: rounded bulge covering the central area, plus a thinner outer back skin
-{
-  const skin = rbox(PANEL_W - 10, PANEL_H - 10, 6, 2.5); skin.translate(0, 0, -PANEL_D - 1.2 - 3 + 0.5); monitorGroup.push(skin);
-  const house = rbox(400, 250, 46, 16, 5); house.translate(0, -10, -PANEL_D - 1.2 - 23 - 2); monitorGroup.push(house);
-  // VESA plate (100x100 pattern) with four bosses
-  const vesa = rbox(118, 118, 8, 4); vesa.translate(0, -10, -PANEL_D - 1.2 - 46 - 4 - 2 + 1); monitorGroup.push(vesa);
-  for (const sx of [-1, 1]) for (const sy of [-1, 1]) { const boss = new THREE.CylinderGeometry(5, 5, 3, 20); boss.rotateX(Math.PI / 2); boss.translate(sx * 50, -10 + sy * 50, -PANEL_D - 1.2 - 46 - 8 - 2 + 1 - 1.5); monitorGroup.push(boss); }
-  // ports recess strip on the housing underside
-  const ports = new THREE.BoxGeometry(160, 6, 26); ports.translate(-40, -10 - 125 + 3, -PANEL_D - 1.2 - 23 - 2); monitorGroup.push(ports);
-  // power button nub under the chin (right side)
-  const pwr = new THREE.CylinderGeometry(3, 3, 3, 20); pwr.translate(PANEL_W / 2 - 40, -PANEL_H / 2 - 1.2, -PANEL_D / 2 - 1.2); monitorGroup.push(pwr);
-  // tiny status LED on the chin
-  const led = new THREE.CylinderGeometry(1.4, 1.4, 1, 12); led.rotateX(Math.PI / 2); led.translate(PANEL_W / 2 - 40, -PANEL_H / 2 + CHIN / 2 - 3, 0.3); monitorGroup.push(led);
-}
-// Place the panel: tilt back 4 degrees around the hinge (which sits at the VESA plate), front face near z = 30
-const MONITOR_TILT = -4 * DEG;
-const monitorXf = { pos: [0, PANEL_CY, 32], rot: [MONITOR_TILT, 0, 0] };
-for (const g of monitorGroup) add('monitor', g, monitorXf);
+  const housing = loft(rings, ys, { capBottom: true }); housing.rotateX(Math.PI / 2);
+  { const ix = housing.index; for (let t = 0; t < ix.count; t += 3) { const b = ix.getX(t + 1), c = ix.getX(t + 2); ix.setX(t + 1, c); ix.setX(t + 2, b); } housing.computeVertexNormals(); } // the z mirror flipped winding
+  monitor.push([housing, 0]);
 
-// =============================================================================
-// STAND: hinge + bracket + tapered neck + lathed oval base
-// =============================================================================
-const hingeZ = 32 - PANEL_D - 1.2 - 46 - 8 - 2 - 6; // just behind VESA plate
-const hingeY = PANEL_CY - 10;
+  // rear details on the plateau: hinge mount plate, vent strip (plate + ribs), cable/port cover
+  const pl = (w, h, d, r, x, y, z = PLATEAU_Z) => { const g = rbox(w, h, d, r, 3); g.translate(x, y, z - d / 2 + 0.3); monitor.push([g, 0]); };
+  pl(104, 50, 3.0, 8, 0, BULGE_CY - 0);                       // hinge saddle
+  pl(116, 22, 1.6, 4, 0, BULGE_CY + 33);                       // vent plate
+  for (let i = -7; i <= 7; i++) { const g = new THREE.BoxGeometry(2.4, 15, 1.2); g.translate(i * 7.2, BULGE_CY + 33, PLATEAU_Z - 1.6 - 0.3); monitor.push([g, 0]); }
+  pl(124, 18, 2.6, 5, 0, BULGE_CY - 44);                       // cable / port cover
+  // power button nub and status LED on the chin
+  const pwr = new THREE.CylinderGeometry(3.2, 3.2, 3, 24); pwr.translate(PANEL_W / 2 - 40, -PANEL_H / 2 - 0.4, -EDGE / 2); monitor.push([pwr, 0]);
+  const led = new THREE.CylinderGeometry(1.1, 1.1, 0.6, 12); led.rotateX(Math.PI / 2); led.translate(PANEL_W / 2 - 40, -PANEL_H / 2 + CHIN / 2 - 3, 0.0); monitor.push([led, 0]);
+}
 {
-  // hinge barrel (axis X)
-  const barrel = new THREE.CylinderGeometry(11, 11, 76, 32); barrel.rotateZ(Math.PI / 2); add('stand', barrel, { pos: [0, hingeY, hingeZ] });
-  // bracket plate bolting to the VESA
-  const brk = rbox(100, 100, 6, 3); add('stand', brk, { pos: [0, hingeY, hingeZ + 6 + 3], rot: [MONITOR_TILT, 0, 0] });
-  // neck: tapered rounded-rect loft, leaning back 10 degrees, from base hub to the hinge
-  const neckBottomY = 16, neckTopY = hingeY + 10;
-  const lean = 10 * DEG; const L = (neckTopY - neckBottomY) / Math.cos(lean);
-  const N = 48; const rings = [roundedRect(84, 30, 12, N), roundedRect(78, 26, 10, N), roundedRect(62, 15, 7, N), roundedRect(58, 14, 6.5, N), roundedRect(58, 14, 6.5, N)];
-  const neck = loft(rings, [0, L * 0.10, L * 0.70, L * 0.96, L], { capTop: { dish: 0, steps: 1 } });
-  // bottom of neck sits at z such that top meets hinge: top z = hingeZ; bottom z = hingeZ + L*sin(lean)
-  add('stand', neck, { pos: [0, neckBottomY, hingeZ + L * Math.sin(lean)], rot: [-lean, 0, 0] });
-  // cable clip ring on the neck
-  const clip = new THREE.TorusGeometry(26, 3, 12, 40); clip.rotateX(Math.PI / 2);
-  add('stand', clip, { pos: [0, neckBottomY + L * 0.45 * Math.cos(lean), hingeZ + L * Math.sin(lean) - L * 0.45 * Math.sin(lean)], rot: [-lean, 0, 0], scale: [1.55, 1, 0.55] });
-  // lathed base profile (r, y): raised hub, gentle slope, thin flat rim with rounded edge
-  const prof = [[0, 24], [30, 24], [40, 22.5], [50, 17], [66, 10.5], [90, 7.5], [112, 6.5], [120, 6], [124, 4.5], [125.5, 2], [125, 0.4], [122, 0], [0, 0]];
-  const base = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 96);
-  // oval footprint: deeper than wide? Real bases are wider than deep. scale z 0.72
-  add('stand', base, { pos: [0, 0, hingeZ + L * Math.sin(lean) + 8], scale: [1.0, 1, 0.78] });
+  const tilt = -4 * DEG;
+  const [bx, by, bz] = BARREL_LOCAL;
+  for (const [list, name] of [[monitor, 'monitor'], [screenParts, 'screen']]) for (const [g, crease] of list) { g.translate(-bx, -by, -bz); add(name, g, { pos: [0, HINGE_Y, HINGE_Z], rot: [tilt, 0, 0] }, crease); }
 }
 
 // =============================================================================
-// KEYBOARD (TKL main block + F row). Case is a wedge; keys follow the slope.
+// STAND: plinth foot + raised hub, neck with rear cable channel & clip, ring-hinged barrel boss
 // =============================================================================
-const U = 19.05;
-const KB_ROWS = [
-  // [startX offsets in u, key widths in u]
-  { y: 0, keys: [[0, 1], [2, 1], [3, 1], [4, 1], [5, 1], [6.5, 1], [7.5, 1], [8.5, 1], [9.5, 1], [11, 1], [12, 1], [13, 1], [14, 1]], h: 9.5, gapAfter: 0.5 },
-  { y: 1.5, keys: 'seq', widths: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2], h: 10.6 },
-  { y: 2.5, keys: 'seq', widths: [1.5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1.5], h: 10.0 },
-  { y: 3.5, keys: 'seq', widths: [1.75, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.25], h: 9.2 },
-  { y: 4.5, keys: 'seq', widths: [2.25, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2.75], h: 9.4 },
-  { y: 5.5, keys: 'seq', widths: [1.25, 1.25, 1.25, 6.25, 1.25, 1.25, 1.25, 1.25], h: 10.2 },
-];
-const KB_UNITS_W = 15, KB_UNITS_D = 6.5;
-const KB_MARGIN = 7, KB_W = KB_UNITS_W * U + 2 * KB_MARGIN, KB_D = KB_UNITS_D * U + 2 * KB_MARGIN;
-const KB_FRONT_H = 9, KB_BACK_H = 21; // wedge
-const kbSlope = Math.atan((KB_BACK_H - KB_FRONT_H) / KB_D);
-const KB_POS = [0, 0, 265];
-
-function keycap(wU, dU, h, { tilt = 0 } = {}) {
-  const N = 40; const w = wU * U - 1.1, d = dU * U - 1.1; // 1.1 mm gap between caps
-  const tw = w - 5.2, td = d - 5.0; // top face
-  const rings = [roundedRect(w, d, 1.6, N), roundedRect(w - 0.3, d - 0.3, 1.5, N), roundedRect(tw + 1.0, td + 1.0, 2.2, N), roundedRect(tw, td, 2.0, N)];
-  const g = loft(rings, [0, 0.6, h - 0.9, h], { capTop: { dish: 0.55, steps: 3 } });
-  if (tilt) g.rotateX(tilt);
-  return g;
-}
 {
-  // Case: side profile (z = depth axis, y = height) extruded along X with bevelled ends
-  const s = new THREE.Shape(); const hd = KB_D / 2, r = 3;
-  s.moveTo(-hd + r, 0); s.lineTo(hd - r, 0); s.quadraticCurveTo(hd, 0, hd, r); // front-bottom (z=+hd is front)
-  s.lineTo(hd, KB_FRONT_H - r); s.quadraticCurveTo(hd, KB_FRONT_H, hd - r, KB_FRONT_H);
-  s.lineTo(-hd + r, KB_BACK_H); s.quadraticCurveTo(-hd, KB_BACK_H, -hd, KB_BACK_H - r);
-  s.lineTo(-hd, r); s.quadraticCurveTo(-hd, 0, -hd + r, 0);
-  const caseG = new THREE.ExtrudeGeometry(s, { depth: KB_W - 6, bevelEnabled: true, bevelThickness: 3, bevelSize: 3, bevelSegments: 5, curveSegments: 6 });
-  // Extrude: shape in XY, extruded along +Z. Map: shape.x -> world z, shape.y -> world y, extrude z -> world x.
-  caseG.rotateY(Math.PI / 2); // now extrude axis is +X... shape.x -> -z? verify by bbox below
-  caseG.computeBoundingBox(); const bb = caseG.boundingBox;
-  caseG.translate(-(bb.min.x + bb.max.x) / 2, -bb.min.y, -(bb.min.z + bb.max.z) / 2);
-  // after rotateY(+90deg): (x,y,z) -> (z, y, -x); so shape.x (depth) -> -world z; i.e. front (shape +x) -> -z. Flip to make front +z.
-  caseG.scale(1, 1, -1);
-  add('keyboard', caseG, { pos: KB_POS });
-  // top plate recess rim: a slightly inset raised plate under keys (visible between keys)
-  const plateY = (z) => KB_FRONT_H + (KB_D / 2 - z) / KB_D * (KB_BACK_H - KB_FRONT_H);
-  const plate = new THREE.BoxGeometry(KB_UNITS_W * U + 3, 1.6, KB_UNITS_D * U + 3);
-  add('keyboard', plate, { pos: [KB_POS[0], KB_POS[1] + plateY(0) - 0.6, KB_POS[2]], rot: [kbSlope, 0, 0] });
-  // keys
-  const zBack = KB_D / 2 - KB_MARGIN; // far edge of key area (local z of top row's back edge)
-  for (const row of KB_ROWS) {
-    const list = [];
-    if (row.keys === 'seq') { let x = 0; for (const w of row.widths) { list.push([x, w]); x += w; } } else list.push(...row.keys);
-    for (const [xu, wu] of list) {
-      const cxU = xu + wu / 2 - KB_UNITS_W / 2; const czU = row.y + 0.5; // centre, in units from the back edge
-      const localZ = zBack - czU * U; const localX = cxU * U;
-      const topY = plateY(localZ) + 0.2; // sit on the plate (plate is 1.6 thick centred at plateY-0.6)
-      const g = keycap(wu, 1, row.h);
-      // keys rest on the sloped plate: rotate by slope around X about the plate surface
-      add('keyboard', g, { pos: [KB_POS[0] + localX, KB_POS[1] + topY - Math.sin(kbSlope) * 0, KB_POS[2] + localZ], rot: [kbSlope, 0, 0] });
-    }
+  // plinth 220 x 170, 3 mm chamfer top & bottom, floating on a slightly smaller pad
+  const PW = 220, PD = 170, PR = 26; const ring = (w, d) => rrectS(w, d, PR - (PW - w) / 2, 8, 20, 14);
+  const P = (w, d, y) => ({ w, d, y });
+  const prof = [P(214, 164, 1.2), P(220, 170, 4.2), P(220, 170, 7.0), P(214, 164, PLINTH_TOP)];
+  const plinth = loft(prof.map(({ w, d }) => ring(w, d)), prof.map((p) => p.y), { capTop: { dish: 0, steps: 1 }, capBottom: true });
+  add('stand', plinth, { pos: [0, 0, HUB_Z] }, 28);
+  const pad = loft([rrectS(196, 146, 18, 8, 18, 12), rrectS(196, 146, 18, 8, 18, 12)], [0, 1.4], { capBottom: true });
+  add('stand', pad, { pos: [0, 0, HUB_Z] }, 28);
+  // raised hub
+  const hp = [[116, 90, 22, PLINTH_TOP - 0.3], [104, 80, 22, PLINTH_TOP + 3.5], [94, 72, 20, PLINTH_TOP + 7.5]];
+  const hub = loft(hp.map(([w, d, r]) => rrectS(w, d, r, 8, 12, 10)), hp.map((h) => h[3]), { capTop: { dish: 0, steps: 1 } });
+  add('stand', hub, { pos: [0, 0, HUB_Z] }, 28);
+
+  // neck: tapered slab leaning back to the hinge, with a rear cable groove (real indent) and a cover clip
+  const yBot = PLINTH_TOP + 7.0, L = HINGE_Y - yBot; const tanLean = (HUB_Z - HINGE_Z) / L;
+  const defs = [ // [t along neck 0..1, width, depth, radius, groove depth]
+    [0.00, 96, 32, 15, 0], [0.04, 88, 26, 12, 0], [0.10, 80, 21, 9, 3.0], [0.30, 76, 19, 8, 5.5],
+    [0.70, 74, 18, 8, 6], [0.92, 74, 20, 8, 5], [1.0, 72, 20, 8, 0],
+  ];
+  const nrings = []; const nys = [];
+  for (const [t, w, d, r, gd] of defs) {
+    const ring = rrectS(w, d, r, 6, 36, 4).map(([x, z]) => {
+      if (Math.abs(z + d / 2) < 1e-6 && Math.abs(x) < 24) z += gd * (1 - smoothstep(11, 19, Math.abs(x)));
+      return [x, z];
+    });
+    nrings.push(ring); nys.push(t * L);
   }
-  // USB cable stub at the back centre-left
-  const stub = new THREE.CylinderGeometry(2.5, 2.5, 14, 16); stub.rotateX(Math.PI / 2);
-  add('keyboard', stub, { pos: [KB_POS[0] - 60, KB_POS[1] + 11, KB_POS[2] - KB_D / 2 - 6] });
+  const neck = loft(nrings, nys, { capTop: { dish: 0, steps: 1 } });
+  { const p = neck.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - tanLean * p.getY(i)); neck.computeVertexNormals(); }
+  add('stand', neck, { pos: [0, yBot, HUB_Z] });
+  // cover clip: a slim plate bridging the cable channel part way up
+  const clipT = 0.42; const clipY = yBot + clipT * L; const clipZ = HUB_Z - tanLean * clipT * L - 18 / 2 - 0.4;
+  const clip = rbox(40, 34, 3.6, 1.6, 3); add('stand', clip, { pos: [0, clipY, clipZ + 0.6], rot: [Math.atan(tanLean) * 0, 0, 0] });
+  // hinge: central barrel + two collar rings (ring hinge) and chamfered end caps, axis X
+  const barrel = lathe([[0, 49], [10.5, 49], [12.6, 47], [13, 45], [13, -45], [12.6, -47], [10.5, -49], [0, -49]], 40); barrel.rotateZ(Math.PI / 2);
+  add('stand', barrel, { pos: [0, HINGE_Y, HINGE_Z] }, 35);
+  for (const sx of [-1, 1]) {
+    const collar = lathe([[0, 8], [16, 8], [18.2, 6], [18.2, -6], [16, -8], [0, -8]], 44); collar.rotateZ(Math.PI / 2);
+    add('stand', collar, { pos: [sx * 27, HINGE_Y, HINGE_Z] }, 35);
+  }
+  // neck head block joining the collars
+  const head = rbox(54, 34, 26, 8, 4); add('stand', head, { pos: [0, HINGE_Y - 14, HINGE_Z - 1] });
+}
+
+// =============================================================================
+// KEYBOARD: slim aluminium-style low-profile board (Mac-style 15u layout with F-row and inverted-T arrows).
+// Case: chamfered rounded slab, 4.5 mm at the front rising to 11 mm at the back, on four low rubber feet.
+// Keys: dished low-profile caps, 1 mm gaps, staggered rows.
+// =============================================================================
+const U = 19.05, KEY_GAP = 1.0;
+const KB_M = 6;                                   // case margin around the key field
+const KB_W = 15 * U + 2 * KB_M, KB_F_ROW = 13, KB_D = KB_F_ROW + 5 * U + 2 * KB_M;
+const KB_FRONT_T = 4.5, KB_BACK_T = 11, KB_FEET = 1.2;
+const KB_POS = [0, 0, 218];
+const kbHz = (z) => KB_FRONT_T + (KB_BACK_T - KB_FRONT_T) * ((KB_D / 2 - z) / KB_D); // case top height at local z
+const kbSlope = Math.atan((KB_BACK_T - KB_FRONT_T) / KB_D);
+
+function keycap(wMM, dMM, h) {
+  const cs = 5, ex = Math.max(1, Math.round(wMM / 9)), ey = Math.max(1, Math.round(dMM / 12));
+  const rr = (w, d, r) => rrectS(w, d, r, cs, ex, ey);
+  const rings = [rr(wMM, dMM, 2.4), rr(wMM - 0.3, dMM - 0.3, 2.4), rr(wMM - 1.7, dMM - 1.7, 3.0), rr(wMM - 3.0, dMM - 3.0, 3.4)];
+  return loft(rings, [0, 0.7, h - 0.9, h], { capTop: { dish: 0.45, steps: 3 } });
+}
+{
+  // case: plan-view rounded rectangle loft, then scaled in height by the wedge profile
+  const rr = (w, d, r) => rrectS(w, d, r, 6, 40, 10);
+  const rings = [rr(KB_W - 5, KB_D - 5, 6), rr(KB_W, KB_D, 8), rr(KB_W, KB_D, 8), rr(KB_W - 2.6, KB_D - 2.6, 7)];
+  const ys0 = [0, 1.3, 3.3, 4.5];
+  const body = loft(rings, ys0, { capTop: { dish: 0, steps: 1 }, capBottom: true });
+  { const p = body.attributes.position; for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) * kbHz(p.getZ(i)) / 4.5); }
+  add('keyboard', body, { pos: [KB_POS[0], KB_POS[1] + KB_FEET, KB_POS[2]] }, 30);
+  // rubber feet
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) { const f = rbox(30, KB_FEET * 2, 12, 0.5, 2); add('keyboard', f, { pos: [sx * (KB_W / 2 - 34), 0, KB_POS[2] + sz * (KB_D / 2 - 14)] }); }
+
+  const zBack = -KB_D / 2 + KB_M;                 // back edge of the key field (case-local z)
+  const rowC = [zBack + KB_F_ROW / 2]; for (let r = 0; r < 5; r++) rowC.push(zBack + KB_F_ROW + U * r + U / 2);
+  const rows = [
+    { c: rowC[0], d: KB_F_ROW - KEY_GAP, h: 4.0, keys: [1.5, ...Array(12).fill(1), 1.5] },
+    { c: rowC[1], d: U - KEY_GAP, h: 5.0, keys: [...Array(13).fill(1), 2] },
+    { c: rowC[2], d: U - KEY_GAP, h: 5.0, keys: [1.5, ...Array(12).fill(1), 1.5] },
+    { c: rowC[3], d: U - KEY_GAP, h: 5.0, keys: [1.75, ...Array(11).fill(1), 2.25] },
+    { c: rowC[4], d: U - KEY_GAP, h: 5.0, keys: [2.25, ...Array(10).fill(1), 2.75] },
+  ];
+  const putKey = (xu, wu, zc, d, h) => {
+    const w = wu * U - KEY_GAP; const x = (xu + wu / 2 - 7.5) * U;
+    add('keycaps', keycap(w, d, h), { pos: [KB_POS[0] + x, KB_POS[1] + KB_FEET + kbHz(zc) - 0.15, KB_POS[2] + zc], rot: [kbSlope, 0, 0] });
+  };
+  for (const row of rows) { let xu = 0; for (const wu of row.keys) { putKey(xu, wu, row.c, row.d, row.h); xu += wu; } }
+  // bottom row: fn ctrl opt cmd [space] cmd opt, then arrow cluster (half-height up/down)
+  const zb = rowC[5]; const bot = [1, 1, 1, 1.25, 5.5, 1.25, 1]; let xu = 0;
+  for (const wu of bot) { putKey(xu, wu, zb, U - KEY_GAP, 5.0); xu += wu; }
+  const half = (U - KEY_GAP) / 2 - 0.4;
+  putKey(12, 1, zb, U - KEY_GAP, 5.0); putKey(14, 1, zb, U - KEY_GAP, 5.0);
+  putKey(13, 1, zb - U / 4, half, 5.0); putKey(13, 1, zb + U / 4, half, 5.0);
 }
 
 // =============================================================================
@@ -312,7 +341,7 @@ function keycap(wU, dU, h, { tilt = 0 } = {}) {
   // side buttons on the thumb side (-X), low domed slivers
   const sb = (zc, len) => { const g = rbox(3.5, 5.5, len, 1.6, 3); g.translate(-W(0.5 - zc / L) - 0.6, H(0.5) * 0.45, zc); return g; };
   const sideA = sb(12, 16), sideB = sb(-6, 16);
-  const mouseXf = { pos: [262, 0, 262], rot: [0, -14 * DEG, 0] };
+  const mouseXf = { pos: [252, 0, 226], rot: [0, -14 * DEG, 0] };
   add('mouse', shell, mouseXf); add('mouse', wheel, mouseXf); add('mouse', sideA, mouseXf); add('mouse', sideB, mouseXf);
 }
 
@@ -325,7 +354,7 @@ for (const [name, list] of Object.entries(parts)) {
   const merged = mergeGeometries(list, false);
   const g = mergeVertices(merged, 1e-4);
   tris += g.index.count / 3;
-  const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0xc9d2dc, roughness: 0.55, metalness: 0 }));
+  const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: new THREE.Color(SHADE[name], SHADE[name], SHADE[name]), roughness: 0.55, metalness: 0 }));
   mesh.name = name; scene.add(mesh);
 }
 const exporter = new GLTFExporter();

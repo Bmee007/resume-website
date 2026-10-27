@@ -113,13 +113,14 @@ function poseRig(V, pose) {
     const P = b.parent ? pw.get(b.parent).clone().add(head.get(b.name).clone().sub(head.get(b.parent)).applyQuaternion(Rp)) : head.get(b.name).clone();
     let R = Rp.clone();
     if (spec.rot) R.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(spec.rot[0] * DEG, spec.rot[1] * DEG, spec.rot[2] * DEG, 'XYZ')));
+    if (spec.axisRot) for (const [axis, deg] of spec.axisRot) R.multiply(new THREE.Quaternion().setFromAxisAngle(V3(axis).normalize(), deg * DEG));
     if (spec.aim) { const d0 = tail.get(b.name).clone().sub(head.get(b.name)).normalize().applyQuaternion(R); R = new THREE.Quaternion().setFromUnitVectors(d0, V3(spec.aim).normalize()).multiply(R); }
     if (spec.twist) { const axis = tail.get(b.name).clone().sub(head.get(b.name)).normalize().applyQuaternion(R); R = new THREE.Quaternion().setFromAxisAngle(axis, spec.twist * DEG).multiply(R); }
     Rw.set(b.name, R); pw.set(b.name, P);
     skin.push(new THREE.Matrix4().compose(P, R, new THREE.Vector3(1, 1, 1)).multiply(new THREE.Matrix4().makeTranslation(-head.get(b.name).x, -head.get(b.name).y, -head.get(b.name).z)));
   }
   const tailPos = (n) => tail.get(n).clone().sub(head.get(n)).applyQuaternion(Rw.get(n)).add(pw.get(n));
-  return { skin, pos: pw, tailPos };
+  return { skin, pos: pw, tailPos, rot: Rw, head, tail };
 }
 function skinPoints(P, W, skin) {
   const out = new Array(P.length); const v = new THREE.Vector3(), acc = new THREE.Vector3();
@@ -155,61 +156,149 @@ const frameMatrix = (F) => {
 // Human right hand: pose the fingers into a grip, extract hand + forearm (cut mid-forearm), add the shirt
 // sleeve with its cuff, and a rounded ring to hide the cut.
 // =============================================================================
+const CURLS = { 2: [70, 62, 30], 3: [76, 68, 34], 4: [80, 72, 36], 5: [84, 76, 40] }; // index..pinky: MCP, PIP, DIP (deg)
+const SPREAD = 3; // finger abduction per finger (deg)
+const FOREARM_CUT = 0.55; // fraction of the way from elbow to wrist where the sleeve is cut
+// scene-space directions of the human thumb bones: laid forward along the top edge and over the robot's thumb web (-Z)
+const HUMAN_THUMB = [new THREE.Vector3(0.78, 0.55, -0.25), new THREE.Vector3(0.84, 0.40, -0.40), new THREE.Vector3(0.90, 0.20, -0.40)];
+
+/** Flip winding of a closed part whose signed volume is negative (mirrored/negative-scaled/lathed parts). */
+function outward(g) {
+  const pos = g.attributes.position; const idx = g.index ? g.index.array : null; if (!idx) return g;
+  let vol = 0; const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  for (let i = 0; i < idx.length; i += 3) { a.fromBufferAttribute(pos, idx[i]); b.fromBufferAttribute(pos, idx[i + 1]); c.fromBufferAttribute(pos, idx[i + 2]); vol += a.dot(b.clone().cross(c)); }
+  if (vol < 0) for (let i = 0; i < idx.length; i += 3) { const t = idx[i + 1]; idx[i + 1] = idx[i + 2]; idx[i + 2] = t; }
+  return g;
+}
+/** One level of midpoint subdivision followed by Taubin smoothing (boundary vertices fixed): rounds the
+ *  faceted MakeHuman mesh into a smoother surface with ~4x the triangles, without shrinking it. */
+function subdivideSmooth(g, smoothIters = 3) {
+  const P = []; const pos = g.attributes.position; for (let i = 0; i < pos.count; i++) P.push(new THREE.Vector3().fromBufferAttribute(pos, i));
+  const idx = g.index.array; const mid = new Map(); const tris = [];
+  const edge = (a, b) => { const k = a < b ? a * 1e6 + b : b * 1e6 + a; let m = mid.get(k); if (m === undefined) { m = P.length; P.push(P[a].clone().add(P[b]).multiplyScalar(0.5)); mid.set(k, m); } return m; };
+  const edgeUse = new Map(); const ek = (a, b) => (a < b ? a * 1e6 + b : b * 1e6 + a);
+  for (let i = 0; i < idx.length; i += 3) for (let e = 0; e < 3; e++) { const k = ek(idx[i + e], idx[i + (e + 1) % 3]); edgeUse.set(k, (edgeUse.get(k) || 0) + 1); }
+  const fixed = new Uint8Array(P.length * 4 + 8);
+  for (let i = 0; i < idx.length; i += 3) {
+    const [a, b, c] = [idx[i], idx[i + 1], idx[i + 2]]; const ab = edge(a, b), bc = edge(b, c), ca = edge(c, a);
+    tris.push([a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]);
+  }
+  for (const [k, n] of edgeUse) if (n === 1) { const a = Math.floor(k / 1e6), b = k - a * 1e6; fixed[a] = 1; fixed[b] = 1; const m = mid.get(k); if (m !== undefined) fixed[m] = 1; }
+  const nbr = P.map(() => new Set());
+  for (const [a, b, c] of tris) { nbr[a].add(b).add(c); nbr[b].add(a).add(c); nbr[c].add(a).add(b); }
+  const step = (lam) => {
+    const next = P.map((p, i) => { if (fixed[i] || !nbr[i].size) return p; const avg = new THREE.Vector3(); for (const j of nbr[i]) avg.add(P[j]); avg.multiplyScalar(1 / nbr[i].size); return p.clone().addScaledVector(avg.sub(p), lam); });
+    for (let i = 0; i < P.length; i++) P[i] = next[i];
+  };
+  for (let it = 0; it < smoothIters; it++) { step(0.5); step(-0.53); }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.Float32BufferAttribute(P.flatMap((p) => [p.x, p.y, p.z]), 3));
+  out.setIndex(tris.flat()); return out;
+}
+/** Pull vertices behind the plane (point o, normal n pointing to the kept side) onto the plane: a clean planar cut. */
+function clampToPlane(g, o, n) {
+  const p = g.attributes.position; const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const t = v.clone().sub(o).dot(n); if (t < 0) { v.addScaledVector(n, -t); p.setXYZ(i, v.x, v.y, v.z); } }
+  return g;
+}
+
 function buildHumanHand() {
   const V = morphBase([['caucasian-male-young', 1 / 3], ['african-male-young', 1 / 3], ['asian-male-young', 1 / 3]]);
-  const pose = {
-    'wrist.R': { rot: [8, 0, 0] },
-    'finger1-1.R': { rot: [22, 0, 40] }, 'finger1-2.R': { rot: [28, 0, 0] }, 'finger1-3.R': { rot: [30, 0, 0] }, // thumb across the top
+  // rest-pose hand frame: f = wrist->middle MCP, h = index MCP -> pinky MCP (knuckle line), palm normal = f x h
+  // (verified: the thumb CMC and the thenar bulge lie on the +(f x h) side of the right hand)
+  const restJ = (j) => { const ids = rig.joints[j]; const c = new THREE.Vector3(); for (const i of ids) c.add(V3(V[i])); return c.multiplyScalar(1 / ids.length); };
+  const rW = restJ('wrist.R____head'), rM = restJ('finger3-1.R____head'), rI = restJ('finger2-1.R____head'), rP = restJ('finger5-1.R____head');
+  const rf = rM.clone().sub(rW).normalize(); const rh = rP.clone().sub(rI).normalize(); const rn = rf.clone().cross(rh).normalize(); // rn = palm side
+  const hinge = rh.clone().negate().toArray(); // rotating about (pinky -> index) by +deg curls the fingertips toward the palm
+  const poseFor = (thumbAims) => {
+    const pose = { 'wrist.R': { axisRot: [[hinge, 10], [rf.toArray(), -8]] } }; // slight flexion + pronation
+    for (const [f, [m, pp, d]] of Object.entries(CURLS)) { pose[`finger${f}-1.R`] = { axisRot: [[hinge, m], [rn.toArray(), (f - 3.5) * SPREAD]] }; pose[`finger${f}-2.R`] = { axisRot: [[hinge, pp]] }; pose[`finger${f}-3.R`] = { axisRot: [[hinge, d]] }; }
+    if (thumbAims) thumbAims.forEach((d, k) => { pose[`finger1-${k + 1}.R`] = { aim: d.toArray() }; });
+    return pose;
   };
-  const curls = { 2: [70, 62, 30], 3: [76, 68, 34], 4: [80, 72, 36], 5: [84, 76, 40] }; // index .. pinky: MCP, PIP, DIP
-  for (const [f, [m, p, d]] of Object.entries(curls)) { pose[`finger${f}-1.R`] = { rot: [m, 0, (f - 3.5) * -3] }; pose[`finger${f}-2.R`] = { rot: [p, 0, 0] }; pose[`finger${f}-3.R`] = { rot: [d, 0, 0] }; }
-  const posed = poseRig(V, pose);
+  // pass 1: fingers only -> palm frame M; pass 2: thumb bones aimed along scene directions (over the robot's thumb web)
+  const frameOf = (posed) => {
+    const wrist = posed.pos.get('wrist.R'); const mcp = posed.pos.get('finger3-1.R').clone();
+    const f = mcp.clone().sub(wrist).normalize();
+    const aRaw = posed.pos.get('finger2-1.R').clone().sub(posed.pos.get('finger5-1.R'));
+    const a = aRaw.sub(f.clone().multiplyScalar(aRaw.dot(f))).normalize();
+    const back = f.clone().cross(a.clone().negate()).normalize().negate(); // away from the palm
+    const local = new THREE.Matrix4().makeBasis(a, back, f).setPosition(wrist.clone().lerp(mcp, 0.5));
+    return frameMatrix(HUMAN).multiply(local.clone().invert());
+  };
+  const posed1 = poseRig(V, poseFor(null)); const M1 = frameOf(posed1);
+  const Rinv = new THREE.Matrix4().extractRotation(M1).invert();
+  const posed = poseRig(V, poseFor(HUMAN_THUMB.map((d) => d.clone().normalize().applyMatrix4(Rinv))));
+  const M = frameOf(posed1); // palm frame is independent of the thumb
   const W = base.V.map((_, i) => rig.vw.get(i) || []);
   const body = skinPoints(V, W, posed.skin);
   const shirt = fitProxy(path.join(SRC, 'sysassets/clothes/male_casualsuit01/male_casualsuit01.mhclo'), V);
   const shirtP = skinPoints(shirt.P, shirt.W, posed.skin);
-  // bones belonging to the right hand / forearm
   const armBones = new Set(rig.bones.filter((b) => /\.R$/.test(b.name) && /^(wrist|metacarpal|finger|lowerarm)/.test(b.name)).map((b) => b.i));
   const inArm = (w) => w.length && w.reduce((t, [bi, ww]) => t + (armBones.has(bi) ? ww : 0), 0) > 0.5;
-  // cut plane: mid-forearm, perpendicular to the forearm axis
+  // cut plane: part-way along the forearm, perpendicular to its axis; faces crossing it are clamped onto it
   const elbow = posed.pos.get('lowerarm01.R'), wrist = posed.pos.get('wrist.R');
   const axis = wrist.clone().sub(elbow).normalize();
-  const cutAt = elbow.clone().lerp(wrist, 0.42);
+  const cutAt = elbow.clone().lerp(wrist, FOREARM_CUT);
   const beyond = (p) => V3(p).sub(cutAt).dot(axis) > 0;
-  const keep = (P, Wl) => (f) => f.idx.every((i) => inArm(Wl[i]) && beyond(P[i]));
-  const skinG = facesToGeometry(body, bodyFaces, keep(body, W));
-  const sleeveG = facesToGeometry(shirtP, shirt.faces, keep(shirtP, shirt.W));
-  // hand frame from the posed joints (right hand: palm normal = a x f, back = f x a)
-  const mcp = posed.tailPos('metacarpal2.R').add(posed.tailPos('metacarpal3.R')).multiplyScalar(0.5);
-  const f = mcp.clone().sub(wrist).normalize();
-  const aRaw = posed.tailPos('metacarpal1.R').sub(posed.tailPos('metacarpal4.R'));
-  const a = aRaw.sub(f.clone().multiplyScalar(aRaw.dot(f))).normalize();
-  // palm side = the side the curled fingers went to (robust to handedness/sign conventions)
-  let back = f.clone().cross(a).normalize();
-  const curlDir = posed.tailPos('finger3-3.R').sub(posed.tailPos('metacarpal2.R'));
-  console.log('DBG curl.back', curlDir.dot(back).toFixed(3), 'curl.f', curlDir.dot(f).toFixed(3), 'curl.a', curlDir.dot(a).toFixed(3));
-  if (curlDir.dot(back) > 0) back.negate();
-  const palmCentre = wrist.clone().lerp(mcp, 0.5);
-  const local = new THREE.Matrix4().makeBasis(a, back, f).setPosition(palmCentre);
-  const M = frameMatrix(HUMAN).multiply(local.clone().invert());
-  // cuff ring at the cut: lathe (rounded rim) around the forearm axis, sized from the sleeve cross-section there
-  const cutLocal = cutAt.clone().applyMatrix4(M); const axisW = axis.clone().transformDirection(M);
-  let rMax = 0; const sp = sleeveG.attributes.position;
-  for (let i = 0; i < sp.count; i++) { const p = new THREE.Vector3().fromBufferAttribute(sp, i).applyMatrix4(M); const d = p.sub(cutLocal); const t = d.dot(axisW); if (t < 0.25) rMax = Math.max(rMax, d.sub(axisW.clone().multiplyScalar(t)).length()); }
-  const R = rMax + 0.03;
-  const prof = [[0, -0.02], [R - 0.12, -0.02], [R - 0.04, 0.0], [R, 0.05], [R + 0.02, 0.14], [R + 0.01, 0.26], [R - 0.03, 0.34], [R - 0.12, 0.36], [0, 0.36]];
-  const cuff = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 64);
-  cuff.rotateX(Math.PI / 2); // lathe axis Y -> Z; then align +Z with -axis (ring extends proximally)
-  const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), axisW.clone().negate());
-  cuff.applyQuaternion(q); cuff.translate(cutLocal.x - axisW.x * -0.02, cutLocal.y - axisW.y * -0.02, cutLocal.z - axisW.z * -0.02);
-  for (const g of [skinG, sleeveG]) g.applyMatrix4(M);
-  cuff.deleteAttribute('uv'); cuff.deleteAttribute('normal');
-  const g = mergeVertices(mergeGeometries([mergeVertices(skinG, 1e-5), mergeVertices(sleeveG, 1e-5), mergeVertices(cuff, 1e-5)], false), 1e-5);
-  g.computeVertexNormals();
+  const keep = (P, Wl) => (f) => f.idx.every((i) => inArm(Wl[i])) && f.idx.some((i) => beyond(P[i]));
+  const prep = (g) => { const m = mergeVertices(g, 1e-5); return m; };
+  let skinG = clampToPlane(prep(facesToGeometry(body, bodyFaces, keep(body, W))), cutAt, axis);
+  let sleeveG = clampToPlane(prep(facesToGeometry(shirtP, shirt.faces, keep(shirtP, shirt.W))), cutAt, axis);
+  skinG = subdivideSmooth(skinG, 3); sleeveG = subdivideSmooth(sleeveG, 2);
+  skinG.computeVertexNormals();
+  // ---- skin detail in posed space: finger creases on the inside of each joint, nail beds on the fingertips ----
+  const palmDir = (bone) => rn.clone().applyQuaternion(posed.rot.get(bone));
+  const sp0 = skinG.attributes.position, nrm = skinG.attributes.normal; const vtx = new THREE.Vector3(), nv = new THREE.Vector3();
+  const creases = [];
+  for (const n of [2, 3, 4, 5]) for (const k of [1, 2, 3]) creases.push({ bone: `finger${n}-${k}.R`, depth: k === 1 ? 0.016 : 0.022, sigma: 0.034, side: 1 });
+  for (const k of [2, 3]) creases.push({ bone: `finger1-${k}.R`, depth: 0.02, sigma: 0.034, side: 1 });
+  for (const n of [2, 3, 4, 5]) creases.push({ bone: `finger${n}-2.R`, depth: 0.011, sigma: 0.03, side: -1 }); // dorsal knuckle wrinkles
+  for (const cr of creases) {
+    const h = posed.pos.get(cr.bone); const t = posed.tailPos(cr.bone).sub(h).normalize(); const pd = palmDir(cr.bone);
+    for (let i = 0; i < sp0.count; i++) {
+      vtx.fromBufferAttribute(sp0, i); const d = vtx.clone().sub(h); const ax = d.dot(t); if (Math.abs(ax) > cr.sigma * 3) continue;
+      const rad = d.clone().addScaledVector(t, -ax).length(); if (rad > 0.3) continue;
+      nv.fromBufferAttribute(nrm, i); if (nv.dot(pd) * cr.side < 0.35) continue;
+      const w = Math.exp(-((ax / cr.sigma) ** 2)); vtx.addScaledVector(nv, -cr.depth * w); sp0.setXYZ(i, vtx.x, vtx.y, vtx.z);
+    }
+  }
+  const nails = [];
+  for (const n of [1, 2, 3, 4, 5]) {
+    const bone = `finger${n}-3.R`; const h = posed.pos.get(bone); const tl = posed.tailPos(bone); const L = tl.clone().sub(h); const t = L.clone().normalize();
+    const dorsal = palmDir(bone).negate().sub(t.clone().multiplyScalar(palmDir(bone).negate().dot(t))).normalize();
+    const w = n === 1 ? 0.115 : 0.088, len = n === 1 ? 0.14 : 0.115;
+    // sit on the skin: march from outside inward along -dorsal to find the surface
+    const c0 = h.clone().addScaledVector(L, 0.58); const surf = surfaceAlong(skinG, c0.clone().addScaledVector(dorsal, 0.3), dorsal.clone().negate());
+    const c = surf ?? c0.clone().addScaledVector(dorsal, 0.075);
+    const plate = new THREE.CapsuleGeometry(w / 2, len - w, 4, 14); plate.rotateX(Math.PI / 2); plate.scale(1, 0.16, 1); plate.deleteAttribute('uv'); plate.deleteAttribute('normal');
+    const x = t.clone().cross(dorsal).normalize(); const basis = new THREE.Matrix4().makeBasis(x, dorsal, t).setPosition(c.addScaledVector(dorsal, -0.004));
+    plate.applyMatrix4(basis); nails.push(plate);
+  }
+  skinG.computeVertexNormals();
+  // ---- cuff: hollow rolled hem + the opening, lathed around the forearm axis at the cut plane ----
+  const cutLocal = cutAt.clone(); const axisW = axis.clone();
+  let rSum = 0, rN = 0; const sp = sleeveG.attributes.position;
+  for (let i = 0; i < sp.count; i++) { const d = new THREE.Vector3().fromBufferAttribute(sp, i).sub(cutLocal); const t = d.dot(axisW); if (t < 0.12) { rSum += d.sub(axisW.clone().multiplyScalar(t)).length(); rN++; } }
+  const R = rSum / Math.max(1, rN) + 0.015;
+  const prof = [[0, 0.5], [R - 0.11, 0.5], [R - 0.11, 0.03], [R - 0.095, -0.015], [R - 0.07, -0.045], [R - 0.04, -0.045], [R - 0.015, -0.02], [R - 0.005, 0.02], [R, 0.1], [R, 0.35], [R - 0.06, 0.46]];
+  const cuff = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 72);
+  cuff.rotateX(Math.PI / 2); // lathe axis Y -> Z; then align +Z with -axis (the ring extends proximally)
+  cuff.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), axisW.clone().negate()));
+  cuff.translate(cutLocal.x, cutLocal.y, cutLocal.z); cuff.deleteAttribute('uv'); cuff.deleteAttribute('normal');
+  const pieces = [skinG, sleeveG, cuff, ...nails].map((g) => { g.deleteAttribute('uv'); g.deleteAttribute('normal'); g.applyMatrix4(M); return g.index ? g : mergeVertices(g, 1e-6); });
+  for (const pc of [pieces[2], ...pieces.slice(3)]) outward(pc); // closed parts: cuff + nails
+  const g = mergeGeometries(pieces, false); g.computeVertexNormals();
   const tip = (n) => posed.tailPos(n).applyMatrix4(M);
-  console.log('DBG scene: wrist', wrist.clone().applyMatrix4(M).toArray().map((v)=>v.toFixed(2)).join(','), 'mcp', mcp.clone().applyMatrix4(M).toArray().map((v)=>v.toFixed(2)).join(','), 'index MCP', posed.tailPos('metacarpal1.R').applyMatrix4(M).toArray().map((v)=>v.toFixed(2)).join(','), 'index PIP', posed.tailPos('finger2-1.R').applyMatrix4(M).toArray().map((v)=>v.toFixed(2)).join(','), 'thumb CMC', posed.pos.get('finger1-1.R').clone().applyMatrix4(M).toArray().map((v)=>v.toFixed(2)).join(','));
-  console.log('human: cuff R', R.toFixed(2), 'index tip', tip('finger2-3.R').toArray().map((v) => v.toFixed(2)).join(','), 'pinky tip', tip('finger5-3.R').toArray().map((v) => v.toFixed(2)).join(','), 'thumb tip', tip('finger1-3.R').toArray().map((v) => v.toFixed(2)).join(','));
+  const fmt = (v) => v.toArray().map((x) => x.toFixed(2)).join(',');
+  console.log('human: cuff R', R.toFixed(2), 'tris', g.index.count / 3, 'index tip', fmt(tip('finger2-3.R')), 'pinky tip', fmt(tip('finger5-3.R')), 'thumb tip', fmt(tip('finger1-3.R')));
   return g;
+}
+
+/** First intersection of a ray with a geometry's surface (brute force); returns a Vector3 or null. */
+function surfaceAlong(g, origin, dir) {
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })); const rc = new THREE.Raycaster(origin, dir.clone().normalize(), 0, 1.0);
+  const hit = rc.intersectObject(m, false)[0]; return hit ? hit.point.clone() : null;
 }
 
 // =============================================================================
@@ -220,7 +309,8 @@ const rbox = (w, h, d, r, seg = 3) => new RoundedBoxGeometry(w, h, d, seg, r);
 const xform = (g, m) => { g.applyMatrix4(m); return g; };
 const T = (x, y, z) => new THREE.Matrix4().makeTranslation(x, y, z);
 const RX = (deg) => new THREE.Matrix4().makeRotationX(deg * DEG);
-const THUMB_DIR = [new THREE.Vector3(0.28, -0.5, 0.8), new THREE.Vector3(0.05, -0.55, 0.83)];
+// robot thumb segment directions (build frame: +x thumb side, -y palm side, +z fingers): lies along the radial edge, tip nested on the human's index knuckle
+const THUMB_DIR = [new THREE.Vector3(0.10, -0.42, 0.90), new THREE.Vector3(-0.06, -0.50, 0.86)];
 function buildRobotHand() {
   const parts = [];
   const add = (g, m) => parts.push(m ? xform(g, m) : g);
@@ -280,7 +370,7 @@ function buildRobotHand() {
       return p.clone().add(z.multiplyScalar(L));
     };
     let p = new THREE.Vector3(PALM_W / 2 - 0.1, -0.04, 0.2);
-    p = segment(p, new THREE.Vector3(0.5, -0.35, 0.72), 0.42, 0.26, 0.24, { cmc: true });
+    p = segment(p, new THREE.Vector3(0.25, -0.3, 0.92), 0.42, 0.26, 0.24, { cmc: true });
     p = segment(p, THUMB_DIR[0], 0.36, 0.21, 0.19);
     p = segment(p, THUMB_DIR[1], 0.3, 0.18, 0.16, { tip: true });
     console.log('robot thumb tip (build frame)', p.toArray().map((v) => v.toFixed(2)).join(','));
@@ -299,18 +389,18 @@ function buildRobotHand() {
   }
   // ---- forearm shell: tapering elliptical shell with seams, cable channel, screw heads, end rim ----
   {
-    const prof = [[0, 0], [0.30, 0], [0.37, 0.03], [0.40, 0.12], [0.41, 0.3], [0.40, 0.33], [0.41, 0.36], [0.44, 0.9], [0.47, 1.5], [0.49, 1.85], [0.49, 1.9], [0.46, 1.94], [0.44, 2.0], [0.46, 2.02], [0.49, 2.06], [0.49, 2.1], [0.40, 2.13], [0, 2.13]];
+    const prof = [[0, 0], [0.30, 0], [0.37, 0.03], [0.40, 0.12], [0.41, 0.3], [0.40, 0.33], [0.41, 0.36], [0.44, 0.7], [0.47, 1.0], [0.49, 1.2], [0.49, 1.25], [0.46, 1.29], [0.44, 1.34], [0.46, 1.37], [0.49, 1.41], [0.49, 1.45], [0.40, 1.48], [0, 1.48]];
     const shell = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y)), 64); shell.rotateX(Math.PI / 2); shell.scale(1, 0.78, -1); shell.translate(0, 0, -0.72);
     add(shell);
     // cable channel on the palm side (-Y): two rails and a cable between them, with clamps
-    for (const sx of [-1, 1]) add(rbox(0.045, 0.07, 1.25, 0.012, 2), T(sx * 0.1, -0.78 * 0.44 - 0.02, -1.55));
-    const cable = new THREE.CylinderGeometry(0.035, 0.035, 1.35, 16); cable.rotateX(Math.PI / 2); add(cable, T(0, -0.78 * 0.44 - 0.01, -1.55));
-    for (const z of [-1.0, -2.1]) add(rbox(0.3, 0.05, 0.08, 0.01, 2), T(0, -0.78 * 0.44 - 0.02, z));
+    for (const sx of [-1, 1]) add(rbox(0.045, 0.07, 0.85, 0.012, 2), T(sx * 0.1, -0.78 * 0.44 - 0.02, -1.15));
+    const cable = new THREE.CylinderGeometry(0.035, 0.035, 0.95, 16); cable.rotateX(Math.PI / 2); add(cable, T(0, -0.78 * 0.44 - 0.01, -1.15));
+    for (const z of [-0.85, -1.45]) add(rbox(0.3, 0.05, 0.08, 0.01, 2), T(0, -0.78 * 0.44 - 0.02, z));
     // screw heads on the thumb-side flank (+X) and a small access panel on the other flank
-    for (const z of [-1.1, -1.9]) { const sh = new THREE.CylinderGeometry(0.045, 0.045, 0.016, 16); sh.rotateZ(Math.PI / 2); sh.translate(0.455, 0.0, z); add(sh); const slot = rbox(0.012, 0.012, 0.06, 0.003, 1); slot.translate(0.464, 0, z); add(slot); }
-    add(rbox(0.016, 0.3, 0.6, 0.004, 1), T(-0.45, 0.02, -1.5));
+    for (const z of [-0.95, -1.4]) { const sh = new THREE.CylinderGeometry(0.045, 0.045, 0.016, 16); sh.rotateZ(Math.PI / 2); sh.translate(0.455, 0.0, z); add(sh); const slot = rbox(0.012, 0.012, 0.06, 0.003, 1); slot.translate(0.464, 0, z); add(slot); }
+    add(rbox(0.016, 0.3, 0.5, 0.004, 1), T(-0.45, 0.02, -1.1));
   }
-  let g = mergeGeometries(parts.map((p) => { p.deleteAttribute('uv'); return mergeVertices(p, 1e-5); }), false);
+  let g = mergeGeometries(parts.map((p) => { p.deleteAttribute('uv'); p.deleteAttribute('normal'); return outward(mergeVertices(p, 1e-5)); }), false);
   g = mergeVertices(g, 1e-5); g.computeVertexNormals();
   g.applyMatrix4(frameMatrix(ROBOT)); g.computeVertexNormals();
   return g;

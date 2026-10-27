@@ -143,19 +143,23 @@ export function canadaPins() {
   const { pins } = canadaPlan();
   const P = [];
   const H = 0.22;
-  pins.forEach(({ xz: [x, z] }) => {
-    P.push(part(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 32), { p: [x, 0.05, z], shade: 0.95 }));          // halo disc on the slab
-    P.push(part(new THREE.TorusGeometry(0.075, 0.009, 10, 40), { p: [x, 0.056, z], r: [Math.PI / 2, 0, 0], shade: 0.15 }));
-    P.push(part(cyl(0.012, 0.016, H), { p: [x, 0.05 + H / 2, z], shade: 0.2 }));
-    P.push(part(new THREE.SphereGeometry(0.042, 20, 14), { p: [x, 0.05 + H, z], shade: 0.15 }));
+  // Ground height of the relief under each city (canada.glb, sampled), so halos sit on the terrain, not above it
+  const GROUND = { Delta: 0.0002, Calgary: 0.022, Regina: 0.012, Winnipeg: 0.005, Toronto: 0.003, Montreal: 0.001, Moncton: 0.001 };
+  const base = (pin) => (GROUND[pin.city] ?? 0.005) + 0.012;
+  pins.forEach((pin) => {
+    const [x, z] = pin.xz; const b = base(pin);
+    P.push(part(new THREE.CylinderGeometry(0.075, 0.075, 0.012, 32), { p: [x, b, z], shade: 0.95 }));          // halo disc on the slab
+    P.push(part(new THREE.TorusGeometry(0.075, 0.009, 10, 40), { p: [x, b + 0.006, z], r: [Math.PI / 2, 0, 0], shade: 0.15 }));
+    P.push(part(cyl(0.012, 0.016, H), { p: [x, b + H / 2, z], shade: 0.2 }));
+    P.push(part(new THREE.SphereGeometry(0.042, 20, 14), { p: [x, b + H, z], shade: 0.15 }));
   });
   const pts = [];
   for (let i = 0; i < pins.length; i++) {
-    const [x, z] = pins[i].xz; pts.push(new THREE.Vector3(x, 0.05 + H, z));
-    if (i < pins.length - 1) { const [nx, nz] = pins[i + 1].xz; pts.push(new THREE.Vector3((x + nx) / 2, 0.05 + H + 0.09, (z + nz) / 2)); }
+    const [x, z] = pins[i].xz; const yi = base(pins[i]) + H; pts.push(new THREE.Vector3(x, yi, z));
+    if (i < pins.length - 1) { const [nx, nz] = pins[i + 1].xz; pts.push(new THREE.Vector3((x + nx) / 2, (yi + base(pins[i + 1]) + H) / 2 + 0.09, (z + nz) / 2)); }
   }
   P.push(part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 96, 0.011, 8, false), { shade: 0.3 }));
-  const labels = pins.map((p) => ({ text: p.city.toUpperCase(), pos: [p.xz[0], 0.05 + H + 0.1, p.xz[1]] }));
+  const labels = pins.map((pin) => ({ text: pin.city.toUpperCase(), pos: [pin.xz[0], base(pin) + H + 0.1, pin.xz[1]] }));
   return { parts: P, labels };
 }
 

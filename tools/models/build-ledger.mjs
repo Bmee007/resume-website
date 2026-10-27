@@ -72,15 +72,17 @@ const xFold = (f) => -(SPINE_W / 2) * (1 - f) * 0.92;
 // Curl of the outer sheets of the left block near the fore-edge: only the top CURL_N sheets lift, each by
 // its own amount and reach (per-layer jitter), strongest at the front (tail) corner, so they separate there.
 const BOW = 6.5;                      // pages bow up toward the gutter shoulder (thick block fanning open)
-const CURL_N = 8, CURL_MAX = 4.0, CURL_L = 50;
-const CURL_J = Array.from({ length: LAYERS + 1 }, (_, k) => (k === LAYERS ? { a: 1, l: 1, zs: 0 } : { a: 0.7 + 0.25 * rnd(), l: 1.0 + 0.4 * rnd(), zs: rndIn(-0.22, 0.22) }));
+const CURL_N = 8, CURL_MAX = 2.6, CURL_CORNER = 1.6, CURL_L = 50;
+const CURL_J = Array.from({ length: LAYERS + 1 }, (_, k) => (k === LAYERS ? { a: 1, l: 1, zs: 0 } : { a: 0.5 + 0.45 * rnd(), l: 1.0 + 0.45 * rnd(), zs: rndIn(-0.25, 0.25) }));
 function curlY(f, x, z, side) {
   const k = Math.round(f * LAYERS); const n = k - (LAYERS - CURL_N);
   if (side !== -1 || n <= 0) return 0;
   const j = CURL_J[k]; const L = CURL_L * j.l;
   const d = (-PAGE_W + L) - x; if (d <= 0) return 0;
   const zf = smooth((z + PAGE_H / 2) / PAGE_H + j.zs);
-  return CURL_MAX * (n / CURL_N) ** 1.3 * j.a * (d / L) ** 2.3 * (0.35 + 0.65 * zf);
+  const tn = (n / CURL_N) ** 1.3;
+  const corner = smooth((z - 50) / 50 + j.zs) * smooth((-x - (PAGE_W - 36)) / 36); // front corner: sheets part company
+  return tn * j.a * (CURL_MAX * (d / L) ** 2.3 * (0.35 + 0.65 * zf) + CURL_CORNER * corner);
 }
 // Height of the surface of layer f at x (x <= 0, measured from the spine centre, before mirroring).
 function pageY(f, x, z, side) {
@@ -91,6 +93,14 @@ function pageY(f, x, z, side) {
   const u = clamp01((x - (xf - Lg)) / Lg);             // 0 flat -> 1 at the fold
   const ease = 0.5 - 0.5 * Math.cos(Math.PI * u);
   return yFlat - (yFlat - yFold) * ease + curlY(f, x, z, side);
+}
+
+// Actual top surface: the loft keeps every sheet >= SHEET_GAP above the one below, which lifts the top sheet where
+// the layers converge in the gutter. This mirrors that clamp so rulings, ribbon and pen sit on what is rendered.
+const SHEET_GAP = 0.05;
+function surfY(x, z, side) {
+  let y = -1e9; for (let k = 0; k <= LAYERS; k++) y = Math.max(y, pageY(k / LAYERS, x, z, side) + (LAYERS - k) * SHEET_GAP);
+  return y;
 }
 
 // =============================================================================
@@ -153,7 +163,7 @@ function reliefPatch(side, { u0, u1, z0, z1, h, ru, rz }) {
   const pos = []; const idx = [];
   for (const z of zs) for (const u of us) {
     const xl = side === -1 ? u - PAGE_W : -u; const w = prof(u, u0, u1, ru) * prof(z, z0, z1, rz);
-    pos.push(side === -1 ? xl : -xl, pageY(1, xl, z, side) + h * w - 0.06 * (1 - w), z);
+    pos.push(side === -1 ? xl : -xl, surfY(xl, z, side) + h * w - 0.06 * (1 - w), z);
   }
   const W = us.length;
   for (let j = 0; j < zs.length - 1; j++) for (let i = 0; i < W - 1; i++) { const a = j * W + i; idx.push(a, a + W, a + 1, a + 1, a + W, a + W + 1); }
@@ -203,7 +213,7 @@ function buildBlock(side) {
   const rings = [];
   for (let k = 0; k <= LAYERS; k++) {
     const ring = walk.map(([i, j]) => P(k, i, j));
-    if (k > 0) for (let n = 0; n < RN; n++) ring[n][1] = Math.max(ring[n][1], rings[k - 1][n][1] + 0.05);
+    if (k > 0) for (let n = 0; n < RN; n++) ring[n][1] = Math.max(ring[n][1], rings[k - 1][n][1] + SHEET_GAP);
     rings.push(ring);
   }
   for (let k = 0; k <= LAYERS; k++) for (const p of rings[k]) pos.push(...p);
@@ -247,7 +257,7 @@ function buildBlock(side) {
 // Exposed top-surface height of a block (for resting the ribbon and pen): x in world (either side).
 function topY(x, z) {
   const side = x < 0 ? -1 : 1; const xl = -Math.abs(x);
-  return pageY(1, Math.max(xl, -PAGE_W), z, side);
+  return surfY(Math.max(xl, -PAGE_W), z, side);
 }
 
 add('pages', buildBlock(-1));
@@ -289,7 +299,7 @@ for (const side of [-1, 1]) for (const g of buildRelief(side)) add('pages', g);
 // =============================================================================
 let ribbonGeo = null;
 {
-  const RW = 7.5, RT = 0.25, HW = RW / 2, HT = RT / 2;
+  const RW = 8, RT = 0.25, HW = RW / 2, HT = RT / 2;
   const yT = (x, z) => topY(x, z);
   const XE = 30.4, eT = yT(XE, 104);
   const pts = [
@@ -297,7 +307,7 @@ let ribbonGeo = null;
     [13.0, 12, yT(13, 12) + 0.3], [18.5, 52, yT(18.5, 52) + 0.3], [25.0, 88, yT(25, 88) + 0.3],
     [XE - 1.2, 100.5, yT(XE - 1.2, 100.5) + 0.3], [XE - 0.3, 104.2, eT + 0.45], [XE, 105.9, eT - 0.9],
     [XE + 0.1, 106.6, eT - 4], [XE + 0.15, 106.8, 8], [XE + 0.25, 107.6, 3.7], [XE + 0.4, 108.9, 3.35],
-    [XE + 0.6, 110.2, 1.2], [XE + 0.9, 112.5, 0.4], [XE + 2.0, 120, 0.3], [XE + 4.0, 129, 0.3],
+    [XE + 0.6, 110.2, 1.2], [XE + 0.9, 112.5, 0.4], [XE + 1.8, 118, 0.3], [XE + 3.2, 124.5, 0.3],
   ].map(([x, z, y]) => new THREE.Vector3(x, y, z));
   const curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal', 0.5);
   const L = curve.getLength();
@@ -310,7 +320,7 @@ let ribbonGeo = null;
   const C = sv.map((s, i) => {
     const q = curve.getPointAt(s); const w = onPage(q.z); const u = i / N;
     const tw = 0.2 * Math.sin(u * 17 + 1.0) * w;                               // gentle twist (half the old amplitude, then conformed)
-    const lift = (-0.4 + 0.6 * smooth((q.z + 103.5) / 8)) + 0.3 * (1 - Math.cos(u * 18)) * w + HW * Math.abs(Math.sin(tw));
+    const lift = (-0.4 + 0.6 * smooth((q.z + 103.5) / 8)) + 0.4 * (1 - Math.cos(u * 14)) * w + HW * Math.abs(Math.sin(tw));
     return { p: new THREE.Vector3(q.x, lerp(q.y, yT(q.x, q.z) + lift, w), q.z), tw, w };
   });
   // 2) frames: tangent by central differences, normal = parallel transport blended with the page normal on the page
@@ -324,27 +334,38 @@ let ribbonGeo = null;
     let n = nTr.clone().lerp(pageN(C[i].p.x, C[i].p.z), C[i].w).normalize();
     n.applyAxisAngle(t, C[i].tw); n.sub(t.clone().multiplyScalar(n.dot(t))).normalize();
     const bin = new THREE.Vector3().crossVectors(t, n).normalize();
-    rows.push({ p: C[i].p, n, bin });
+    // never let the flat strip sink into the (curved) page across its width: lift to clear the page at the edges
+    let e = 0; const pc = C[i].p;
+    if (C[i].w > 0.01) for (const a of [-HW, -HW / 2, HW / 2, HW]) e = Math.max(e, yT(pc.x + bin.x * a, pc.z + bin.z * a) - (pc.y + bin.y * a) + 0.2);
+    rows.push({ p: e > 0 ? pc.clone().addScaledVector(new THREE.Vector3(0, 1, 0), e * C[i].w) : pc, n, bin });
   }
-  const push = (r, a, b) => { pos.push(r.p.x + r.bin.x * a + r.n.x * b, r.p.y + r.bin.y * a + r.n.y * b, r.p.z + r.bin.z * a + r.n.z * b); };
-  for (const r of rows) for (const [a, b] of [[-HW, -HT], [HW, -HT], [HW, HT], [-HW, HT]]) push(r, a, b);
+  // cross-section: 5 columns across, edges cupped up by CUP so the satin strip catches light along its length
+  const CUP = 0.85, COLS = 5, R = 2 * COLS; const colA = Array.from({ length: COLS }, (_, j) => -HW + (2 * HW * j) / (COLS - 1));
+  const push = (r, a, b) => { const bb = b + CUP * (a / HW) ** 2; pos.push(r.p.x + r.bin.x * a + r.n.x * bb, r.p.y + r.bin.y * a + r.n.y * bb, r.p.z + r.bin.z * a + r.n.z * bb); };
+  for (const r of rows) { for (let j = 0; j < COLS; j++) push(r, colA[j], -HT); for (let j = COLS - 1; j >= 0; j--) push(r, colA[j], HT); }
+  const bot = (i, j) => i * R + j, top = (i, j) => i * R + COLS + (COLS - 1 - j);
   const idx = [];
-  for (let i = 0; i < N; i++) for (let c = 0; c < 4; c++) {
-    const a = i * 4 + c, b = i * 4 + (c + 1) % 4, d = (i + 1) * 4 + c, e = (i + 1) * 4 + (c + 1) % 4;
-    if (i === N - 1 && (c === 0 || c === 2)) continue; // top and bottom of the last segment carry the V cut
+  for (let i = 0; i < N; i++) for (let c = 0; c < R; c++) {
+    const a = i * R + c, b = i * R + (c + 1) % R, d = (i + 1) * R + c, e = (i + 1) * R + (c + 1) % R;
+    if (i === N - 1 && c !== COLS - 1 && c !== R - 1) continue; // top and bottom of the last segment carry the V cut
     idx.push(a, d, b, b, d, e);
   }
-  idx.push(0, 1, 2, 0, 2, 3); // start cap (tucked against the head of the spine)
-  // swallow-tail: centre points on the last-but-one row, two triangles each on top and bottom, plus the two V faces
-  { const M = N - 1, ct = pos.length / 3; push(rows[M], 0, HT); push(rows[M], 0, -HT);
-    const cb = ct + 1; const TLm = M * 4 + 3, TRm = M * 4 + 2, BLm = M * 4, BRm = M * 4 + 1, TLn = N * 4 + 3, TRn = N * 4 + 2, BLn = N * 4, BRn = N * 4 + 1;
-    idx.push(TLm, ct, TLn, TRm, TRn, ct, BLm, BLn, cb, BRm, cb, BRn);
-    const g0 = (i, j, k, hint) => { const P = (q) => new THREE.Vector3(pos[q * 3], pos[q * 3 + 1], pos[q * 3 + 2]); const nn = new THREE.Vector3().crossVectors(P(j).sub(P(i)), P(k).sub(P(i))); if (nn.dot(hint) < 0) idx.push(i, k, j); else idx.push(i, j, k); };
+  const P3 = (q) => new THREE.Vector3(pos[q * 3], pos[q * 3 + 1], pos[q * 3 + 2]);
+  const tri = (i, j, k, hint) => { const nn = new THREE.Vector3().crossVectors(P3(j).sub(P3(i)), P3(k).sub(P3(i))); if (nn.dot(hint) < 0) idx.push(i, k, j); else idx.push(i, j, k); };
+  { const nh = T[0].clone().negate(); for (let k = 1; k < R - 1; k++) tri(0, k, k + 1, nh); } // start cap, tucked at the head
+  { // swallow-tail: apex on the last-but-one row, edge corners on the last row
+    const M = N - 1; const up = rows[N].n, dn = rows[N].n.clone().negate();
+    for (const [h, f] of [[up, top], [dn, bot]]) { tri(f(M, 0), f(N, 0), f(M, 1), h); tri(f(M, 1), f(N, 0), f(M, 2), h); tri(f(M, 2), f(N, COLS - 1), f(M, 3), h); tri(f(M, 3), f(N, COLS - 1), f(M, 4), h); }
     const hl = T[N].clone().multiplyScalar(0.8).add(rows[N].bin.clone().multiplyScalar(0.6)), hr = T[N].clone().multiplyScalar(0.8).sub(rows[N].bin.clone().multiplyScalar(0.6));
-    g0(TLn, ct, cb, hl); g0(TLn, cb, BLn, hl); g0(TRn, cb, ct, hr); g0(TRn, BRn, cb, hr);
+    tri(top(N, 0), top(M, 2), bot(M, 2), hl); tri(top(N, 0), bot(M, 2), bot(N, 0), hl);
+    tri(top(N, COLS - 1), bot(M, 2), top(M, 2), hr); tri(top(N, COLS - 1), bot(N, COLS - 1), bot(M, 2), hr);
   }
   ribbonGeo = geomFrom(pos, idx);
-  { const n = ribbonGeo.attributes.normal; let sy = 0; for (let i = 3; i < 40 * 4; i += 4) sy += n.getY(i); if (sy < 0) { const ix = ribbonGeo.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } ribbonGeo.computeVertexNormals(); } }
+  { // closed solid: make the winding outward by the sign of the enclosed volume
+    const p = ribbonGeo.attributes.position, ix = ribbonGeo.index.array; let vol = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), Cc = new THREE.Vector3();
+    for (let i = 0; i < ix.length; i += 3) { A.fromBufferAttribute(p, ix[i]); B.fromBufferAttribute(p, ix[i + 1]); Cc.fromBufferAttribute(p, ix[i + 2]); vol += A.dot(B.clone().cross(Cc)); }
+    if (vol < 0) { for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } ribbonGeo.computeVertexNormals(); }
+  }
   add('ribbon', ribbonGeo.clone());
 }
 
