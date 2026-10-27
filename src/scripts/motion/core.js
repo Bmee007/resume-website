@@ -38,6 +38,7 @@ export function getLenis() { return lenis; }
 export function scrollToHash(hash, opts = {}) {
   const el = document.querySelector(hash);
   if (!el) return;
+  window.__navHoldUntil = performance.now() + 2200;   // the nav stays visible while an anchor jump glides (see Nav.astro)
   if (lenis) lenis.scrollTo(el, { offset: 0, duration: 1.6, ...opts });
   else el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth' });
 }

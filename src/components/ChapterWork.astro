@@ -164,6 +164,7 @@ const projects = [
   .case-title { margin: 0; font-weight: 400; font-size: clamp(1.2rem, 1.7vw, 1.5rem); color: var(--ink); }
   .case-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .project-chip { border: 1px solid var(--line-2); border-radius: 999px; padding: 0.35rem 0.7rem; color: var(--ink-2); display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap; max-width: 100%; }
+  @media (max-width: 899px) { .project-chip { white-space: normal; text-align: left; } }
   .project-chip--ai { color: var(--accent); border-color: color-mix(in oklch, var(--accent) 45%, transparent); }
   [data-tone="dark"] .project-chip--ai { color: oklch(0.90 0.06 225); } /* the accent is too dim on the storm tint for AA */
   .project-outcome { max-width: 30rem; }

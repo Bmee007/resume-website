@@ -39,7 +39,8 @@ export function runLoader() {
     tl.timeScale(seen ? 2.2 : 1.45); // ~1.6 s to the choice on a first visit
     tl.to(o, { v: 100, duration: 1.5, ease: 'power3.inOut', onUpdate: () => { if (num) num.textContent = String(Math.round(o.v)).padStart(3, '0'); } }, 0)
       .to(marks, { drawSVG: '100%', duration: 1.6, stagger: 0.12, ease: 'power2.inOut' }, 0.1)
-      .to(label, { duration: 1.0, scrambleText: { text: 'SYSTEMS ONLINE', chars: SCRAMBLE_CHARS, speed: 0.4 } }, 0.6);
+      .to(label, { duration: 1.0, scrambleText: { text: 'SYSTEMS ONLINE', chars: SCRAMBLE_CHARS, speed: 0.4 } }, 0.6)
+      .to(document.querySelector('.loader-corner--bl span') || {}, { duration: 0.8, scrambleText: { text: 'Systems ready', chars: SCRAMBLE_CHARS, speed: 0.5 } }, 1.2);   // the corner no longer says "loading" once the gate is ready
 
     const enter = (withSound) => {
       setAmbient(withSound);

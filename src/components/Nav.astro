@@ -178,7 +178,7 @@ const chapters = [
     align-items: center;
     gap: 0.9rem;
     font-family: var(--font-mono);
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -256,6 +256,7 @@ const chapters = [
     // direction-aware: a clear downward scroll hides the bar, a clear upward scroll (or the top of the page) reveals it; small jitter
     // (layout shifts, scroll anchoring after a long jump) leaves it as it was
     const dy = y - lastY, now = performance.now();
+    if (now < ((window as unknown as { __navHoldUntil?: number }).__navHoldUntil ?? 0)) { nav?.classList.remove('is-hidden'); upTravel = 0; lastY = y; return; }   // gliding to an anchor: keep the nav
     if (dy > 0 || now - lastUp > 450) upTravel = 0;           // a new downward move, or a pause, starts the count again
     if (dy < 0) { upTravel += -dy; lastUp = now; }
     if (nav) { if (y <= 600 || upTravel >= 36) nav.classList.remove('is-hidden'); else if (dy > 8) nav.classList.add('is-hidden'); }   // ±16px layout-shift corrections never reveal it
