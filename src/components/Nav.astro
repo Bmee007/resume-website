@@ -249,14 +249,16 @@ const chapters = [
   // Local time (Toronto), ticks every 30s
   // Scrolled state → surface; hide on fast scroll-down, reveal on scroll-up
   const nav = document.getElementById('site-nav');
-  let lastY = 0;
+  let lastY = 0, upTravel = 0, lastUp = 0;
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     document.body.classList.toggle('scrolled', y > 40);
     // direction-aware: a clear downward scroll hides the bar, a clear upward scroll (or the top of the page) reveals it; small jitter
     // (layout shifts, scroll anchoring after a long jump) leaves it as it was
-    const dy = y - lastY;
-    if (nav) { if (y <= 600 || dy < -8) nav.classList.remove('is-hidden'); else if (dy > 8) nav.classList.add('is-hidden'); }
+    const dy = y - lastY, now = performance.now();
+    if (dy > 0 || now - lastUp > 450) upTravel = 0;           // a new downward move, or a pause, starts the count again
+    if (dy < 0) { upTravel += -dy; lastUp = now; }
+    if (nav) { if (y <= 600 || upTravel >= 36) nav.classList.remove('is-hidden'); else if (dy > 8) nav.classList.add('is-hidden'); }   // ±16px layout-shift corrections never reveal it
     lastY = y;
   }, { passive: true });
   const timeEl = document.getElementById('nav-time');

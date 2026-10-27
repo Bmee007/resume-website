@@ -141,6 +141,15 @@ const projects = [
   .case-cap span { white-space: nowrap; background: color-mix(in oklch, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 0.3rem 0.55rem; border-radius: 999px; }
   .work-track:hover .case-cap { opacity: 1; transform: none; }
   .case-panel { transition: transform 0.7s var(--ease-out); }
+  /* cursor-following light (spotlight.js sets --sx/--sy) and a slow push-in on the artwork */
+  .case-panel::after {
+    content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s var(--ease-out);
+    background: radial-gradient(360px circle at var(--sx, 50%) var(--sy, 50%), color-mix(in oklch, var(--accent) 22%, transparent), transparent 70%);
+  }
+  .case-panel:hover::after { opacity: 1; }
+  .case-panel > * { position: relative; z-index: 1; }
+  .case-media img { transition: transform 1.2s var(--ease-out), filter 0.6s; }
+  .case-panel:hover .case-media img { transform: scale(1.06); filter: saturate(1.15) brightness(1.08); }
   .work-track:hover .case-panel:not(:hover) { transform: translateY(6px); }
   .case-panel:hover { transform: translateY(-6px); }
   @media (pointer: coarse) { .case-cap { opacity: 1; transform: none; } .case-cap span + span { display: none; } .work-track:hover .case-panel:not(:hover), .case-panel:hover { transform: none; } }

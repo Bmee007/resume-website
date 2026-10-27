@@ -180,4 +180,14 @@ const spec = [
     transition: color 0.3s, border-color 0.3s, transform 0.4s var(--ease-out);
   }
   .skill-chip:hover { color: var(--ink); border-color: var(--ink); transform: translateY(-2px); }
+  /* hover or focus a chip: its column lights, the others quiet down */
+  .spec-grid:has(.skill-chip:hover) .spec-col:not(:has(.skill-chip:hover)),
+  .spec-grid:has(.skill-chip:focus-visible) .spec-col:not(:has(.skill-chip:focus-visible)) { opacity: 0.38; }
+  .spec-col { transition: opacity 0.45s var(--ease-out); position: relative; }
+  .spec-col::before, .timeline-entry::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s var(--ease-out);
+    background: radial-gradient(280px circle at var(--sx, 50%) var(--sy, 50%), color-mix(in oklch, var(--accent) 14%, transparent), transparent 70%);
+  }
+  .spec-col:hover::before, .timeline-entry:hover::before { opacity: 1; }
+  .timeline-entry { position: relative; }
 </style>

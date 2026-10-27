@@ -5,6 +5,8 @@
 import { gsap, ScrollTrigger } from './core.js';
 
 const N = 12;                                   // wipe points kept for the trail
+const COARSE = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;   // phones: a cheaper cloud (4 octaves, one bank, lower resolution)
+const OCT = COARSE ? 4 : 6;
 const VERT = 'attribute vec2 a; void main(){ gl_Position = vec4(a, 0.0, 1.0); }';
 const FRAG = /* glsl */`
 precision highp float;
@@ -13,7 +15,7 @@ float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32);
 float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
   return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
 float fbm(vec2 p){ float v = 0.0, a = 0.5; mat2 r = mat2(0.8, -0.6, 0.6, 0.8);
-  for (int i = 0; i < 6; i++) { v += a * noise(p); p = r * p * 2.04 + vec2(3.1, 7.7); a *= 0.5; } return v; }
+  for (int i = 0; i < ${OCT}; i++) { v += a * noise(p); p = r * p * 2.04 + vec2(3.1, 7.7); a *= 0.5; } return v; }
 // cumulus-style density: warped, billowy base plus finer curl at the edges
 float density(vec2 p, float t){
   vec2 q = vec2(fbm(p * 0.9 + vec2(t, -t * 0.5)), fbm(p * 0.9 + vec2(5.2, 1.3) - vec2(t * 0.7, -t * 0.2)));
@@ -26,8 +28,7 @@ void main(){
   float t = uTime * 0.03;
   float d = density(p, t);
   // a second, nearer bank drifting faster gives depth
-  float d2 = density(p * 1.7 + vec2(7.3, 2.1), t * 1.8);
-  float dens = mix(d, d * 0.6 + d2 * 0.55, 0.42);
+  ${COARSE ? 'float dens = d;' : 'float d2 = density(p * 1.7 + vec2(7.3, 2.1), t * 1.8);\n  float dens = mix(d, d * 0.6 + d2 * 0.55, 0.42);'}
   float thr = mix(-0.1, 0.98, uProg);                                   // scrolling / wiping raises the threshold: the bank tears apart
   float cover = smoothstep(thr - 0.20, thr + 0.12, dens);
   // lighting: compare density here with density a step toward the light (above-left): lit crowns, shadowed undersides
@@ -64,7 +65,7 @@ export function initMist(veil, section, { onShown } = {}) {
   const S = { scroll: 0, settle: 0, arrived: 0, wiped: 0, active: false, last: null, pts: [] };   // pts: {x,y (0..1, y up), px, py, born}
   const ARRIVE = fine ? 0.62 : 0.8;                       // how thin scrolling alone makes it (the rest needs a wipe, or time)
   const resize = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5) * 0.5;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5) * (COARSE ? 0.36 : 0.5);
     canvas.width = Math.max(2, Math.floor(veil.clientWidth * dpr)); canvas.height = Math.max(2, Math.floor(veil.clientHeight * dpr));
     gl.viewport(0, 0, canvas.width, canvas.height);
   };

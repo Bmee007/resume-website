@@ -7,6 +7,7 @@ import { initChapters } from './motion/chapters.js';
 import { initVeil } from './motion/veil.js';
 import { initSplitReveals, initBlockReveals, initScrambles, initCounters, initRules } from './motion/reveals.js';
 import { initMagnetic, initNavScramble } from './motion/magnetic.js';
+import { initSpotlight } from './motion/spotlight.js';
 import { initWork } from './motion/work.js';
 import { initCharts } from './motion/charts.js';
 import { initAmbient } from './motion/ambient.js';
@@ -32,6 +33,7 @@ export async function boot() {
   initCounters();
   initRules();
   initMagnetic();
+  initSpotlight();
   initNavScramble();
   initWork();
   initCharts();
