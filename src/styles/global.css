@@ -227,7 +227,7 @@ section[data-tone="dark"] .telemetry .ch, [data-tone="dark"] .telemetry .ch { co
 /* Phones: reserve a band above the text for the story object */
 @media (max-width: 899px) {
   /* outranks each chapter's scoped padding-block */
-  section.chapter[data-scene] { padding-top: min(58vh, 34rem); }
+  section.chapter[data-scene] { padding-top: min(47vh, 27rem); }
   .chapter-mark { top: 2.5rem; font-size: clamp(3.5rem, 13vw, 5rem); opacity: 0.6; }
 }
 

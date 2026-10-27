@@ -107,7 +107,7 @@ export function initChapters() {
     }
     const measureZones = () => zones.forEach((z) => { if (!z.own) z.pad = parseFloat(getComputedStyle(z.el).paddingTop) || 0; });
     const phoneUpdate = () => {
-      const vh = window.innerHeight; const target = 0.4 * vh;
+      const vh = window.innerHeight; const target = 0.36 * vh;
       let best = null, bd = Infinity;
       for (const z of zones) {
         const r = z.el.getBoundingClientRect();

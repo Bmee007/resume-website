@@ -206,6 +206,7 @@ import ChartHundred from "./charts/ChartHundred.astro";
 
   /* Readout ledger */
   .readout { display: grid; align-content: start; padding-block: 1rem; }
+  @media (max-width: 899px) { #card-yrs, #card-skills { display: none; } } /* phones: the two secondary readout rows repeat what the chapter copy already says */
   #card-ai { min-height: 9.5rem; } /* reserve the answer height so a reply never shoves the rows below it */
   .readout-row {
     display: grid;

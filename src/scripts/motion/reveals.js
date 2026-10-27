@@ -77,7 +77,8 @@ export function initCounters(root = document) {
       trigger: el, start: 'top 85%', once: true,
       onEnter: () => {
         const o = { v: 0 };
-        gsap.to(o, { v: target, duration: 2.0, ease: 'expo.out', onUpdate: () => { el.textContent = fmt(o.v); } });
+        // settles fast (and ends exactly on the target) so a reader never sees a half-counted number
+        gsap.to(o, { v: target, duration: 0.9, ease: 'power3.out', onUpdate: () => { el.textContent = fmt(o.v); }, onComplete: () => { el.textContent = fmt(target); } });
       },
     });
   });
