@@ -11,7 +11,8 @@ export function initVeil() {
   if (reduced()) { veil.style.display = 'none'; return; }
   const section = veil.closest('section');
   const fog = getFog();
-  const boost = (p) => fog?.setDensityBoost?.((1 - p) * 0.9);
+  // 0 = thick mist, 1 = clear: drives the fog density and the dawn bloom behind the headline (--clear)
+  const boost = (p) => { fog?.setDensityBoost?.((1 - p) * 0.9); section.style.setProperty('--clear', Math.max(0, Math.min(1, p)).toFixed(3)); };
   const mist = initMist(veil, section, { onShown: boost });
   if (mist) {
     ScrollTrigger.create({ trigger: section, start: 'top 88%', end: 'top 12%', onUpdate: (st) => mist.setProgress(st.progress), onLeaveBack: () => { mist.setProgress(0); boost(0); } });

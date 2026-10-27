@@ -74,6 +74,16 @@ import Icon from "./Icon.astro";
   .veil-b { right: -30vmax; top: 10vmax; animation-duration: 27s; animation-delay: -9s; background: radial-gradient(closest-side, color-mix(in oklch, var(--storm) 28%, white) 0%, transparent 72%); }
   .veil-c { left: 20vmax; bottom: -45vmax; animation-duration: 31s; animation-delay: -17s; }
   @keyframes veil-drift { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(12vmax, -8vmax, 0) scale(1.18); } }
+  /* Dawn bloom: as the mist clears, cool light rises behind the headline and the form (driven by --clear from veil.js) */
+  .contact::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: calc(var(--clear, 0) * var(--clear, 0));
+    background:
+      radial-gradient(ellipse 52% 46% at 24% 34%, color-mix(in oklch, oklch(0.93 0.05 235) 80%, transparent), transparent 70%),
+      radial-gradient(ellipse 46% 42% at 80% 58%, color-mix(in oklch, oklch(0.9 0.06 250) 55%, transparent), transparent 72%);
+    animation: dawn-drift 16s var(--ease-in-out) infinite alternate;
+  }
+  @keyframes dawn-drift { from { transform: translate3d(-1.5%, 0, 0) scale(1); } to { transform: translate3d(2%, -2%, 0) scale(1.06); } }
+  @media (prefers-reduced-motion: reduce) { .contact::before { animation: none; opacity: 1; } }
   :global(.mist-canvas) { position: absolute; inset: 0; width: 100%; height: 100%; display: block; } /* created at runtime: scoped CSS would not reach it */
   .fog-veil.has-mist { background: transparent; }
   .fog-veil.has-mist .veil-layer { display: none; }
