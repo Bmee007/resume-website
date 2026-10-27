@@ -70,10 +70,19 @@ export function createScene(canvas, labelLayer) {
   const labels = {};
   const attach = (name, geo) => {
     const mat = makeMaterial(geo.attributes.color);
+    // Partial opacity + DoubleSide would blend every wall of a shell (far walls show through the skin as flecks). A depth-only
+    // pre-pass with the same shatter displacement lets the blended pass draw only the nearest surface.
+    mat.depthWrite = false; mat.depthFunc = THREE.LessEqualDepth;
+    const preMat = makeMaterial(geo.attributes.color);
+    preMat.userData.uniforms = mat.userData.uniforms;          // one set of uniforms drives both passes
+    preMat.colorWrite = false; preMat.transparent = false; preMat.depthWrite = true;
+    const pre = new THREE.Mesh(geo, preMat); pre.visible = false; pre.frustumCulled = false; pre.renderOrder = -1;
     const mesh = new THREE.Mesh(geo, mat);
     mesh.visible = false;
     mesh.frustumCulled = false;
-    if (meshes[name]) { group.remove(meshes[name]); meshes[name].geometry.dispose(); }
+    mesh.userData.pre = pre;
+    if (meshes[name]) { group.remove(meshes[name]); group.remove(meshes[name].userData.pre); meshes[name].geometry.dispose(); }
+    group.add(pre);
     group.add(mesh);
     meshes[name] = mesh;
     labels[name] = geo.userData.labels || [];
@@ -155,6 +164,7 @@ export function createScene(canvas, labelLayer) {
       else if (name === STATES[si]) prog = ease;
       else if (name === STATES[sj]) prog = 1 - ease;
       mesh.visible = prog < 0.999;
+      if (mesh.userData.pre) mesh.userData.pre.visible = mesh.visible;
       u.uProgress.value = prog;
       u.uGlow.value = state.glow;
       u.uRim.value.set(...(isDark ? [0.38, 0.48, 0.6] : [0.2, 0.26, 0.34]));

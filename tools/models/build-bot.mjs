@@ -4,13 +4,24 @@
 // Approach: every shell is a parametric surface (surface of revolution or ellipsoid) whose radius is modulated by
 // a displacement field, so panel gaps, vents, the visor recess, eye apertures, the charging port, speaker slots
 // and the chest ring are real geometry that reads in a single clay material. Surfaces are meshed with an adaptive
-// restricted quadtree (refined only where the surface bends), so seams stay crisp at ~140k raw triangles.
+// restricted quadtree (refined where the surface bends or its normal turns), with analytic vertex normals.
 //
-// Pipeline (final GLB is ~108k tris, ~460 kB):
+// Pipeline (final GLB: ~119k tris, ~1.39 MB). The last two steps are NOT optional, see renormal.mjs / pack-glb.mjs:
 //   node tools/models/build-bot.mjs /tmp/bot-raw.glb
-//   npx -y @gltf-transform/cli simplify --ratio 0.5 --error 0.0001 /tmp/bot-raw.glb /tmp/bot-s.glb
-//   node tools/models/renormal.mjs /tmp/bot-s.glb /tmp/bot-n.glb      # gentle pass only; recompute normals after it
-//   npx -y @gltf-transform/cli meshopt /tmp/bot-n.glb public/models/bot.glb
+//   npx -y @gltf-transform/cli simplify --ratio 0.62 --error 0.0003 /tmp/bot-raw.glb /tmp/bot-s.glb
+//   node tools/models/renormal.mjs /tmp/bot-s.glb /tmp/bot-n.glb   # inward winding + one near-to-far-sorted mesh
+//   node tools/models/pack-glb.mjs /tmp/bot-n.glb public/models/bot.glb   # order-preserving meshopt, 14/10-bit
+// (pack-glb needs: npm i --no-save @gltf-transform/core @gltf-transform/extensions @gltf-transform/functions meshoptimizer)
+//
+// Why the odd finishing (the "dirt flecks" bug): the site draws the model transparent + DoubleSide (opacity 0.6 in
+// the Intelligence chapter). three.js renders such materials in two passes, back faces first, then front faces, and
+// blends the second over the first. A closed, OUTWARD-wound shell therefore shows its far inner wall and every nested
+// part through the near skin at 40%: dark seam ghosts and flecks. Winding every shell INWARD puts the visible near
+// skin in the first pass and makes the far wall fail the depth test, so the model reads as solid translucent clay
+// from any angle; the remaining order dependence (an arm in front of the torso) is fixed by the near-to-far
+// triangle sort for the chapter's camera. Also: analytic normals instead of face-averaged ones (the average across a
+// groove bends the corner normals of the big flat triangles next to it and shows as glossy wedges), and normals at
+// 10 bit instead of the default 8-bit octahedral.
 // Debug: VERBOSE=1 prints per-part triangle counts; PART=head,neck exports a subset.
 import * as THREE from '/Users/borinakeo/resume-website/node_modules/three/build/three.module.js';
 import { mergeGeometries, mergeVertices } from '/Users/borinakeo/resume-website/node_modules/three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -38,7 +49,8 @@ const sdRR = (dx, dy, hw, hh, r) => {
 };
 const sdCircle = (dx, dy, r) => Math.hypot(dx, dy) - r;
 // flat-bottomed recess inside sd<0 with a filleted edge of width `soft`
-const recess = (sd, depth, soft) => depth * (1 - sstep(-soft, 0, sd));
+// (soft is floored at ~1.3 mm: the finest cells are ~1 mm, a narrower fillet aliases into dashed, glinting edges)
+const recess = (sd, depth, soft) => depth * (1 - sstep(-Math.max(soft, 1.3), 0, sd));
 // U-shaped groove centred on sd=0 (panel gap)
 const groove = (sd, w, depth) => { const t = Math.abs(sd) / (w / 2); return t >= 1 ? 0 : depth * (1 - t * t); };
 // raised dome inside radius r (negative displacement = outward); sd is the signed distance to the circle
@@ -46,15 +58,43 @@ const dome = (sd, r, h) => { if (sd >= 0) return 0; const t = (sd + r) / r; retu
 
 // ---- mesh builders ----------------------------------------------------------
 // Adaptive parametric surface: a restricted quadtree over (u, v) in [0,1]^2 (v wraps around) that splits a cell
-// whenever the true surface deviates from the bilinear patch through its corners by more than `eps` mm.
-// Hanging nodes are stitched crack-free by fanning from the cell centre. Returns an indexed BufferGeometry.
-function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, stencilMM = 0.7 } = {}) {
+// whenever the true surface deviates from the bilinear patch through its corners by more than `eps` mm, OR whenever
+// the true surface normal deviates from the interpolated corner normals by more than `maxAngle` degrees (shading
+// error: a big flat triangle whose corner normals were bent by a nearby groove renders as a visible wedge under the
+// site's glossy clearcoat). Vertex normals are the analytic surface normals (central differences of the surface
+// function), not averages of the adaptive triangles around them. Hanging nodes are stitched crack-free with an
+// ear-clipped polygon. Returns an indexed BufferGeometry with outward winding and normals.
+function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, stencilMM = 0.7, maxAngle = 4 } = {}) {
   const leaves = new Map(); const key = (l, i, j) => l + ',' + i + ',' + j;
   const cellsU = (l) => cols << l, cellsV = (l) => rows << l;
   const uv = (l, i, j) => [i / cellsU(l), j / cellsV(l)];
   const cache = new Map();
   const P = (u, v) => { const k = u.toFixed(7) + ',' + v.toFixed(7); let p = cache.get(k); if (!p) { p = evalP(u, v); cache.set(k, p); } return p; };
   const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+  // analytic normal along du x dv (the winding direction of the triangles below); null at degenerate points (poles)
+  const H = 2e-4;
+  const normalAt = (u, v) => {
+    const a = evalP(Math.max(0, u - H), v), b = evalP(Math.min(1, u + H), v), c = evalP(u, v - H), d = evalP(u, v + H);
+    const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = d[0] - c[0], vy = d[1] - c[1], vz = d[2] - c[2];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx; const l = Math.hypot(nx, ny, nz);
+    const lu = Math.hypot(ux, uy, uz), lv = Math.hypot(vx, vy, vz);
+    return l > 1e-3 * lu * lv && l > 1e-9 ? [nx / l, ny / l, nz / l] : null;
+  };
+  const ncache = new Map();
+  const N = (u, v) => { const k = u.toFixed(7) + ',' + v.toFixed(7); let n = ncache.get(k); if (n === undefined) { n = normalAt(u, v); ncache.set(k, n); } return n; };
+  const cosMax = Math.cos((maxAngle * Math.PI) / 180);
+  const normalsDeviate = (u0, v0, u1, v1) => {
+    const n00 = N(u0, v0), n10 = N(u1, v0), n01 = N(u0, v1), n11 = N(u1, v1);
+    if (!n00 || !n10 || !n01 || !n11) return false; // at a pole: shading there is handled by the mesh normal
+    const M = 4;
+    for (let a = 0; a <= M; a++) for (let b = 0; b <= M; b++) {
+      const s = a / M, t = b / M; const tn = normalAt(u0 + (u1 - u0) * s, v0 + (v1 - v0) * t); if (!tn) continue;
+      let x = 0, y = 0, z = 0;
+      for (const [w, n] of [[(1 - s) * (1 - t), n00], [s * (1 - t), n10], [(1 - s) * t, n01], [s * t, n11]]) { x += w * n[0]; y += w * n[1]; z += w * n[2]; }
+      const l = Math.hypot(x, y, z) || 1; if ((x * tn[0] + y * tn[1] + z * tn[2]) / l < cosMax) return true;
+    }
+    return false;
+  };
   const needsSplit = (l, i, j) => {
     const [u0, v0] = uv(l, i, j), [u1, v1] = uv(l, i + 1, j + 1);
     const c00 = P(u0, v0), c10 = P(u1, v0), c01 = P(u0, v1), c11 = P(u1, v1);
@@ -67,7 +107,7 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
       for (let k = 0; k < 3; k++) { const bl = (1 - s) * (1 - t) * c00[k] + s * (1 - t) * c10[k] + (1 - s) * t * c01[k] + s * t * c11[k]; err += (p[k] - bl) ** 2; }
       if (err > eps * eps) return true;
     }
-    return false;
+    return normalsDeviate(u0, v0, u1, v1);
   };
   const split = (l, i, j) => { leaves.delete(key(l, i, j)); const out = []; for (const di of [0, 1]) for (const dj of [0, 1]) { const c = [l + 1, 2 * i + di, 2 * j + dj]; leaves.set(key(...c), c); out.push(c); } return out; };
   const queue = [];
@@ -93,8 +133,8 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
   if (process.env.VERBOSE) { const h = []; for (const [l] of leaves.values()) h[l] = (h[l] || 0) + 1; console.error('  leaves/level', JSON.stringify(h)); }
   // triangulate with doubled integer keys (cell centres need half steps)
   const NU = cellsU(maxLevel) * 2, NV = cellsV(maxLevel) * 2;
-  const verts = new Map(); const pos = []; const idx = [];
-  const vtx = (I, J) => { J = ((J % NV) + NV) % NV; const k = I * NV + J; let id = verts.get(k); if (id === undefined) { id = pos.length / 3; const p = P(I / NU, J / NV); pos.push(p[0], p[1], p[2]); verts.set(k, id); } return id; };
+  const verts = new Map(); const pos = []; const nrm = []; const idx = [];
+  const vtx = (I, J) => { J = ((J % NV) + NV) % NV; const k = I * NV + J; let id = verts.get(k); if (id === undefined) { id = pos.length / 3; const p = P(I / NU, J / NV); const n = N(I / NU, J / NV) || [0, 0, 0]; pos.push(p[0], p[1], p[2]); nrm.push(n[0], n[1], n[2]); verts.set(k, id); } return id; };
   for (const [l, i, j] of leaves.values()) {
     const step = 2 << (maxLevel - l); const I0 = i * step, J0 = j * step, I1 = I0 + step, J1 = J0 + step, Im = I0 + step / 2, Jm = J0 + step / 2;
     const [u0, v0] = uv(l, i, j), [u1, v1] = uv(l, i + 1, j + 1); const du = (u1 - u0) * 1e-3, dv = (v1 - v0) * 1e-3;
@@ -106,7 +146,7 @@ function adaptiveSurface(evalP, { cols = 4, rows = 8, maxLevel = 6, eps = 0.22, 
     ring.push([I0, J1]); if (finer(u0 - du, (v0 + v1) / 2)) ring.push([I0, Jm]);
     earClip(ring.map(([I, J]) => ({ I, J, id: vtx(I, J) })), pos, idx);
   }
-  return finishSurface(pos, idx);
+  return finishSurface(pos, idx, nrm);
 }
 
 // Triangulate a convex (in uv) cell ring that may carry collinear hanging nodes. Clips strictly convex corners only,
@@ -134,29 +174,37 @@ function earClip(ring, pos, idx) {
   idx.push(r[0].id, r[1].id, r[2].id);
 }
 
-// Weld, drop degenerate faces, orient the shell outward (positive signed volume) and compute angle-weighted smooth
-// normals. Consistent outward winding matters: the site's double-sided material flips the normal of every back face,
+// Weld by position, drop degenerate faces, orient the shell outward (positive signed volume) and finish the normals:
+// analytic surface normals where available (flipped together with the winding), angle-weighted mesh normals at
+// poles. Consistent outward winding matters: the site's double-sided material flips the normal of every back face,
 // so any face wound against its neighbours renders as a dark fleck.
-function finishSurface(pos, idx) {
-  let g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
-  g = mergeVertices(g, 1e-3);
-  const P = g.attributes.position; const ix = g.index.array; let keep = []; let vol = 0;
-  const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
-  for (let t = 0; t < ix.length; t += 3) {
-    const a = ix[t], b = ix[t + 1], c = ix[t + 2]; if (a === b || b === c || a === c) continue;
-    keep.push(a, b, c); A.fromBufferAttribute(P, a); B.fromBufferAttribute(P, b); C.fromBufferAttribute(P, c); vol += A.dot(B.clone().cross(C));
+function finishSurface(pos, idx, nrm) {
+  const map = new Map(); const remap = new Int32Array(pos.length / 3); const P = []; const Nn = [];
+  for (let i = 0; i < pos.length; i += 3) {
+    const k = `${Math.round(pos[i] * 1e3)},${Math.round(pos[i + 1] * 1e3)},${Math.round(pos[i + 2] * 1e3)}`; let id = map.get(k);
+    if (id === undefined) { id = P.length / 3; map.set(k, id); P.push(pos[i], pos[i + 1], pos[i + 2]); Nn.push(nrm[i], nrm[i + 1], nrm[i + 2]); }
+    else if (Nn[3 * id] === 0 && Nn[3 * id + 1] === 0 && Nn[3 * id + 2] === 0) { Nn[3 * id] = nrm[i]; Nn[3 * id + 1] = nrm[i + 1]; Nn[3 * id + 2] = nrm[i + 2]; }
+    remap[i / 3] = id;
   }
-  if (vol < 0) for (let t = 0; t < keep.length; t += 3) { const tmp = keep[t + 1]; keep[t + 1] = keep[t + 2]; keep[t + 2] = tmp; }
-  g.setIndex(keep); setAngleWeightedNormals(g);
+  let keep = []; let vol = 0; const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = remap[idx[t]], b = remap[idx[t + 1]], c = remap[idx[t + 2]]; if (a === b || b === c || a === c) continue;
+    keep.push(a, b, c); A.fromArray(P, 3 * a); B.fromArray(P, 3 * b); C.fromArray(P, 3 * c); vol += A.dot(B.clone().cross(C));
+  }
+  if (vol < 0) { for (let t = 0; t < keep.length; t += 3) { const x = keep[t + 1]; keep[t + 1] = keep[t + 2]; keep[t + 2] = x; } for (let i = 0; i < Nn.length; i++) Nn[i] = -Nn[i]; }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setIndex(keep);
+  const mesh = angleWeightedNormals(P, keep); // fallback where the analytic normal is undefined (poles)
+  for (let i = 0; i < Nn.length; i += 3) if (Nn[i] === 0 && Nn[i + 1] === 0 && Nn[i + 2] === 0) { Nn[i] = mesh[i]; Nn[i + 1] = mesh[i + 1]; Nn[i + 2] = mesh[i + 2]; }
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(Nn, 3));
   return g;
 }
 
-function setAngleWeightedNormals(g) {
-  const P = g.attributes.position, ix = g.index.array; const N = new Float32Array(P.count * 3);
+function angleWeightedNormals(P, ix) {
+  const N = new Float32Array(P.length);
   const v = [new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()], e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), fn = new THREE.Vector3();
   for (let t = 0; t < ix.length; t += 3) {
-    for (let k = 0; k < 3; k++) v[k].fromBufferAttribute(P, ix[t + k]);
+    for (let k = 0; k < 3; k++) v[k].fromArray(P, 3 * ix[t + k]);
     fn.crossVectors(e1.subVectors(v[1], v[0]), e2.subVectors(v[2], v[0])); const l = fn.length(); if (l < 1e-12) continue; fn.divideScalar(l);
     for (let k = 0; k < 3; k++) {
       e1.subVectors(v[(k + 1) % 3], v[k]).normalize(); e2.subVectors(v[(k + 2) % 3], v[k]).normalize();
@@ -164,8 +212,8 @@ function setAngleWeightedNormals(g) {
       N[3 * i] += fn.x * w; N[3 * i + 1] += fn.y * w; N[3 * i + 2] += fn.z * w;
     }
   }
-  for (let i = 0; i < P.count; i++) { const l = Math.hypot(N[3 * i], N[3 * i + 1], N[3 * i + 2]) || 1; N[3 * i] /= l; N[3 * i + 1] /= l; N[3 * i + 2] /= l; }
-  g.setAttribute('normal', new THREE.BufferAttribute(N, 3));
+  for (let i = 0; i < N.length; i += 3) { const l = Math.hypot(N[i], N[i + 1], N[i + 2]) || 1; N[i] /= l; N[i + 1] /= l; N[i + 2] /= l; }
+  return N;
 }
 
 // Surface of revolution around Y from a 2D profile (array of [r, y], bottom -> top) smoothed with a centripetal
@@ -253,7 +301,7 @@ function pelvisDisp(th, y, r) {
   for (let k = 0; k < 4; k++) { const sd = sdRR(back * r, y - (58 + k * 7.5), 20, 1.3, 1.3); d += recess(sd, 1.6, 0.7); }
   return d;
 }
-add('body', lathe(pelvisProfile, 4, 8, pelvisDisp, { maxLevel: 6, eps: 0.22 }), { pos: [0, PELVIS_Y0, 0] });
+add('body', lathe(pelvisProfile, 4, 8, pelvisDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5 }), { pos: [0, PELVIS_Y0, 0] });
 // waist joint ring, sitting in the gap between pelvis and torso
 add('body', lathe([[0, 0], [50, 0], [58, 1.5], [62, 5], [62, 20], [58, 23], [50, 24], [0, 24]], 2, 4, (th, y) => groove(y - 12, 2.6, 0.9), { maxLevel: 5 }), { pos: [0, WAIST_Y - 8, 0] });
 
@@ -269,7 +317,7 @@ function torsoDisp(th, y, r) {
   d += groove(back * r, 2.4, 1.0) * sstep(12, 15, y) * (1 - sstep(185, 188, y));     // rear vertical seam
   for (const s of [sideL, sideR]) d += groove(s * r, 2.4, 1.0) * sstep(12, 15, y) * (1 - sstep(130, 134, y)); // side shell seams
   // chest tablet: bezel recess with a deeper screen, plus a home-button dimple
-  { const sd = sdRR(front * r, y - 92, 38, 28, 7); d += recess(sd, 2.4, 0.8); d += recess(sd + 3.5, 1.2, 0.5); d += recess(sdCircle(front * r, y - 92 - 24, 2.2), 0.5, 0.5); }
+  { const sd = sdRR(front * r, y - 92, 38, 28, 7); d += recess(sd, 2.4, 2.0); d += recess(sd + 4, 1.2, 1.6); d += recess(sdCircle(front * r, y - 92 - 24, 2.2), 0.5, 0.5); }
   // display/indicator ring on the upper chest: groove ring + sunk disc + raised lens
   { const dx = front * r, dy = y - 152; const sd = sdCircle(dx, dy, 12); d += groove(sd, 2.6, 1.3); d += recess(sd + 1.5, 0.7, 1.0); d += dome(sdCircle(dx, dy, 5.5), 5.5, 0.8); }
   // speaker grilles: 2 columns x 5 short slots on each side of the lower chest
@@ -283,7 +331,7 @@ function torsoDisp(th, y, r) {
   for (const s of [sideL, sideR]) { const sd = sdCircle(s * r, y - SHOULDER_LY, 38); d += recess(sd, 3, 4); d += groove(sd + 1, 2.6, 1.2); }
   return d;
 }
-add('body', lathe(torsoProfile, 4, 8, torsoDisp, { maxLevel: 6, eps: 0.22 }), { pos: [0, TORSO_Y0, 0], scale: [1, 1, TORSO_ZSCALE] });
+add('body', lathe(torsoProfile, 4, 8, torsoDisp, { maxLevel: 6, eps: 0.3, maxAngle: 5 }), { pos: [0, TORSO_Y0, 0], scale: [1, 1, TORSO_ZSCALE] });
 
 // =============================================================================
 // NECK: collar, core column with three separated ring joints, ball joint
@@ -313,8 +361,8 @@ function headDisp(dir, p) {
   const vv = v - (-4 * DEG);
   const sq = Math.pow(Math.pow(Math.abs(u / U0), n) + Math.pow(Math.abs(vv / V0), n), 1 / n);
   const sdV = (sq - 1) * U0 * R;
-  d += recess(sdV, 2.8, 1.2);
-  d += recess(sdV + 3.2, 1.0, 0.7);
+  d += recess(sdV, 2.8, 3.2);
+  d += recess(sdV + 5.5, 1.2, 2.4);
   // eye apertures: rounded rectangles cut into the visor, each with a small lens dome inside
   for (const s of [-1, 1]) {
     const dx = wrap(u - s * 0.27) * R * Math.cos(v), dy = (v - 0.04) * R;
@@ -338,7 +386,7 @@ function headDisp(dir, p) {
   return d;
 }
 {
-  const head = ellipsoid(HEAD_R[0], HEAD_R[1], HEAD_R[2], 4, 8, headDisp, { maxLevel: 6, eps: 0.2 });
+  const head = ellipsoid(HEAD_R[0], HEAD_R[1], HEAD_R[2], 4, 8, headDisp, { maxLevel: 6, eps: 0.28, maxAngle: 5 });
   // attentive: pitched 6 degrees down toward the viewer, a touch of roll and yaw toward the three-quarter camera
   const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(6 * DEG, -6 * DEG, 5 * DEG, 'YXZ'));
   const off = new THREE.Vector3(HEAD_CENTRE[0] - NECK_BALL[0], HEAD_CENTRE[1] - NECK_BALL[1], HEAD_CENTRE[2] - NECK_BALL[2]).applyQuaternion(q);
