@@ -48,6 +48,32 @@ function makeMaterial(shadeAttr) {
   return mat;
 }
 
+// Per-model "front" (and up) in the model's own frame, how strongly it turns to face the cursor (0 = not at all) and the most it may turn.
+// brain: the frontal lobe; bot: the visor; truck: the nose; computer: the screen; pills: the label. Canada is a map, so it stays put.
+const LOOK = {
+  brain:     { f: [0, 0, 1], u: [0, 1, 0], w: 0.92, max: 1.05 },
+  bot:       { f: [0, 0, 1], u: [0, 1, 0], w: 0.95, max: 0.95 },
+  truck:     { f: [0, 0, 1], u: [0, 1, 0], w: 0.4,  max: 0.7 },
+  computer:  { f: [0, 0, 1], u: [0, 1, 0], w: 0.55, max: 0.75 },
+  pills:     { f: [0, 0, 1], u: [0, 1, 0], w: 0.5,  max: 0.8 },
+  handshake: { f: [0, 0, 1], u: [0, 1, 0], w: 0.3,  max: 0.6 },
+  ledger:    { f: [0, 0, 1], u: [0, 1, 0], w: 0.3,  max: 0.6 },
+  warehouse: { f: [0, 0, 1], u: [0, 1, 0], w: 0.25, max: 0.6 },
+};
+const _m = new THREE.Matrix4(), _mm = new THREE.Matrix4(), _qb = new THREE.Quaternion(), _ql = new THREE.Quaternion();
+const _f = new THREE.Vector3(), _u = new THREE.Vector3(), _r = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+/** Orientation that turns the model's own front axis (f) to point along d, keeping its up axis (u) as upright as it can. */
+function lookQuat(out, f, u, d) {
+  _f.fromArray(f).normalize(); _u.fromArray(u).normalize(); _r.crossVectors(_u, _f);
+  _mm.makeBasis(_r, _u, _f);                                       // model basis (columns r, u, f)
+  const ft = d.clone().normalize(); const rt = new THREE.Vector3().crossVectors(_up, ft);
+  if (rt.lengthSq() < 1e-6) rt.set(1, 0, 0); rt.normalize();
+  const ut = new THREE.Vector3().crossVectors(ft, rt);
+  _m.makeBasis(rt, ut, ft);                                        // target basis
+  _m.multiply(_mm.transpose());                                    // R = Target · Modelᵀ
+  return out.setFromRotationMatrix(_m);
+}
+
 export function createScene(canvas, labelLayer) {
   let renderer;
   try {
@@ -118,7 +144,7 @@ export function createScene(canvas, labelLayer) {
     intro: 1, // loader multiplier on scale, so the intro never fights a chapter's own scale
     userY: 0, userX: 0, spinY: 0, spinX: 0, // drag rotation + inertia
   };
-  const smooth = { tiltX: 0, tiltY: 0, twist: 0, tint: [1, 1, 1] };
+  const smooth = { tiltX: 0, tiltY: 0, twist: 0, tint: [1, 1, 1], look: new THREE.Vector3(0, 0, 1), lw: 0 };
   let w = 1, h = 1;
 
   function resize() {
@@ -158,6 +184,24 @@ export function createScene(canvas, labelLayer) {
     state.spinY *= 0.95; state.spinX *= 0.95;
     state.userY *= 0.985; state.userX *= 0.97;
     group.rotation.set(state.rotX + smooth.tiltY * 0.18 + state.userX, state.rotY + Math.sin(t * 0.14) * 0.2 + smooth.tiltX * 0.3 + state.userY + smooth.twist, 0);
+    // Look at the cursor: aim the visible model's front axis at the pointer (a point in front of the screen plane above the cursor)
+    const lookName = ease < 0.5 ? STATES[si] : STATES[sj]; const cfg = LOOK[lookName];
+    const hasCursor = (state.mx ?? -1) >= 0 && cfg && cfg.w > 0;
+    const dragMix = Math.min(1, (Math.abs(state.userX) + Math.abs(state.userY)) * 1.6 + (Math.abs(state.spinX) + Math.abs(state.spinY)) * 25);   // dragging takes over, then it eases back
+    const wantW = hasCursor ? cfg.w * (1 - dragMix) * Math.max(0, Math.min(1, state.opacity * 2)) : 0;
+    smooth.lw += (wantW - smooth.lw) * 0.08;
+    if (hasCursor) {
+      const tx = (state.mx / w - 0.5) * vw, ty = -(state.my / h - 0.5) * vh;
+      const d = new THREE.Vector3(tx - group.position.x, (ty - group.position.y) * ((ty - group.position.y) > 0 ? 0.22 : 0.5), 3.2);   // full left/right turn; looking up is limited most so the ground shadow plate never swings into view
+      const ang = Math.atan2(Math.hypot(d.x, d.y), d.z);              // how far off the viewing axis the cursor is
+      if (ang > cfg.max) { const k = Math.tan(cfg.max) * d.z / Math.max(1e-6, Math.hypot(d.x, d.y)); d.x *= k; d.y *= k; }
+      smooth.look.lerp(d.normalize(), 0.12);
+    } else smooth.look.lerp(new THREE.Vector3(0, 0, 1), 0.06);
+    if (smooth.lw > 0.002 && cfg) {
+      _qb.setFromEuler(group.rotation);
+      lookQuat(_ql, cfg.f, cfg.u, smooth.look);
+      group.quaternion.copy(_qb.slerp(_ql, smooth.lw));
+    }
     const base = Math.min(vw, vh) * 0.3 * state.scale * state.intro;
     group.scale.setScalar(base);
 

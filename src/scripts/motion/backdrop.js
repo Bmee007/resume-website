@@ -35,9 +35,12 @@ export async function initBackdrop() {
       const x = (e.clientX / window.innerWidth) * 2 - 1;
       const y = (e.clientY / window.innerHeight) * 2 - 1;
       if (fog) fog.setMouse(x, -y);
-      if (lattice) { lattice.state.tiltX = x; lattice.state.tiltY = y; }
+      if (lattice) { lattice.state.tiltX = x; lattice.state.tiltY = y; lattice.state.mx = e.clientX; lattice.state.my = e.clientY; }
     }, { passive: true });
   }
+
+  // The object looks at the cursor only while the cursor is in the window
+  document.documentElement.addEventListener('mouseleave', () => { if (lattice) { lattice.state.mx = -1; lattice.state.my = -1; } });
 
   // Drag the story object: hover shows a DRAG cursor, dragging spins it with inertia
   if (lattice) initDrag();
