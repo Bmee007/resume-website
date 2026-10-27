@@ -253,7 +253,10 @@ const chapters = [
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
     document.body.classList.toggle('scrolled', y > 40);
-    if (nav) nav.classList.toggle('is-hidden', y > 600 && y - lastY > 8);
+    // direction-aware: a clear downward scroll hides the bar, a clear upward scroll (or the top of the page) reveals it; small jitter
+    // (layout shifts, scroll anchoring after a long jump) leaves it as it was
+    const dy = y - lastY;
+    if (nav) { if (y <= 600 || dy < -8) nav.classList.remove('is-hidden'); else if (dy > 8) nav.classList.add('is-hidden'); }
     lastY = y;
   }, { passive: true });
   const timeEl = document.getElementById('nav-time');

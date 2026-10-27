@@ -164,10 +164,15 @@ export function initAsk() {
   let touched = false;
   document.querySelectorAll('.ask-chip, .ask-more-btn').forEach((chip) => chip.addEventListener('click', () => {
     const p = chip.dataset.prompt; if (!p) return;
-    touched = true; chip.classList.add('is-asked');
+    touched = true; chip.classList.add('is-asked'); demoText = false;
     if (input) input.value = p; if (send) send.disabled = false; ask(p);
   }));
-  input?.addEventListener('focus', () => { touched = true; });
+  let demoText = false;                                   // true while the input holds the auto-typed sample
+  input?.addEventListener('focus', () => {
+    touched = true;
+    if (demoText) { input.value = ''; demoText = false; if (send) send.disabled = true; }   // never leave a half-typed sample behind
+    else input.select();
+  });
   send?.addEventListener('click', () => { const p = input?.value.trim(); if (p) ask(p); });
   input?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { const p = input.value.trim(); if (p) { e.preventDefault(); ask(p); } }
@@ -187,6 +192,7 @@ export function initAsk() {
   async function demo() {
     const prompt = 'What results have you driven at Kohl & Frisch?'; const canned = CANNED[prompt]; if (!canned || !input) return;
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    demoText = true;
     if (!reducedMotion) for (let i = 1; i <= prompt.length; i++) { if (touched) return; input.value = prompt.slice(0, i); await new Promise((r) => setTimeout(r, 22)); }
     if (touched) { return; }
     input.value = prompt; if (send) send.disabled = false;

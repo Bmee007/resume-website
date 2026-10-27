@@ -94,7 +94,9 @@ export function initChapters() {
       // exit line (viewport heights past the chapter top): data-lattice-exit overrides the ghost/hero rules
       const exitAt = d.latticeExit !== undefined ? parseFloat(d.latticeExit) : null;
       const spin = d.latticeSpin !== undefined ? parseFloat(d.latticeSpin) : 0.55;   // radians the object turns across its chapter
-      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, spin, gap: d.latticeGap !== undefined, ghost: !off && next.opacity < 0.7 });
+      // stage moment: this chapter pins and the object takes the whole frame (desktop only)
+      const stage = !small && d.latticeStage !== undefined ? { cx: num(d.stageCx, 0.5), cy: num(d.stageCy, 0.55), scale: num(d.stageScale, 1.4), spin: num(d.stageSpin, 0.9), p: 0 } : null;
+      chapters.push({ el: s, next, then, thenAt, e0, e1, exitAt, spin, stage, gap: d.latticeGap !== undefined, ghost: !off && next.opacity < 0.7 });
       prev = then || next;
     });
     // Phones: each object lives in its own zone (a chapter's top padding, or a [data-zone-model] spacer) and scrolls with it.
@@ -129,7 +131,7 @@ export function initChapters() {
       let owner = chapters[0];
       for (const ch of chapters) { if (ch.el.getBoundingClientRect().top / vh < ch.e0) owner = ch; }
       const r = owner.el.getBoundingClientRect(); const top = r.top / vh, bottom = r.bottom / vh;
-      const { next, then, thenAt, e0, e1, exitAt, ghost, gap, spin } = owner;
+      const { next, then, thenAt, e0, e1, exitAt, ghost, gap, spin, stage } = owner;
       const tIn = smooth((e0 - top) / (e0 - e1));
       const tThen = !then ? 0
         : thenAt ? smooth((0.85 - thenAt.getBoundingClientRect().top / vh) / 0.45)        // keyed element: 85vh → 40vh
@@ -161,6 +163,11 @@ export function initChapters() {
         st.tint = next.tint;
       }
       st.rotY += turn;
+      if (stage && stage.p > 0) {                                 // stage moment: centre, enlarge and spin the object while the copy recedes
+        const k = smooth(stage.p);
+        st.cx = lerp(st.cx, stage.cx, k); st.cy = lerp(st.cy, stage.cy, k); st.scale = lerp(st.scale, stage.scale, k); st.rotY += stage.spin * k;
+        st.opacity = Math.max(st.opacity, k * 0.95);
+      }
     };
     // The dark chapters' scrim has a soft hole around the story object (see global.css); keep it on the object
     const darkSecs = sections.filter((s) => s.dataset.tone === 'dark');
@@ -176,6 +183,14 @@ export function initChapters() {
         s.style.setProperty('--or', `${r.toFixed(0)}px`); s.style.setProperty('--oa', a.toFixed(3));
       }
     };
+    // Pin each stage chapter and feed its progress to the director (and the CSS, so the copy can recede)
+    chapters.filter((c) => c.stage).forEach((c) => {
+      ScrollTrigger.create({
+        trigger: c.el, start: 'top top', end: '+=85%', pin: true, anticipatePin: 1, scrub: true,
+        onUpdate: (self) => { c.stage.p = self.progress; c.el.style.setProperty('--stage', self.progress.toFixed(3)); },
+        onLeaveBack: () => { c.stage.p = 0; c.el.style.setProperty('--stage', '0'); },
+      });
+    });
     // Drive from the ticker (not a scroll-bounded trigger, whose updates stop once scrolled past its end)
     let lastY = -1, lastH = -1;
     gsap.ticker.add(() => {

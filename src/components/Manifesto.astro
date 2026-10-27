@@ -5,6 +5,7 @@
   id="manifesto" class="chapter manifesto"
   data-scene="clearing" data-tone="light" data-chapter="00" data-label="Manifesto"
   data-lattice="truck" data-lattice-tint="1.1,1.0,0.9" data-lattice-cx="0.745" data-lattice-cy="0.5" data-lattice-scale="0.78" data-lattice-rx="0.2" data-lattice-ry="0.5"
+  data-lattice-stage data-stage-cx="0.5" data-stage-cy="0.56" data-stage-scale="1.38" data-stage-spin="1.1"
 >
   <div class="wrap grid-12">
     <p class="t-statement manifesto-text" data-split data-split-exit>
@@ -30,4 +31,9 @@
   }
   @media (min-width: 900px) { .manifesto-text { grid-column: 2 / 10; } .manifesto-link { grid-column: 2 / 6; } }
   .manifesto-link { grid-column: 1 / -1; margin-top: 2rem; }
+  /* Stage moment (desktop, motion allowed): the sentence recedes while the truck takes the whole frame (chapters.js drives --stage) */
+  @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
+    .manifesto { min-height: 100svh; display: grid; align-content: center; }
+    .manifesto .wrap { opacity: calc(1 - var(--stage, 0) * 0.9); filter: blur(calc(var(--stage, 0) * 3px)); transition: none; }
+  }
 </style>
